@@ -35,14 +35,15 @@ class QuickTileService : TileService() {
     private val sharedPreferences by lazy { getSharedPreferences(packageName, Context.MODE_PRIVATE) }
     private val quickTileKeepAwakeServiceReceiver by lazy { QuickTileKeepAwakeServiceReceiver() }
     private val caffeineDurationSelector by lazy {
-        CaffeineDurationSelector(this).apply {
-            caffeineDurationCallback = CaffeineDurationCallbacksImpl()
-        }
+        CaffeineDurationSelector(this).apply { caffeineDurationCallback = CaffeineDurationCallbacksImpl() }
     }
     private var isQuickTileReceiverRegistered = false
 
     override fun onStartListening() {
         super.onStartListening()
+
+        isCaffeineStarted = sharedPreferences.getBoolean(KeepAwakeService.SHARED_PREFS_IS_CAFFEINE_STARTED, false)
+        sharedPreferences.getString(KeepAwakeService.SHARED_PREFS_CAFFEINE_DURATION, null)?.let { caffeineDuration = Duration.parse(it) }
 
         registerQuickTileReceiver()
         updateQuickTile(isCaffeineStarted, caffeineDuration)
@@ -51,21 +52,20 @@ class QuickTileService : TileService() {
     override fun onStopListening() {
         super.onStopListening()
 
-        caffeineDuration = 0.minutes
-        isCaffeineStarted = false
+        isCaffeineStarted = sharedPreferences.getBoolean(KeepAwakeService.SHARED_PREFS_IS_CAFFEINE_STARTED, false)
 
-        Log.d(
-                LOG_TAG,
-                "registerQuickTileReceiver(), unregistering ${this::quickTileKeepAwakeServiceReceiver.name}..."
-        )
-        if (isQuickTileReceiverRegistered) {
-            unregisterReceiver(quickTileKeepAwakeServiceReceiver)
-            isQuickTileReceiverRegistered = false
+        Log.d(LOG_TAG, "onStopListening(), isCaffeineStarted: $isCaffeineStarted, caffeineDuration: ${caffeineDuration.format()}")
+
+        if (!isCaffeineStarted) {
+            caffeineDuration = 0.minutes
+
+            Log.d(LOG_TAG, "registerQuickTileReceiver(), unregistering ${this::quickTileKeepAwakeServiceReceiver.name}...")
+            if (isQuickTileReceiverRegistered) {
+                unregisterReceiver(quickTileKeepAwakeServiceReceiver)
+                isQuickTileReceiverRegistered = false
+            }
+            Log.d(LOG_TAG, "registerQuickTileReceiver(), ${this::quickTileKeepAwakeServiceReceiver.name} unregistered!")
         }
-        Log.d(
-                LOG_TAG,
-                "registerQuickTileReceiver(), ${this::quickTileKeepAwakeServiceReceiver.name} unregistered!"
-        )
 
         updateQuickTile(isCaffeineStarted, caffeineDuration)
     }
@@ -73,25 +73,21 @@ class QuickTileService : TileService() {
     override fun onClick() {
         if (!arePermissionsGranted()) return
 
-        isCaffeineStarted = sharedPreferences.getBoolean(
-                KeepAwakeService.SHARED_PREFS_IS_CAFFEINE_STARTED,
-                false
-        )
+        isCaffeineStarted = sharedPreferences.getBoolean(KeepAwakeService.SHARED_PREFS_IS_CAFFEINE_STARTED, false)
+
+        Log.d(LOG_TAG, "onClick(), isCaffeineStarted: $isCaffeineStarted, ${if (isCaffeineStarted) "stopping" else "starting"}...")
 
         if (isCaffeineStarted) {
-            Log.d(LOG_TAG, "onClick(), isCaffeineStarted: $isCaffeineStarted, stopping...")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 isCaffeineStarted = false
                 updateQuickTile(false, 0.minutes)
                 caffeineDurationSelector.clearState()
                 startForegroundService(
-                        Intent(
-                                this@QuickTileService,
-                                KeepAwakeService::class.java
-                        ).apply { action = KeepAwakeService.KEEP_AWAKE_SERVICE_ACTION_STOP })
+                        Intent(this@QuickTileService, KeepAwakeService::class.java).apply {
+                            action = KeepAwakeService.KEEP_AWAKE_SERVICE_ACTION_STOP
+                        })
             }
         } else {
-            Log.d(LOG_TAG, "onClick(), isCaffeineStarted: $isCaffeineStarted, starting...")
             caffeineDurationSelector.selectNextDuration()
         }
     }
@@ -99,53 +95,34 @@ class QuickTileService : TileService() {
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun registerQuickTileReceiver() {
         if (!isQuickTileReceiverRegistered) {
-            Log.d(
-                    LOG_TAG,
-                    "registerQuickTileReceiver(), registering ${this::quickTileKeepAwakeServiceReceiver.name}..."
-            )
+            Log.d(LOG_TAG, "registerQuickTileReceiver(), registering ${this::quickTileKeepAwakeServiceReceiver.name}...")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(
-                        quickTileKeepAwakeServiceReceiver,
-                        IntentFilter(QUICK_TILE_ACTION_UPDATE),
-                        Context.RECEIVER_EXPORTED
-                )
+                registerReceiver(quickTileKeepAwakeServiceReceiver, IntentFilter(QUICK_TILE_ACTION_UPDATE), Context.RECEIVER_EXPORTED)
             } else {
-                registerReceiver(
-                        quickTileKeepAwakeServiceReceiver,
-                        IntentFilter(QUICK_TILE_ACTION_UPDATE)
-                )
+                registerReceiver(quickTileKeepAwakeServiceReceiver, IntentFilter(QUICK_TILE_ACTION_UPDATE))
             }
 
             isQuickTileReceiverRegistered = true
 
-            Log.d(
-                    LOG_TAG,
-                    "registerQuickTileReceiver(), ${this::quickTileKeepAwakeServiceReceiver.name} registered!"
-            )
+            Log.d(LOG_TAG, "registerQuickTileReceiver(), ${this::quickTileKeepAwakeServiceReceiver.name} registered!")
         }
     }
 
     private fun arePermissionsGranted(): Boolean {
         val permissionsGranted =
-                sharedPreferences.getBoolean(
-                        MainActivity.SHARED_PREFERENCES_ALL_PERMISSIONS_GRANTED,
-                        false
-                )
-
+                sharedPreferences.getBoolean(MainActivity.SHARED_PREFERENCES_ALL_PERMISSIONS_GRANTED, false)
         // Log.d(LOG_TAG, "arePermissionsGranted(), Permissions Granted: $permissionsGranted")
-
         if (!permissionsGranted) {
-            val intent = Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-            }
+            val intent =
+                    Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 startActivityAndCollapse(
                         PendingIntent.getActivity(
                                 this,
                                 0,
-                                intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                                intent,
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                         )
                 )
             } else {
@@ -160,8 +137,7 @@ class QuickTileService : TileService() {
     private fun updateQuickTile(isCaffeineStarted: Boolean, duration: Duration) = qsTile?.apply {
         val isActive = isCaffeineStarted || (duration > 0.minutes)
         val durationSting = if (isActive) duration.format(true) else "Off"
-        val iconDrawable =
-                if (isActive) R.drawable.baseline_coffee_24 else R.drawable.outline_coffee_24
+        val iconDrawable = if (isActive) R.drawable.baseline_coffee_24 else R.drawable.outline_coffee_24
 
         contentDescription = getString(R.string.app_name)
         state = if (isActive) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
@@ -180,16 +156,10 @@ class QuickTileService : TileService() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 isCaffeineStarted = true
                 startForegroundService(
-                        Intent(
-                                this@QuickTileService,
-                                KeepAwakeService::class.java
-                        ).apply {
+                        Intent(this@QuickTileService, KeepAwakeService::class.java).apply {
                             action = KeepAwakeService.KEEP_AWAKE_SERVICE_ACTION_START
 
-                            putExtra(
-                                    KeepAwakeService.KEEP_AWAKE_SERVICE_INTENT_EXTRA_DURATION,
-                                    duration.toString()
-                            )
+                            putExtra(KeepAwakeService.KEEP_AWAKE_SERVICE_INTENT_EXTRA_DURATION, duration.toString())
                         })
             }
         }
@@ -199,10 +169,7 @@ class QuickTileService : TileService() {
                 isCaffeineStarted = false
                 caffeineDurationSelector.clearState()
                 startForegroundService(
-                        Intent(
-                                this@QuickTileService,
-                                KeepAwakeService::class.java
-                        ).apply {
+                        Intent(this@QuickTileService, KeepAwakeService::class.java).apply {
                             action = KeepAwakeService.KEEP_AWAKE_SERVICE_ACTION_STOP
                         })
             }
@@ -216,9 +183,6 @@ class QuickTileService : TileService() {
 
     inner class QuickTileKeepAwakeServiceReceiver : BroadcastReceiver() {
 
-        @Suppress("PrivatePropertyName")
-        private val LOG_TAG = this::class.simpleName
-
         @SuppressLint("SetTextI18n")
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent == null) return
@@ -228,10 +192,7 @@ class QuickTileService : TileService() {
             val caffeineDurationStr = intent.getStringExtra(INTENT_QUICK_TILE_DURATION_EXTRA) ?: return
             caffeineDuration = Duration.parse(caffeineDurationStr)
 
-            Log.d(
-                    LOG_TAG,
-                    "quickTileReceiverOnReceive(), duration: $caffeineDuration, isActive: $isCaffeineStarted"
-            )
+            Log.d(LOG_TAG, "quickTileReceiverOnReceive(), duration: $caffeineDuration, isActive: $isCaffeineStarted")
             updateQuickTile(isCaffeineStarted, caffeineDuration)
         }
     }

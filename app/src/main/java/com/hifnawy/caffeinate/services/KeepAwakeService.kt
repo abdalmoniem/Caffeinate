@@ -3,6 +3,7 @@ package com.hifnawy.caffeinate.services
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -33,6 +34,7 @@ class KeepAwakeService : Service() {
         const val KEEP_AWAKE_SERVICE_ACTION_STOP = "caffeinate.stop"
         const val KEEP_AWAKE_SERVICE_INTENT_EXTRA_DURATION = "caffeinate.duration"
         const val SHARED_PREFS_IS_CAFFEINE_STARTED = "shared.prefs.is.caffeine.started"
+        const val SHARED_PREFS_CAFFEINE_DURATION = "shared.prefs.caffeine.duration"
         private const val NOTIFICATION_ID = 23
     }
 
@@ -70,15 +72,9 @@ class KeepAwakeService : Service() {
         when (intent.action) {
             KEEP_AWAKE_SERVICE_ACTION_START -> {
                 registerScreenLockReceiver()
-                val durationStr = intent.getStringExtra(KEEP_AWAKE_SERVICE_INTENT_EXTRA_DURATION)
-                                  ?: return START_NOT_STICKY
+                val durationStr = intent.getStringExtra(KEEP_AWAKE_SERVICE_INTENT_EXTRA_DURATION) ?: return START_NOT_STICKY
 
                 selectedDuration = Duration.parse(durationStr)
-
-                Log.d(
-                        LOG_TAG,
-                        "onStartCommand(), selectedDuration: ${selectedDuration.format()}"
-                )
 
                 startCaffeine(selectedDuration == Duration.INFINITE)
             }
@@ -88,7 +84,8 @@ class KeepAwakeService : Service() {
             }
         }
 
-        sharedPreferences.edit().putBoolean(SHARED_PREFS_IS_CAFFEINE_STARTED, isCaffeineStarted).apply()
+        Log.d(LOG_TAG, "onStartCommand(), isCaffeineStarted: $isCaffeineStarted, selectedDuration: ${selectedDuration.format()}")
+
         return START_STICKY
     }
 
@@ -101,17 +98,10 @@ class KeepAwakeService : Service() {
 
     private fun registerScreenLockReceiver() {
         if (!isScreenLockReceiverRegistered) {
-            Log.d(
-                    LOG_TAG,
-                    "registerScreenLockReceiver(), registering ${this::screenLockReceiver.name}..."
-            )
+            Log.d(LOG_TAG, "registerScreenLockReceiver(), registering ${this::screenLockReceiver.name}...")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(
-                        screenLockReceiver,
-                        IntentFilter(Intent.ACTION_SCREEN_OFF),
-                        RECEIVER_EXPORTED
-                )
+                registerReceiver(screenLockReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF), RECEIVER_EXPORTED)
             } else {
                 registerReceiver(screenLockReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
             }
@@ -126,19 +116,26 @@ class KeepAwakeService : Service() {
         val isActive = isCaffeineStarted || (selectedDuration > 0.minutes)
         val channelIdStr = "${getString(R.string.app_name)} Status"
         val durationStr = if (isActive) "Duration: ${selectedDuration.format()}" else "Off"
-        val notificationBuilder = NotificationCompat.Builder(this, channelIdStr)
-            .setSilent(true)
-            .setOngoing(true)
-            .setSubText(durationStr)
-            .setContentText(durationStr)
-            .setWhen(System.currentTimeMillis())
-            .setSmallIcon(R.drawable.baseline_coffee_24)
-            .setContentInfo(getString(R.string.app_name))
-            .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
-            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+        val pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                Intent(this, MainActivity::class.java),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notificationBuilder =
+                NotificationCompat.Builder(this, channelIdStr)
+                    .setSilent(true)
+                    .setOngoing(true)
+                    .setSubText(durationStr)
+                    .setContentText(durationStr)
+                    .setContentIntent(pendingIntent)
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.drawable.baseline_coffee_24)
+                    .setContentInfo(getString(R.string.app_name))
+                    .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
+                    .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel =
-                    NotificationChannel(channelIdStr, channelIdStr, NotificationManager.IMPORTANCE_HIGH)
+            val channel = NotificationChannel(channelIdStr, channelIdStr, NotificationManager.IMPORTANCE_HIGH)
             notificationBuilder.setChannelId(channel.id)
             notificationManager.createNotificationChannel(channel)
         }
@@ -156,12 +153,7 @@ class KeepAwakeService : Service() {
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             @Suppress("DEPRECATION")
-            newWakeLock(
-                    PowerManager.FULL_WAKE_LOCK,
-                    "${getString(R.string.app_name)}:wakelockTag"
-            ).apply {
-                acquire()
-            }
+            newWakeLock(PowerManager.FULL_WAKE_LOCK, "${getString(R.string.app_name)}:wakelockTag").apply { acquire() }
         }
 
         caffeineTimerTask = object : TimerTask() {
@@ -183,6 +175,8 @@ class KeepAwakeService : Service() {
                             stopCaffeine()
                         }
                     }
+
+                    sharedPreferences.edit().putString(SHARED_PREFS_CAFFEINE_DURATION, selectedDuration.toString()).apply()
                 }
             }
         }
@@ -192,13 +186,12 @@ class KeepAwakeService : Service() {
 
         isCaffeineStarted = true
 
+        sharedPreferences.edit().putBoolean(SHARED_PREFS_IS_CAFFEINE_STARTED, isCaffeineStarted).apply()
+
         updateQuickTile()
         updateApp()
 
-        Log.d(
-                LOG_TAG,
-                "startCaffeine(), ${getString(R.string.app_name)} started with duration: ${selectedDuration.format()}"
-        )
+        Log.d(LOG_TAG, "startCaffeine(), ${getString(R.string.app_name)} started with duration: ${selectedDuration.format()}")
     }
 
     @SuppressLint("SetTextI18n")
@@ -213,18 +206,12 @@ class KeepAwakeService : Service() {
             if (this::caffeineTimerTask.isInitialized) caffeineTimerTask.cancel()
 
             if (isScreenLockReceiverRegistered) {
-                Log.d(
-                        LOG_TAG,
-                        "stopCaffeine(), unregistering ${this::screenLockReceiver.name}..."
-                )
+                Log.d(LOG_TAG, "stopCaffeine(), unregistering ${this::screenLockReceiver.name}...")
 
                 unregisterReceiver(screenLockReceiver)
                 isScreenLockReceiverRegistered = false
 
-                Log.d(
-                        LOG_TAG,
-                        "stopCaffeine(), ${this::screenLockReceiver.name} unregistered!"
-                )
+                Log.d(LOG_TAG, "stopCaffeine(), ${this::screenLockReceiver.name} unregistered!")
             }
 
             stopForeground(STOP_FOREGROUND_REMOVE)
@@ -238,6 +225,9 @@ class KeepAwakeService : Service() {
         isCaffeineStarted = false
         selectedDuration = 0.minutes
 
+        sharedPreferences.edit().putBoolean(SHARED_PREFS_IS_CAFFEINE_STARTED, isCaffeineStarted).apply()
+        sharedPreferences.edit().putString(SHARED_PREFS_CAFFEINE_DURATION, selectedDuration.toString()).apply()
+
         updateQuickTile()
         updateApp()
     }
@@ -246,10 +236,7 @@ class KeepAwakeService : Service() {
         Intent(QuickTileService.QUICK_TILE_ACTION_UPDATE).apply {
             putExtra("ID", "updateQuickTile()")
             putExtra(QuickTileService.INTENT_QUICK_TILE_IS_ACTIVE_EXTRA, isCaffeineStarted)
-            putExtra(
-                    QuickTileService.INTENT_QUICK_TILE_DURATION_EXTRA,
-                    selectedDuration.toString()
-            )
+            putExtra(QuickTileService.INTENT_QUICK_TILE_DURATION_EXTRA, selectedDuration.toString())
 
             sendBroadcast(this)
         }

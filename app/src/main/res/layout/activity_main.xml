@@ -190,32 +190,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <TextView
-        android:id="@+id/remainingTimeLabelTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:text="Caffeinate: "
-        android:textAlignment="textEnd"
-        android:textSize="@dimen/caffeine_duration_timer_normal_size"
-        app:layout_constraintBottom_toBottomOf="@+id/remainingTimeTextView"
-        app:layout_constraintEnd_toStartOf="@+id/remainingTimeTextView"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/remainingTimeTextView" />
-
-    <TextView
-        android:id="@+id/remainingTimeTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:text="00:00"
-        android:textSize="@dimen/caffeine_duration_timer_normal_size"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/remainingTimeLabelTextView"
-        app:layout_constraintTop_toBottomOf="@id/drawOverlaysCard" />
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/caffeineButton"
         android:layout_width="wrap_content"
@@ -226,6 +200,7 @@
         android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/remainingTimeLabelTextView" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/drawOverlaysCard" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

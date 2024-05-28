@@ -24,15 +24,8 @@ class CaffeineDurationSelector(private val context: Context) {
     @Suppress("PrivatePropertyName")
     private val LOG_TAG = this::class.simpleName
     private val clickHandler by lazy { Handler(Looper.getMainLooper()) }
-    private val sharedPreferences by lazy {
-        context.getSharedPreferences(
-                context.packageName, Context
-            .MODE_PRIVATE
-        )
-    }
-    private val selectedDurations by lazy {
-        listOf(30.seconds, 5.minutes, 10.minutes, 15.minutes, 30.minutes, Duration.INFINITE)
-    }
+    private val sharedPreferences by lazy { context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE) }
+    private val selectedDurations by lazy { listOf(30.seconds, 5.minutes, 10.minutes, 15.minutes, 30.minutes, Duration.INFINITE) }
     private var selectedDuration = 0.minutes
     private var selectedDurationIndex = 0
     private var isCaffeineStarted = false
@@ -68,10 +61,7 @@ class CaffeineDurationSelector(private val context: Context) {
                                     selectedDurationIndex = 0
                                 }
 
-                                sharedPreferences.edit().putBoolean(
-                                        KeepAwakeService.SHARED_PREFS_IS_CAFFEINE_STARTED,
-                                        isCaffeineStarted
-                                ).apply()
+                                sharedPreferences.edit().putBoolean(KeepAwakeService.SHARED_PREFS_IS_CAFFEINE_STARTED, isCaffeineStarted).apply()
                                 clickHandler.removeCallbacksAndMessages(null)
                             },
                             1000.milliseconds.inWholeMilliseconds
@@ -95,10 +85,7 @@ class CaffeineDurationSelector(private val context: Context) {
     }
 
     fun clearState() {
-        Log.d(
-                LOG_TAG,
-                "clearState(), Stopping..."
-        )
+        Log.d(LOG_TAG, "clearState(), Stopping...")
         isCaffeineStarted = false
         selectedDurationIndex = -1
     }
