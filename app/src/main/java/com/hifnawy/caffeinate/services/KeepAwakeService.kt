@@ -1,6 +1,7 @@
 package com.hifnawy.caffeinate.services
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -14,9 +15,16 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.hifnawy.caffeinate.DurationExtensionFunctions.format
+import androidx.core.content.ContextCompat
+import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
+import com.hifnawy.caffeinate.ServiceStatus
+import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.ui.MainActivity
+import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.time.Duration
@@ -24,67 +32,28 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-class KeepAwakeService : Service() {
+class KeepAwakeService : Service(), ServiceStatusObserver {
 
     override fun onBind(intent: Intent): IBinder? = null
 
-    companion object {
-
-        const val KEEP_AWAKE_SERVICE_ACTION_START = "caffeinate.action"
-        const val KEEP_AWAKE_SERVICE_ACTION_STOP = "caffeinate.stop"
-        const val KEEP_AWAKE_SERVICE_INTENT_EXTRA_DURATION = "caffeinate.duration"
-        const val SHARED_PREFS_IS_CAFFEINE_STARTED = "shared.prefs.is.caffeine.started"
-        const val SHARED_PREFS_CAFFEINE_DURATION = "shared.prefs.caffeine.duration"
-        private const val NOTIFICATION_ID = 23
-    }
-
-    @Suppress("PrivatePropertyName")
-    private val LOG_TAG = this::class.simpleName
+    private val caffeinateApplication by lazy { application as CaffeinateApplication }
     private val notificationManager by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
-    private val sharedPreferences by lazy { getSharedPreferences(packageName, Context.MODE_PRIVATE) }
-    private val screenLockReceiver by lazy {
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                Log.d(LOG_TAG, "screenLockReceiverOnReceive(), Screen Locked, Stopping...")
-
-                stopCaffeine()
-            }
-        }
-    }
+    private val screenLockReceiver by lazy { ScreenLockStateReceiver() }
     private var isScreenLockReceiverRegistered = false
-    private var selectedDuration = 0.minutes
-    private var isCaffeineStarted = false
-    private var isServiceStarted = false
-    private lateinit var wakeLock: PowerManager.WakeLock
-    private lateinit var caffeineTimer: Timer
+    private var caffeineTimer: Timer? = null
+    private var wakeLock: PowerManager.WakeLock? = null
     private lateinit var caffeineTimerTask: TimerTask
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null) return START_NOT_STICKY
-        if (intent.action == null) return START_NOT_STICKY
+        val status = caffeinateApplication.lastStatusUpdate as ServiceStatus.Running
 
-        showForegroundNotification()
-        updateQuickTile()
-        updateApp()
+        Log.d(LOG_TAG, "onStartCommand(): status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
 
-        Log.d(LOG_TAG, "onStartCommand(), action: ${intent.action}")
+        caffeinateApplication.observers.add(this)
+        registerScreenLockReceiver()
+        startCaffeine(status.remaining)
 
-        when (intent.action) {
-            KEEP_AWAKE_SERVICE_ACTION_START -> {
-                registerScreenLockReceiver()
-                val durationStr = intent.getStringExtra(KEEP_AWAKE_SERVICE_INTENT_EXTRA_DURATION) ?: return START_NOT_STICKY
-
-                selectedDuration = Duration.parse(durationStr)
-
-                startCaffeine(selectedDuration == Duration.INFINITE)
-            }
-
-            KEEP_AWAKE_SERVICE_ACTION_STOP  -> {
-                stopCaffeine()
-            }
-        }
-
-        Log.d(LOG_TAG, "onStartCommand(), isCaffeineStarted: $isCaffeineStarted, selectedDuration: ${selectedDuration.format()}")
+        startForeground(NOTIFICATION_ID, buildForegroundNotification())
 
         return START_STICKY
     }
@@ -92,13 +61,20 @@ class KeepAwakeService : Service() {
     override fun onDestroy() {
         super.onDestroy()
 
-        Log.d(LOG_TAG, "onDestroy(), stopping caffeine...")
+        Log.d(LOG_TAG, "onDestroy(): stopping caffeine...")
         stopCaffeine()
+    }
+
+    override fun onServiceStatusUpdate(status: ServiceStatus) {
+        when (status) {
+            is ServiceStatus.Running -> notificationManager.notify(NOTIFICATION_ID, buildForegroundNotification())
+            else                     -> stopForeground(STOP_FOREGROUND_REMOVE)
+        }
     }
 
     private fun registerScreenLockReceiver() {
         if (!isScreenLockReceiverRegistered) {
-            Log.d(LOG_TAG, "registerScreenLockReceiver(), registering ${this::screenLockReceiver.name}...")
+            Log.d(LOG_TAG, "registerScreenLockReceiver(): registering ${this::screenLockReceiver.name}...")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 registerReceiver(screenLockReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF), RECEIVER_EXPORTED)
@@ -108,14 +84,14 @@ class KeepAwakeService : Service() {
 
             isScreenLockReceiverRegistered = true
 
-            Log.d(LOG_TAG, "registerScreenLockReceiver(), ${this::screenLockReceiver.name} registered!")
+            Log.d(LOG_TAG, "registerScreenLockReceiver(): ${this::screenLockReceiver.name} registered!")
         }
     }
 
-    private fun showForegroundNotification() {
-        val isActive = isCaffeineStarted || (selectedDuration > 0.minutes)
+    private fun buildForegroundNotification(): Notification {
+        val status = caffeinateApplication.lastStatusUpdate
         val channelIdStr = "${getString(R.string.app_name)} Status"
-        val durationStr = if (isActive) "Duration: ${selectedDuration.format()}" else "Off"
+        val durationStr = if (status is ServiceStatus.Running) "Duration: ${status.remaining.toFormattedTime()}" else "Off"
         val pendingIntent = PendingIntent.getActivity(
                 this,
                 0,
@@ -139,116 +115,148 @@ class KeepAwakeService : Service() {
             notificationBuilder.setChannelId(channel.id)
             notificationManager.createNotificationChannel(channel)
         }
-        if (!isServiceStarted) {
-            startForeground(NOTIFICATION_ID, notificationBuilder.build())
-            isServiceStarted = true
-        } else {
-            notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
-        }
+
+        return notificationBuilder.build()
     }
 
-    @SuppressLint("SetTextI18n", "WakelockTimeout")
-    private fun startCaffeine(indefinitely: Boolean = false) {
-        Log.d(LOG_TAG, "startCaffeine(), indefinitely: $indefinitely")
+    @SuppressLint("WakelockTimeout")
+    private fun startCaffeine(duration: Duration) {
+        val isIndefinite = duration == Duration.INFINITE
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
-        wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-            @Suppress("DEPRECATION")
-            newWakeLock(PowerManager.FULL_WAKE_LOCK, "${getString(R.string.app_name)}:wakelockTag").apply { acquire() }
+        caffeineTimerTask = CaffeineTimerTask(duration)
+
+        Log.d(LOG_TAG, "startCaffeine(): indefinitely: $isIndefinite")
+
+        @Suppress("DEPRECATION")
+        wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "${getString(R.string.app_name)}:wakelockTag").apply { acquire() }
+
+        caffeineTimer?.cancel()
+        caffeineTimer = Timer().apply { schedule(caffeineTimerTask, DEBOUNCE_DURATION.inWholeMilliseconds, 1000.milliseconds.inWholeMilliseconds) }
+    }
+
+    private fun stopCaffeine() {
+        Log.d(LOG_TAG, "stopCaffeine(): stopping ${getString(R.string.app_name)}...")
+
+        wakeLock?.apply {
+            if (isHeld) {
+                Log.d(LOG_TAG, "stopCaffeine(): releasing ${this@KeepAwakeService::wakeLock.name}...")
+                release()
+                Log.d(LOG_TAG, "stopCaffeine(): ${this@KeepAwakeService::wakeLock.name} released!")
+            }
         }
 
-        caffeineTimerTask = object : TimerTask() {
-            override fun run() {
-                if (isCaffeineStarted) {
-                    Log.d(
-                            LOG_TAG,
-                            "caffeineTimerTask(), indefinitely: $indefinitely, selectedDuration: ${selectedDuration.format()}, isCaffeineStarted:$isCaffeineStarted"
-                    )
+        if (this::caffeineTimerTask.isInitialized) caffeineTimerTask.cancel()
 
-                    showForegroundNotification()
-                    updateQuickTile()
-                    updateApp()
+        if (isScreenLockReceiverRegistered) {
+            Log.d(LOG_TAG, "stopCaffeine(): unregistering ${this::screenLockReceiver.name}...")
 
-                    if (!indefinitely) {
-                        selectedDuration -= 1.seconds
+            unregisterReceiver(screenLockReceiver)
+            isScreenLockReceiverRegistered = false
 
-                        if (selectedDuration <= 0.minutes) {
-                            stopCaffeine()
+            Log.d(LOG_TAG, "stopCaffeine(): ${this::screenLockReceiver.name} unregistered!")
+        }
+
+        with(caffeinateApplication) {
+            observers.remove(this@KeepAwakeService)
+            notifyObservers(ServiceStatus.Stopped)
+        }
+
+        Log.d(LOG_TAG, "stopCaffeine(): ${getString(R.string.app_name)} stopped!")
+    }
+
+    inner class CaffeineTimerTask(private var duration: Duration) : TimerTask() {
+
+        private val isIndefinite = duration == Duration.INFINITE
+
+        init {
+            Log.d(LOG_TAG, "CaffeineTimerTask::init: ${getString(R.string.app_name)} started with duration: ${duration.toFormattedTime()}")
+        }
+
+        override fun run() {
+            CoroutineScope(Dispatchers.Main).launch {
+                when (val status = caffeinateApplication.lastStatusUpdate) {
+                    is ServiceStatus.Running -> {
+                        Log.d(
+                                LOG_TAG,
+                                "CaffeineTimerTask::run(): isIndefinite: $isIndefinite, duration: ${status.remaining.toFormattedTime()}, status: $status"
+                        )
+
+                        if (!isIndefinite) duration -= 1.seconds
+                        when {
+                            duration <= 0.minutes -> toggleState(this@KeepAwakeService, STATE.STOP)
+                            else                  -> caffeinateApplication.notifyObservers(ServiceStatus.Running(duration))
                         }
                     }
 
-                    sharedPreferences.edit().putString(SHARED_PREFS_CAFFEINE_DURATION, selectedDuration.toString()).apply()
+                    else                     -> toggleState(this@KeepAwakeService, STATE.STOP)
                 }
             }
         }
-
-        caffeineTimer = Timer()
-        caffeineTimer.schedule(caffeineTimerTask, 0, 1000.milliseconds.inWholeMilliseconds)
-
-        isCaffeineStarted = true
-
-        sharedPreferences.edit().putBoolean(SHARED_PREFS_IS_CAFFEINE_STARTED, isCaffeineStarted).apply()
-
-        updateQuickTile()
-        updateApp()
-
-        Log.d(LOG_TAG, "startCaffeine(), ${getString(R.string.app_name)} started with duration: ${selectedDuration.format()}")
     }
 
-    @SuppressLint("SetTextI18n")
-    private fun stopCaffeine() {
-        if (isCaffeineStarted) {
-            if (this::wakeLock.isInitialized && wakeLock.isHeld) {
-                Log.d(LOG_TAG, "stopCaffeine(), releasing ${this::wakeLock.name}...")
-                wakeLock.release()
-                Log.d(LOG_TAG, "stopCaffeine(), ${this::wakeLock.name} released!")
+    private class ScreenLockStateReceiver : BroadcastReceiver() {
+
+        override fun onReceive(context: Context, intent: Intent) {
+            Log.d(LOG_TAG, "screenLockReceiverOnReceive(): Screen Locked, Stopping...")
+
+            toggleState(context, KeepAwakeService.Companion.STATE.STOP)
+        }
+    }
+
+    companion object {
+        private enum class STATE {
+            START,
+            STOP,
+            TOGGLE
+        }
+
+        private val DEBOUNCE_DURATION = 1.seconds
+        private val LOG_TAG = KeepAwakeService::class.simpleName
+
+        fun startNextDuration(caffeinateApplication: CaffeinateApplication) {
+            when (val status = caffeinateApplication.lastStatusUpdate) {
+                is ServiceStatus.Running -> debounceNextDuration(status, caffeinateApplication)
+                else                     -> toggleState(caffeinateApplication.applicationContext, STATE.START)
+            }
+        }
+
+        private fun debounceNextDuration(status: ServiceStatus.Running, caffeinateApplication: CaffeinateApplication) {
+            with(caffeinateApplication) {
+                val state = when (status.remaining) {
+                    in 0.seconds..timeout - DEBOUNCE_DURATION / 2 -> STATE.STOP
+                    else                                          -> {
+                        timeout = nextTimeout
+                        if (prevTimeout == Duration.INFINITE) STATE.STOP else STATE.START
+                    }
+                }
+
+                toggleState(applicationContext, state)
+            }
+        }
+
+        private fun toggleState(context: Context, newState: STATE) {
+            Log.d(LOG_TAG, "changeState($newState)")
+            val caffeinateApplication = context.applicationContext as CaffeinateApplication
+            val start = when (newState) {
+                STATE.START  -> true
+                STATE.STOP   -> false
+                STATE.TOGGLE -> caffeinateApplication.lastStatusUpdate is ServiceStatus.Stopped
+            }
+            val intent = Intent(context, KeepAwakeService::class.java)
+            val status = when {
+                start -> ServiceStatus.Running(caffeinateApplication.timeout)
+                else  -> ServiceStatus.Stopped
             }
 
-            if (this::caffeineTimerTask.isInitialized) caffeineTimerTask.cancel()
+            caffeinateApplication.notifyObservers(status)
 
-            if (isScreenLockReceiverRegistered) {
-                Log.d(LOG_TAG, "stopCaffeine(), unregistering ${this::screenLockReceiver.name}...")
-
-                unregisterReceiver(screenLockReceiver)
-                isScreenLockReceiverRegistered = false
-
-                Log.d(LOG_TAG, "stopCaffeine(), ${this::screenLockReceiver.name} unregistered!")
+            when {
+                start -> ContextCompat.startForegroundService(context, intent)
+                else  -> context.stopService(intent)
             }
-
-            stopForeground(STOP_FOREGROUND_REMOVE)
-            stopSelf()
-
-            Log.d(LOG_TAG, "stopCaffeine(), ${getString(R.string.app_name)} Stopped!")
-        } else {
-            Log.d(LOG_TAG, "stopCaffeine(), ${getString(R.string.app_name)} is Already Stopped!")
         }
 
-        isCaffeineStarted = false
-        selectedDuration = 0.minutes
-
-        sharedPreferences.edit().putBoolean(SHARED_PREFS_IS_CAFFEINE_STARTED, isCaffeineStarted).apply()
-        sharedPreferences.edit().putString(SHARED_PREFS_CAFFEINE_DURATION, selectedDuration.toString()).apply()
-
-        updateQuickTile()
-        updateApp()
-    }
-
-    private fun updateQuickTile() {
-        Intent(QuickTileService.QUICK_TILE_ACTION_UPDATE).apply {
-            putExtra("ID", "updateQuickTile()")
-            putExtra(QuickTileService.INTENT_QUICK_TILE_IS_ACTIVE_EXTRA, isCaffeineStarted)
-            putExtra(QuickTileService.INTENT_QUICK_TILE_DURATION_EXTRA, selectedDuration.toString())
-
-            sendBroadcast(this)
-        }
-    }
-
-    private fun updateApp() {
-        Intent(MainActivity.MAIN_ACTIVITY_ACTION_UPDATE).apply {
-            putExtra("ID", "updateApp()")
-            putExtra(MainActivity.INTENT_IS_CAFFEINE_STARTED, isCaffeineStarted)
-            putExtra(MainActivity.INTENT_CAFFEINE_DURATION, selectedDuration.toString())
-
-            sendBroadcast(this)
-        }
+        private const val NOTIFICATION_ID = 23
     }
 }
