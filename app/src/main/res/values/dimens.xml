@@ -2,4 +2,8 @@
 <resources>
     <dimen name="caffeine_duration_timer_normal_size">30sp</dimen>
     <dimen name="caffeine_duration_timer_infinity_size">80sp</dimen>
+    <dimen name="permissions_text_size">15sp</dimen>
+    <dimen name="allow_dimming_pref_description_text_size">15sp</dimen>
+    <dimen name="allow_dimming_pref_text_size">20sp</dimen>
+    <dimen name="caffeinate_button_text_size">35sp</dimen>
 </resources>
