@@ -15,16 +15,18 @@ import com.hifnawy.caffeinate.ServiceStatus
 import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.ui.MainActivity
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.SharedPrefsManager
 
 class QuickTileService : TileService() {
 
-    private val sharedPreferences by lazy { getSharedPreferences(packageName, Context.MODE_PRIVATE) }
-    private val arePermissionsGranted by lazy { sharedPreferences.getBoolean(MainActivity.SHARED_PREFERENCES_ALL_PERMISSIONS_GRANTED, false) }
+    private val LOG_TAG = QuickTileService::class.java.simpleName
+    private val caffeinateApplication by lazy { application as CaffeinateApplication }
+    private val isAllPermissionsGranted by lazy { SharedPrefsManager(caffeinateApplication).isAllPermissionsGranted }
 
     override fun onStartListening() {
         super.onStartListening()
 
-        Log.d(LOG_TAG, "onStartListening()")
+        Log.d(LOG_TAG, "${::onStartListening.name}()")
 
         updateQuickTile()
     }
@@ -32,34 +34,11 @@ class QuickTileService : TileService() {
     override fun onClick() {
         if (!checkPermissions()) return
 
-        KeepAwakeService.startNextDuration(application as CaffeinateApplication)
-    }
-
-    private fun checkPermissions(): Boolean {
-        Log.d(LOG_TAG, "${::arePermissionsGranted.name}() -> Permissions Granted: $arePermissionsGranted")
-        if (!arePermissionsGranted) {
-            val intent =
-                    Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                startActivityAndCollapse(
-                        PendingIntent.getActivity(
-                                this,
-                                0,
-                                intent,
-                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                        )
-                )
-            } else {
-                startActivity(intent)
-            }
-            return false
-        } else {
-            return true
-        }
+        KeepAwakeService.startNextDuration(caffeinateApplication)
     }
 
     private fun updateQuickTile() {
-        val currentStatus = (application as CaffeinateApplication).lastStatusUpdate
+        val currentStatus = caffeinateApplication.lastStatusUpdate
         Log.d(LOG_TAG, "${::updateQuickTile.name}() -> running = $currentStatus")
         val tile = qsTile ?: return
 
@@ -81,24 +60,39 @@ class QuickTileService : TileService() {
         }
     }
 
-    companion object {
-
-        private val LOG_TAG = QuickTileService::class.java.simpleName
-
-        fun requestTileStateUpdate(context: Context) {
-            Log.d(LOG_TAG, "requestTileStateUpdate()")
-            try {
-                requestListeningState(context, ComponentName(context, QuickTileService::class.java))
-            } catch (ex: Exception) {
-                Log.e(LOG_TAG, "Error when calling requestListeningState()", ex)
+    private fun checkPermissions(): Boolean {
+        Log.d(LOG_TAG, "${::isAllPermissionsGranted.name}() -> Permissions Granted: $isAllPermissionsGranted")
+        if (!isAllPermissionsGranted) {
+            val intent =
+                    Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startActivityAndCollapse(
+                        PendingIntent.getActivity(
+                                this,
+                                0,
+                                intent,
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        )
+                )
+            } else {
+                startActivity(intent)
             }
+            return false
+        } else {
+            return true
         }
     }
 
     class TileServiceStatusObserver(private val context: Context) : ServiceStatusObserver {
 
+        private val LOG_TAG = TileServiceStatusObserver::class.java.simpleName
         override fun onServiceStatusUpdate(status: ServiceStatus) {
-            requestTileStateUpdate(context)
+            Log.d(LOG_TAG, "${LOG_TAG}::${::onServiceStatusUpdate.name}()")
+            try {
+                requestListeningState(context, ComponentName(context, QuickTileService::class.java))
+            } catch (ex: Exception) {
+                Log.e(LOG_TAG, "Error when calling ${LOG_TAG}::${::onServiceStatusUpdate.name}()", ex)
+            }
         }
     }
 }
