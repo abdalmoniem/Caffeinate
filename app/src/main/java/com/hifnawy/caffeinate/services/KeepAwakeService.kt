@@ -20,6 +20,7 @@ import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.ServiceStatus
 import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.NotificationUtils
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.WakeLockExtensionFunctions.releaseSafely
@@ -70,12 +71,13 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         Log.d(LOG_TAG, "${::onStartCommand.name}() -> foreground notification sent!")
 
         Log.d(LOG_TAG, "${::onStartCommand.name}() -> adding ${this::class.simpleName} to ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
-        caffeinateApplication.keepAwakeServiceObservers.add(this)
+        caffeinateApplication.keepAwakeServiceObservers.addObserver(caffeinateApplication::keepAwakeServiceObservers.name, this)
         Log.d(LOG_TAG, "${::onStartCommand.name}() -> ${this::class.simpleName} added to ${CaffeinateApplication::keepAwakeServiceObservers.name}!")
 
         Log.d(LOG_TAG, "${::onStartCommand.name}() -> adding ${this::class.simpleName} to ${CaffeinateApplication::sharedPrefsObservers.name}...")
-        caffeinateApplication.sharedPrefsObservers.add(this)
+        caffeinateApplication.sharedPrefsObservers.addObserver(caffeinateApplication::sharedPrefsObservers.name, this)
         Log.d(LOG_TAG, "${::onStartCommand.name}() -> ${this::class.simpleName} added to ${CaffeinateApplication::sharedPrefsObservers.name}!")
+
 
         registerScreenLockReceiver()
         startCaffeine(status.remaining)
@@ -212,7 +214,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
         wakeLock?.apply {
             Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> releasing ${this@KeepAwakeService::wakeLock.name}...")
-            releaseSafely()
+            releaseSafely(::wakeLock.name)
             Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> ${this@KeepAwakeService::wakeLock.name} released!")
         } ?: Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> wakeLock is not held!")
         @Suppress("DEPRECATION")
@@ -241,7 +243,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
         wakeLock?.apply {
             Log.d(LOG_TAG, "${::stopCaffeine.name}() -> releasing ${this@KeepAwakeService::wakeLock.name}...")
-            releaseSafely()
+            releaseSafely(::wakeLock.name)
             Log.d(LOG_TAG, "${::stopCaffeine.name}() -> ${this@KeepAwakeService::wakeLock.name} released!")
         } ?: Log.d(LOG_TAG, "${::stopCaffeine.name}() -> wakeLock is not held!")
 
