@@ -149,7 +149,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                 KeepAwakeService::class.java,
                 ACTION_CHANGE_TIMEOUT,
                 R.drawable.baseline_coffee_24,
-                "Next Timeout",
+                getString(R.string.foreground_notification_action_next_timeout),
                 1
         )
         val notificationActionEnableDimming = NotificationUtils.getNotificationAction(
@@ -157,7 +157,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                 KeepAwakeService::class.java,
                 ACTION_CHANGE_DIMMING_ENABLED,
                 R.drawable.baseline_coffee_24,
-                if (isDimmingEnabled) "Disable Dimming" else "Enable Dimming",
+                if (isDimmingEnabled) getString(R.string.foreground_notification_action_disable_dimming) else getString(R.string.foreground_notification_action_enable_dimming),
                 2
         )
         val notificationBuilder =
@@ -165,7 +165,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                     .setSilent(true)
                     .setOngoing(true)
                     .setSubText(durationStr)
-                    .setContentText("Tap to turn off")
+                    .setContentText(getString(R.string.foreground_notification_tap_to_turn_off))
                     .setWhen(System.currentTimeMillis())
                     .setContentIntent(notificationStopIntent)
                     .addAction(notificationActionNextTimeout)
@@ -174,7 +174,12 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                     .setContentInfo(getString(R.string.app_name))
                     .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
                     .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-                    .setContentTitle("${getString(R.string.app_name)} will keep the display on" + if (status.remaining != Duration.INFINITE) " for $durationStr" else "")
+                    .setContentTitle(
+                            when (status.remaining) {
+                                Duration.INFINITE -> getString(R.string.foreground_notification_title_duration_indefinite)
+                                else              -> getString(R.string.foreground_notification_title_duration_definite, durationStr)
+                            }
+                    )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelIdStr, channelIdStr, NotificationManager.IMPORTANCE_HIGH)
