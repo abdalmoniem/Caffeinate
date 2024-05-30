@@ -47,18 +47,18 @@ class KeepAwakeService : Service(), ServiceStatusObserver {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val status = caffeinateApplication.lastStatusUpdate as ServiceStatus.Running
 
-        Log.d(LOG_TAG, "onStartCommand(): status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
+        Log.d(LOG_TAG, "${::onStartCommand.name}() -> status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
 
-        Log.d(LOG_TAG, "adding ${this::class.simpleName} to observers...")
+        Log.d(LOG_TAG, "${::onStartCommand.name}() -> adding ${this::class.simpleName} to observers...")
         caffeinateApplication.observers.add(this)
-        Log.d(LOG_TAG, "${this::class.simpleName} added to observers!")
+        Log.d(LOG_TAG, "${::onStartCommand.name}() -> ${this::class.simpleName} added to observers!")
 
         registerScreenLockReceiver()
         startCaffeine(status.remaining)
 
-        Log.d(LOG_TAG, "onStartCommand(): sending foreground notification...")
+        Log.d(LOG_TAG, "${::onStartCommand.name}() -> sending foreground notification...")
         startForeground(NOTIFICATION_ID, buildForegroundNotification())
-        Log.d(LOG_TAG, "onStartCommand(): foreground notification sent!")
+        Log.d(LOG_TAG, "${::onStartCommand.name}() -> foreground notification sent!")
 
         return START_STICKY
     }
@@ -66,20 +66,28 @@ class KeepAwakeService : Service(), ServiceStatusObserver {
     override fun onDestroy() {
         super.onDestroy()
 
-        Log.d(LOG_TAG, "onDestroy(): stopping ${getString(R.string.app_name)}...")
+        Log.d(LOG_TAG, "${::onDestroy.name}() -> stopping ${getString(R.string.app_name)}...")
         stopCaffeine()
     }
 
     override fun onServiceStatusUpdate(status: ServiceStatus) {
         when (status) {
-            is ServiceStatus.Running -> notificationManager.notify(NOTIFICATION_ID, buildForegroundNotification())
+            is ServiceStatus.Running -> {
+                Log.d(
+                        LOG_TAG,
+                        "${::onServiceStatusUpdate.name}() -> " +
+                        "duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}"
+                )
+                notificationManager.notify(NOTIFICATION_ID, buildForegroundNotification())
+            }
+
             else                     -> stopForeground(STOP_FOREGROUND_REMOVE)
         }
     }
 
     private fun registerScreenLockReceiver() {
         if (!isScreenLockReceiverRegistered) {
-            Log.d(LOG_TAG, "registerScreenLockReceiver(): registering ${this::screenLockReceiver.name}...")
+            Log.d(LOG_TAG, "${::registerScreenLockReceiver.name}() -> registering ${this::screenLockReceiver.name}...")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 registerReceiver(screenLockReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF), RECEIVER_EXPORTED)
@@ -89,7 +97,7 @@ class KeepAwakeService : Service(), ServiceStatusObserver {
 
             isScreenLockReceiverRegistered = true
 
-            Log.d(LOG_TAG, "registerScreenLockReceiver(): ${this::screenLockReceiver.name} registered!")
+            Log.d(LOG_TAG, "${::registerScreenLockReceiver.name}() -> ${this::screenLockReceiver.name} registered!")
         }
     }
 
@@ -131,77 +139,77 @@ class KeepAwakeService : Service(), ServiceStatusObserver {
 
         Log.d(
                 LOG_TAG,
-                "startCaffeine(): starting ${getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite"
+                "${::startCaffeine.name}() -> starting ${getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite"
         )
 
         wakeLock?.apply {
             if (isHeld) {
-                Log.d(LOG_TAG, "startCaffeine(): releasing ${this@KeepAwakeService::wakeLock.name}...")
+                Log.d(LOG_TAG, "${::startCaffeine.name}() -> releasing ${this@KeepAwakeService::wakeLock.name}...")
                 release()
-                Log.d(LOG_TAG, "startCaffeine(): ${this@KeepAwakeService::wakeLock.name} released!")
+                Log.d(LOG_TAG, "${::startCaffeine.name}() -> ${this@KeepAwakeService::wakeLock.name} released!")
             } else {
-                Log.d(LOG_TAG, "startCaffeine(): ${this@KeepAwakeService::wakeLock.name} is already released!")
+                Log.d(LOG_TAG, "${::startCaffeine.name}() -> ${this@KeepAwakeService::wakeLock.name} is already released!")
             }
         }
 
-        Log.d(LOG_TAG, "startCaffeine(): acquiring ${this::wakeLock.name}...")
+        Log.d(LOG_TAG, "${::startCaffeine.name}() -> acquiring ${this::wakeLock.name}...")
         @Suppress("DEPRECATION")
         wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "${getString(R.string.app_name)}:wakelockTag")
             .apply { acquire(duration.inWholeMilliseconds) }
-        Log.d(LOG_TAG, "startCaffeine(): ${this::wakeLock.name} acquired!")
+        Log.d(LOG_TAG, "${::startCaffeine.name}() -> ${this::wakeLock.name} acquired!")
 
         caffeineTimer?.apply {
-            Log.d(LOG_TAG, "startCaffeine(): cancelling ${this@KeepAwakeService::caffeineTimerTask.name}...")
+            Log.d(LOG_TAG, "${::startCaffeine.name}() -> cancelling ${this@KeepAwakeService::caffeineTimerTask.name}...")
             cancel()
-            Log.d(LOG_TAG, "startCaffeine(): ${this@KeepAwakeService::caffeineTimerTask.name} cancelled!")
+            Log.d(LOG_TAG, "${::startCaffeine.name}() -> ${this@KeepAwakeService::caffeineTimerTask.name} cancelled!")
         }
 
-        Log.d(LOG_TAG, "creating ${this::caffeineTimerTask.name}...")
+        Log.d(LOG_TAG, "${::startCaffeine.name}() -> creating ${this::caffeineTimerTask.name}...")
         caffeineTimerTask = CaffeineTimerTask(duration)
-        Log.d(LOG_TAG, "${this::caffeineTimerTask.name} created!")
+        Log.d(LOG_TAG, "${::startCaffeine.name}() -> ${this::caffeineTimerTask.name} created!")
 
         caffeineTimer = Timer().apply {
-            Log.d(LOG_TAG, "startCaffeine(): scheduling ${this@KeepAwakeService::caffeineTimerTask.name}...")
+            Log.d(LOG_TAG, "${::startCaffeine.name}() -> scheduling ${this@KeepAwakeService::caffeineTimerTask.name}...")
             schedule(caffeineTimerTask, DEBOUNCE_DURATION.inWholeMilliseconds, 1000.milliseconds.inWholeMilliseconds)
-            Log.d(LOG_TAG, "startCaffeine(): ${this@KeepAwakeService::caffeineTimerTask.name} scheduled!")
+            Log.d(LOG_TAG, "${::startCaffeine.name}() -> ${this@KeepAwakeService::caffeineTimerTask.name} scheduled!")
         }
     }
 
     private fun stopCaffeine() {
-        Log.d(LOG_TAG, "stopCaffeine(): stopping ${getString(R.string.app_name)}...")
+        Log.d(LOG_TAG, "${::stopCaffeine.name}() -> stopping ${getString(R.string.app_name)}...")
 
         wakeLock?.apply {
             if (isHeld) {
-                Log.d(LOG_TAG, "stopCaffeine(): releasing ${this@KeepAwakeService::wakeLock.name}...")
+                Log.d(LOG_TAG, "${::stopCaffeine.name}() -> releasing ${this@KeepAwakeService::wakeLock.name}...")
                 release()
-                Log.d(LOG_TAG, "stopCaffeine(): ${this@KeepAwakeService::wakeLock.name} released!")
+                Log.d(LOG_TAG, "${::stopCaffeine.name}() -> ${this@KeepAwakeService::wakeLock.name} released!")
             } else {
-                Log.d(LOG_TAG, "startCaffeine(): ${this@KeepAwakeService::wakeLock.name} is already released!")
+                Log.d(LOG_TAG, "${::startCaffeine.name}() -> ${this@KeepAwakeService::wakeLock.name} is already released!")
             }
         }
 
-        Log.d(LOG_TAG, "stopCaffeine(): cancelling ${this::caffeineTimerTask.name}...")
+        Log.d(LOG_TAG, "${::stopCaffeine.name}() -> cancelling ${this::caffeineTimerTask.name}...")
         caffeineTimerTask?.cancel()
-        Log.d(LOG_TAG, "stopCaffeine(): ${this::caffeineTimerTask.name} cancelled!")
+        Log.d(LOG_TAG, "${::stopCaffeine.name}() -> ${this::caffeineTimerTask.name} cancelled!")
 
         if (isScreenLockReceiverRegistered) {
-            Log.d(LOG_TAG, "stopCaffeine(): unregistering ${this::screenLockReceiver.name}...")
+            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> unregistering ${this::screenLockReceiver.name}...")
             unregisterReceiver(screenLockReceiver)
             isScreenLockReceiverRegistered = false
-            Log.d(LOG_TAG, "stopCaffeine(): ${this::screenLockReceiver.name} unregistered!")
+            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> ${this::screenLockReceiver.name} unregistered!")
         }
 
         with(caffeinateApplication) {
-            Log.d(LOG_TAG, "removing ${this@KeepAwakeService::class.simpleName} from observers...")
+            Log.d(LOG_TAG, "${::stopCaffeine.name}: removing ${this@KeepAwakeService::class.simpleName} from observers...")
             observers.remove(this@KeepAwakeService)
-            Log.d(LOG_TAG, "${this@KeepAwakeService::class.simpleName} removed from observers!")
+            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> ${this@KeepAwakeService::class.simpleName} removed from observers!")
 
-            Log.d(LOG_TAG, "stopCaffeine(): notifying observers...")
+            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> notifying observers...")
             notifyObservers(ServiceStatus.Stopped)
-            Log.d(LOG_TAG, "stopCaffeine(): observers notified!")
+            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> observers notified!")
         }
 
-        Log.d(LOG_TAG, "stopCaffeine(): ${getString(R.string.app_name)} stopped!")
+        Log.d(LOG_TAG, "${::stopCaffeine.name}() -> ${getString(R.string.app_name)} stopped!")
     }
 
     inner class CaffeineTimerTask(private var duration: Duration) : TimerTask() {
@@ -220,15 +228,17 @@ class KeepAwakeService : Service(), ServiceStatusObserver {
                 when (val status = caffeinateApplication.lastStatusUpdate) {
                     is ServiceStatus.Running -> {
                         if (!isIndefinite) duration -= 1.seconds
+
+                        Log.d(
+                                LOG_TAG,
+                                "${this@CaffeineTimerTask::class.simpleName}::${this@CaffeineTimerTask::run.name}() -> " +
+                                "duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: $isIndefinite"
+                        )
+
                         when {
                             duration <= 0.minutes -> toggleState(this@KeepAwakeService, STATE.STOP)
                             else                  -> caffeinateApplication.notifyObservers(ServiceStatus.Running(duration))
                         }
-
-                        Log.d(
-                                LOG_TAG,
-                                "CaffeineTimerTask::run(): duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: $isIndefinite"
-                        )
                     }
 
                     else                     -> toggleState(this@KeepAwakeService, STATE.STOP)
@@ -240,7 +250,7 @@ class KeepAwakeService : Service(), ServiceStatusObserver {
     private class ScreenLockStateReceiver : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d(LOG_TAG, "screenLockReceiverOnReceive(): Screen Locked, Stopping...")
+            Log.d(LOG_TAG, "${this::class.simpleName}::${::onReceive.name}() -> Screen Locked, Stopping...")
             toggleState(context, KeepAwakeService.Companion.STATE.STOP)
         }
     }
@@ -277,7 +287,7 @@ class KeepAwakeService : Service(), ServiceStatusObserver {
         }
 
         private fun toggleState(context: Context, newState: STATE) {
-            Log.d(LOG_TAG, "toggleState() : newState: $newState")
+            Log.d(LOG_TAG, "${::toggleState.name}() -> newState: $newState")
             val caffeinateApplication = context.applicationContext as CaffeinateApplication
             val start = when (newState) {
                 STATE.START  -> true
