@@ -46,7 +46,6 @@ class MainActivity : AppCompatActivity(), ServiceStatusObserver {
         DynamicColors.applyToActivityIfAvailable(this)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-        Log.d(this::class.simpleName, "Build.VERSION.SDK_INT: ${Build.VERSION.SDK_INT}")
 
         binding.caffeineButton.setOnClickListener {
             val permissionsGranted = sharedPreferences.getBoolean(SHARED_PREFERENCES_ALL_PERMISSIONS_GRANTED, false)

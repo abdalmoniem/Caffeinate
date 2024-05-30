@@ -36,7 +36,7 @@ class QuickTileService : TileService() {
     }
 
     private fun checkPermissions(): Boolean {
-        Log.d(LOG_TAG, "arePermissionsGranted(): Permissions Granted: $arePermissionsGranted")
+        Log.d(LOG_TAG, "${::arePermissionsGranted.name}() -> Permissions Granted: $arePermissionsGranted")
         if (!arePermissionsGranted) {
             val intent =
                     Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT }
@@ -60,7 +60,7 @@ class QuickTileService : TileService() {
 
     private fun updateQuickTile() {
         val currentStatus = (application as CaffeinateApplication).lastStatusUpdate
-        Log.d(LOG_TAG, "updateQuickTile(): running = $currentStatus")
+        Log.d(LOG_TAG, "${::updateQuickTile.name}() -> running = $currentStatus")
         val tile = qsTile ?: return
 
         val (tileState, tileSubtitle) = when (currentStatus) {
