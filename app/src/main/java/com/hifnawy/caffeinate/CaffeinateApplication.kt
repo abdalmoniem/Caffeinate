@@ -2,9 +2,9 @@ package com.hifnawy.caffeinate
 
 import android.app.Application
 import com.google.android.material.color.DynamicColors
-import com.hifnawy.caffeinate.services.KeepAwakeService
 import com.hifnawy.caffeinate.services.QuickTileService
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -31,15 +31,14 @@ class CaffeinateApplication : Application() {
     var timeout = firstTimeout
     var keepAwakeServiceObservers = mutableListOf<ServiceStatusObserver>()
     var sharedPrefsObservers = mutableListOf<SharedPrefsManager.SharedPrefsChangedListener>()
-
     var lastStatusUpdate: ServiceStatus = ServiceStatus.Stopped
         private set
 
     override fun onCreate() {
         super.onCreate()
-
         DynamicColors.applyToActivitiesIfAvailable(this)
-        keepAwakeServiceObservers.add(QuickTileService.TileServiceStatusObserver(this))
+
+        keepAwakeServiceObservers.addObserver(::keepAwakeServiceObservers.name, QuickTileService.TileServiceStatusObserver(this))
     }
 
     fun notifyObservers(status: ServiceStatus) {

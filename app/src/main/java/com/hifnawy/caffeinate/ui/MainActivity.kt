@@ -25,6 +25,8 @@ import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.databinding.ActivityMainBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions
+import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 
 class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedListener, ServiceStatusObserver {
@@ -53,8 +55,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         super.onResume()
         if (isAllPermissionsGranted()) onIsAllPermissionsGrantedChanged(true)
 
-        caffeinateApplication.keepAwakeServiceObservers.add(this)
-        caffeinateApplication.sharedPrefsObservers.add(this)
+        caffeinateApplication.keepAwakeServiceObservers.addObserver(caffeinateApplication::keepAwakeServiceObservers.name, this)
+        caffeinateApplication.sharedPrefsObservers.addObserver(caffeinateApplication::sharedPrefsObservers.name, this)
 
         onServiceStatusUpdate(caffeinateApplication.lastStatusUpdate)
     }
