@@ -12,10 +12,13 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.content.res.AppCompatResources
+import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.hifnawy.caffeinate.CaffeinateApplication
@@ -23,6 +26,7 @@ import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.ServiceStatus
 import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.databinding.ActivityMainBinding
+import com.hifnawy.caffeinate.databinding.DialogChooseThemeBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
@@ -30,6 +34,8 @@ import com.hifnawy.caffeinate.utils.SharedPrefsManager
 
 class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedListener, ServiceStatusObserver {
 
+    @Suppress("PrivatePropertyName")
+    private val LOG_TAG = MainActivity::class.simpleName
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
@@ -38,14 +44,48 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        AppCompatDelegate.setDefaultNightMode(sharedPreferences.theme.value)
+        if (DynamicColors.isDynamicColorAvailable() && sharedPreferences.isMaterialYouEnabled) DynamicColors.applyToActivityIfAvailable(this@MainActivity)
+
         enableEdgeToEdge()
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        binding.caffeineButton.setOnClickListener {
-            if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
+        with(binding) {
+            val themeClickListener = View.OnClickListener { showChooseThemeDialog() }
 
-            KeepAwakeService.startNextDuration(caffeinateApplication)
+            appThemeCard.setOnClickListener(themeClickListener)
+            appThemeButton.setOnClickListener(themeClickListener)
+
+            when (sharedPreferences.theme) {
+                SharedPrefsManager.Theme.SYSTEM_DEFAULT -> appThemeButton.text = getString(R.string.app_theme_system_default)
+                SharedPrefsManager.Theme.LIGHT          -> appThemeButton.text = getString(R.string.app_theme_system_light)
+                SharedPrefsManager.Theme.DARK           -> appThemeButton.text = getString(R.string.app_theme_system_dark)
+            }
+
+            if (DynamicColors.isDynamicColorAvailable()) {
+                val materialYouViewsClickListener = View.OnClickListener {
+                    sharedPreferences.isMaterialYouEnabled = (!sharedPreferences.isMaterialYouEnabled).apply { materialYouSwitch.isChecked = this }
+
+                    recreate()
+                }
+
+                materialYouCard.isEnabled = true
+                materialYouTextView.isEnabled = true
+                materialYouSubTextTextView.visibility = View.GONE
+                materialYouSwitch.isEnabled = true
+                materialYouSwitch.isChecked = sharedPreferences.isMaterialYouEnabled
+
+                materialYouCard.setOnClickListener(materialYouViewsClickListener)
+                materialYouSwitch.setOnClickListener(materialYouViewsClickListener)
+            }
+
+            caffeineButton.setOnClickListener {
+                if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
+
+                KeepAwakeService.startNextDuration(caffeinateApplication)
+            }
         }
     }
 
@@ -66,7 +106,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
     override fun onIsAllPermissionsGrantedChanged(value: Boolean) {
         with(binding) {
-            val clickListener = View.OnClickListener {
+            val allowDimmingViewsClickListener = View.OnClickListener {
                 sharedPreferences.isDimmingEnabled = (!sharedPreferences.isDimmingEnabled).apply { allowDimmingSwitch.isChecked = this }
             }
 
@@ -77,8 +117,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             allowDimmingSwitch.isEnabled = value
             allowDimmingSwitch.isChecked = sharedPreferences.isDimmingEnabled
 
-            allowDimmingCard.setOnClickListener(clickListener)
-            allowDimmingSwitch.setOnClickListener(clickListener)
+            allowDimmingCard.setOnClickListener(allowDimmingViewsClickListener)
+            allowDimmingSwitch.setOnClickListener(allowDimmingViewsClickListener)
         }
     }
 
@@ -211,10 +251,53 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             .setIcon(R.drawable.coffee_icon)
             .setCancelable(false)
             .setMessage(getString(R.string.dialog_battery_optimization_needed_message))
-            .setPositiveButton(getString(R.string.ok_button)) { _, _ ->
+            .setPositiveButton(getString(R.string.dialog_button_ok)) { _, _ ->
                 startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${applicationContext.packageName}")))
             }
-            .setNegativeButton(getString(R.string.cancel_button), null)
+            .setNegativeButton(getString(R.string.dialog_button_cancel), null)
             .show()
+    }
+
+    private fun showChooseThemeDialog() {
+        with(binding) {
+            var theme = sharedPreferences.theme
+            val dialogBinding = DialogChooseThemeBinding.inflate(LayoutInflater.from(root.context))
+
+            when (theme.value) {
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> {
+                    dialogBinding.themeRadioGroup.check(R.id.themeSystemDefault)
+                    appThemeButton.text = getString(R.string.app_theme_system_default)
+                }
+
+                AppCompatDelegate.MODE_NIGHT_NO            -> {
+                    dialogBinding.themeRadioGroup.check(R.id.themeSystemLight)
+                    appThemeButton.text = getString(R.string.app_theme_system_light)
+                }
+
+                AppCompatDelegate.MODE_NIGHT_YES           -> {
+                    dialogBinding.themeRadioGroup.check(R.id.themeSystemDark)
+                    appThemeButton.text = getString(R.string.app_theme_system_dark)
+                }
+            }
+
+            dialogBinding.themeRadioGroup.setOnCheckedChangeListener { _, checkedRadioButtonId ->
+                when (checkedRadioButtonId) {
+                    R.id.themeSystemDefault -> theme = SharedPrefsManager.Theme.SYSTEM_DEFAULT
+                    R.id.themeSystemLight   -> theme = SharedPrefsManager.Theme.LIGHT
+                    R.id.themeSystemDark    -> theme = SharedPrefsManager.Theme.DARK
+                }
+            }
+
+            MaterialAlertDialogBuilder(root.context)
+                .setView(dialogBinding.root)
+                .setIcon(R.drawable.baseline_coffee_32)
+                .setPositiveButton(getString(R.string.dialog_button_ok)) { _, _ ->
+                    sharedPreferences.theme = theme
+                    AppCompatDelegate.setDefaultNightMode(theme.value)
+                    recreate()
+                }
+                .setNegativeButton(getString(R.string.dialog_button_cancel), null)
+                .show()
+        }
     }
 }
