@@ -36,12 +36,6 @@ class CaffeinateApplication : Application() {
             notifyObservers(status)
         }
 
-    override fun onCreate() {
-        super.onCreate()
-
-        DynamicColors.applyToActivitiesIfAvailable(this)
-    }
-
     private fun notifyObservers(status: ServiceStatus) {
         if (status is ServiceStatus.Stopped) timeout = firstTimeout
 

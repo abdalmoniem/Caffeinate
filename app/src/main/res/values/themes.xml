@@ -1,9 +1,9 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Base.Theme.Caffeinate" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Theme.Caffeinate" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">#ff6200ee</item>
+        <item name="colorPrimaryVariant">#ff3700b3</item>
+        <item name="colorSecondary">#ff03dac6</item>
+        <item name="colorSecondaryVariant">#ff018786</item>
     </style>
-
-    <style name="Theme.Caffeinate" parent="Base.Theme.Caffeinate" />
 </resources>
