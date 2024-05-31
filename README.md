@@ -19,16 +19,22 @@ Download [latest release](https://github.com/abdalmoniem/Caffeinate/releases/lat
         <td>
             <img src="screenshots/Screenshot_2024-05-30-19-16-07-14.jpg" alt="Caffeinate Screenshot 03" width="180"/>
         </td>
+        <td>
+            <img src="screenshots/Screenshot_2024-05-31-12-19-19-09.jpg" alt="Caffeinate Screenshot 04" width="180"/>
+        </td>
     </tr>
     <tr> 
         <td>
-            <img src="screenshots/Screenshot_2024-05-30-19-16-12-81.jpg" alt="Caffeinate Screenshot 04" width="180"/>
+            <img src="screenshots/Screenshot_2024-05-30-19-16-12-81.jpg" alt="Caffeinate Screenshot 05" width="180"/>
         </td>
         <td>
-            <img src="screenshots/Screenshot_2024-05-30-19-43-23-53.jpg" alt="Caffeinate Screenshot 04" width="180"/>
+            <img src="screenshots/Screenshot_2024-05-30-19-43-23-53.jpg" alt="Caffeinate Screenshot 06" width="180"/>
         </td>
         <td>
-            <img src="screenshots/Screenshot_2024-05-30-19-44-41-86.jpg" alt="Caffeinate Screenshot 05" width="180"/>
+            <img src="screenshots/Screenshot_2024-05-30-19-44-41-86.jpg" alt="Caffeinate Screenshot 07" width="180"/>
+        </td>
+        <td>
+            <img src="screenshots/Screenshot_2024-05-31-12-15-47-02.jpg" alt="Caffeinate Screenshot 08" width="180"/>
         </td>
     </tr>
 </table>

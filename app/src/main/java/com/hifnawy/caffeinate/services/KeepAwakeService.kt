@@ -273,7 +273,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             Log.d(LOG_TAG, "${::stopCaffeine.name}() -> $LOG_TAG removed from ${CaffeinateApplication::sharedPrefsObservers.name}!")
 
             Log.d(LOG_TAG, "${::stopCaffeine.name}() -> notifying observers...")
-            notifyObservers(ServiceStatus.Stopped)
+            caffeinateApplication.lastStatusUpdate = ServiceStatus.Stopped
             Log.d(LOG_TAG, "${::stopCaffeine.name}() -> observers notified!")
         }
 
@@ -303,7 +303,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
                         when {
                             duration <= 0.minutes -> toggleState(this@KeepAwakeService, STATE.STOP)
-                            else                  -> caffeinateApplication.notifyObservers(ServiceStatus.Running(duration))
+                            else                  -> caffeinateApplication.lastStatusUpdate = ServiceStatus.Running(duration)
                         }
                     }
 
@@ -377,7 +377,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                 else  -> ServiceStatus.Stopped
             }
 
-            caffeinateApplication.notifyObservers(status)
+            caffeinateApplication.lastStatusUpdate = status
 
             when {
                 start -> ContextCompat.startForegroundService(context, intent)
