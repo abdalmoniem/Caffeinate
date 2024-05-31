@@ -1,6 +1,4 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
-import java.text.SimpleDateFormat
-import java.util.Date
 
 plugins {
     alias(libs.plugins.android.application)
@@ -15,8 +13,8 @@ android {
         applicationId = "com.hifnawy.caffeinate"
         minSdk = 24
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.1.1"
+        versionCode = 4
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -34,7 +32,6 @@ android {
         variant.outputs.all {
             this as BaseVariantOutputImpl
             val applicationId = variant.buildType.applicationIdSuffix?.let { "${variant.applicationId}.$it" } ?: variant.applicationId
-
             // val appName = applicationId.split(".").last()
             // val formattedDate = SimpleDateFormat("E_dd-MM-yyyy_hh-mm-ss_S_a").format(Date())
             // val apkName = "${appName}_${variant.buildType.name}_v${android.defaultConfig.versionName}_${formattedDate}.apk"
@@ -64,7 +61,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
