@@ -1,3 +1,5 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate/badge)](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate)
+
 # Caffeinate
 
 Caffeinate is an App that helps android developers Keep their phone's screen On while developing
