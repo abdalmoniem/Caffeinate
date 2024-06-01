@@ -4,7 +4,6 @@
 
 Caffeinate is an App that helps android developers Keep their phone's screen On while developing
 
-# Download
 [<img alt="Download from GitHub" height="80" src="assets/direct-apk-download.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
 
 # Screenshots
