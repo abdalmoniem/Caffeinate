@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,6 +33,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
@@ -44,18 +46,45 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <ImageView
+                android:id="@+id/appIcon"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginStart="10dp"
+                android:contentDescription="@string/app_icon"
+                android:src="@drawable/baseline_coffee_24"
+                app:layout_constraintBottom_toBottomOf="@+id/appNameTextView"
+                app:layout_constraintEnd_toStartOf="@+id/appNameTextView"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/appNameTextView" />
+
+            <TextView
+                android:id="@+id/appNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="30dp"
+                android:text="@string/app_name"
+                android:textSize="50sp"
+                app:layout_constraintBottom_toTopOf="@+id/batteryOptimizationCard"
+                app:layout_constraintStart_toEndOf="@+id/appIcon"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/batteryOptimizationCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:minHeight="48dp"
                 app:cardCornerRadius="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/appNameTextView">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -332,21 +361,77 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/allowWhileLockedCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="10dp"
+                android:clickable="true"
+                android:enabled="false"
+                android:focusable="true"
+                app:cardCornerRadius="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/allowDimmingCard">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/allowWhileLockedTextView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:text="@string/allow_while_locked_pref"
+                        android:textSize="@dimen/pref_text_size"
+                        app:layout_constraintBottom_toTopOf="@+id/allowWhileLockedSubTextTextView"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/allowWhileLockedSubTextTextView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/allow_while_locked_pref_description"
+                        android:textSize="@dimen/prefs_description_text_size"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/allowWhileLockedTextView" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/allowWhileLockedSwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:enabled="false"
+                        android:textOff="@string/allow_while_locked_off"
+                        android:textOn="@string/allow_while_locked_on"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/caffeineButton"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="50dp"
                 android:layout_marginEnd="50dp"
-                android:layout_marginBottom="100dp"
                 android:enabled="false"
+                android:minWidth="200dp"
                 android:text="@string/caffeinate_button_off"
                 android:textSize="@dimen/caffeinate_button_text_size"
                 app:cornerRadius="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                tools:ignore="VisualLintButtonSize" />
+                app:layout_constraintTop_toBottomOf="@+id/allowWhileLockedCard" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

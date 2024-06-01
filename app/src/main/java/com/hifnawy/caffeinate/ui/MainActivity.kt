@@ -104,32 +104,58 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         caffeinateApplication.keepAwakeServiceObservers.remove(this)
     }
 
-    override fun onIsAllPermissionsGrantedChanged(value: Boolean) {
+    override fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean) {
         with(binding) {
             val allowDimmingViewsClickListener = View.OnClickListener {
                 sharedPreferences.isDimmingEnabled = (!sharedPreferences.isDimmingEnabled).apply { allowDimmingSwitch.isChecked = this }
             }
+            val allowWhileLockedViewsClickListener = View.OnClickListener {
+                sharedPreferences.isWhileLockedEnabled = (!sharedPreferences.isWhileLockedEnabled).apply { allowWhileLockedSwitch.isChecked = this }
+            }
 
-            caffeineButton.isEnabled = value
-            allowDimmingCard.isEnabled = value
-            allowDimmingTextView.isEnabled = value
-            allowDimmingSubTextTextView.visibility = if (value) View.VISIBLE else View.GONE
-            allowDimmingSwitch.isEnabled = value
+            caffeineButton.isEnabled = isAllPermissionsGranted
+
+            allowDimmingCard.isEnabled = isAllPermissionsGranted
+            allowDimmingTextView.isEnabled = isAllPermissionsGranted
+            allowDimmingSubTextTextView.visibility = if (isAllPermissionsGranted) View.VISIBLE else View.GONE
+            allowDimmingSwitch.isEnabled = isAllPermissionsGranted
             allowDimmingSwitch.isChecked = sharedPreferences.isDimmingEnabled
 
             allowDimmingCard.setOnClickListener(allowDimmingViewsClickListener)
             allowDimmingSwitch.setOnClickListener(allowDimmingViewsClickListener)
+
+            allowWhileLockedCard.isEnabled = isAllPermissionsGranted
+            allowWhileLockedTextView.isEnabled = isAllPermissionsGranted
+            allowWhileLockedSubTextTextView.visibility = if (isAllPermissionsGranted) View.VISIBLE else View.GONE
+            allowWhileLockedSwitch.isEnabled = isAllPermissionsGranted
+            allowWhileLockedSwitch.isChecked = sharedPreferences.isWhileLockedEnabled
+
+            allowWhileLockedCard.setOnClickListener(allowWhileLockedViewsClickListener)
+            allowWhileLockedSwitch.setOnClickListener(allowWhileLockedViewsClickListener)
         }
     }
 
-    override fun onIsDimmingEnabledChanged(value: Boolean) {
-        binding.allowDimmingSwitch.isChecked = value
+    override fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean) {
+        binding.allowDimmingSwitch.isChecked = isDimmingEnabled
+    }
+
+    override fun onIsWhileLockedEnabledChanged(isWhileLockedEnabled: Boolean) {
+        binding.allowWhileLockedSwitch.isChecked = isWhileLockedEnabled
     }
 
     override fun onServiceStatusUpdate(status: ServiceStatus) {
-        binding.caffeineButton.text = when (status) {
-            is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
-            is ServiceStatus.Running -> status.remaining.toFormattedTime()
+        with(binding) {
+            when (status) {
+                is ServiceStatus.Stopped -> {
+                    caffeineButton.text = getString(R.string.caffeinate_button_off)
+                    appIcon.setImageDrawable(AppCompatResources.getDrawable(root.context, R.drawable.outline_coffee_24))
+                }
+
+                is ServiceStatus.Running -> {
+                    caffeineButton.text = status.remaining.toFormattedTime()
+                    appIcon.setImageDrawable(AppCompatResources.getDrawable(root.context, R.drawable.baseline_coffee_24))
+                }
+            }
         }
     }
 
@@ -262,6 +288,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         with(binding) {
             var theme = sharedPreferences.theme
             val dialogBinding = DialogChooseThemeBinding.inflate(LayoutInflater.from(root.context))
+            val dialog = MaterialAlertDialogBuilder(root.context).setView(dialogBinding.root).create()
 
             when (theme.value) {
                 AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> {
@@ -280,24 +307,25 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 }
             }
 
-            dialogBinding.themeRadioGroup.setOnCheckedChangeListener { _, checkedRadioButtonId ->
-                when (checkedRadioButtonId) {
-                    R.id.themeSystemDefault -> theme = SharedPrefsManager.Theme.SYSTEM_DEFAULT
-                    R.id.themeSystemLight   -> theme = SharedPrefsManager.Theme.LIGHT
-                    R.id.themeSystemDark    -> theme = SharedPrefsManager.Theme.DARK
+            with(dialogBinding) {
+                themeRadioGroup.setOnCheckedChangeListener { _, checkedRadioButtonId ->
+                    when (checkedRadioButtonId) {
+                        R.id.themeSystemDefault -> theme = SharedPrefsManager.Theme.SYSTEM_DEFAULT
+                        R.id.themeSystemLight   -> theme = SharedPrefsManager.Theme.LIGHT
+                        R.id.themeSystemDark    -> theme = SharedPrefsManager.Theme.DARK
+                    }
                 }
-            }
 
-            MaterialAlertDialogBuilder(root.context)
-                .setView(dialogBinding.root)
-                .setIcon(R.drawable.baseline_coffee_32)
-                .setPositiveButton(getString(R.string.dialog_button_ok)) { _, _ ->
+                dialogButtonOk.setOnClickListener {
                     sharedPreferences.theme = theme
                     AppCompatDelegate.setDefaultNightMode(theme.value)
                     recreate()
                 }
-                .setNegativeButton(getString(R.string.dialog_button_cancel), null)
-                .show()
+
+                dialogButtonCancel.setOnClickListener { dialog.dismiss() }
+            }
+
+            dialog.show()
         }
     }
 }
