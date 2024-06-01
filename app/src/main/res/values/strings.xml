@@ -3,6 +3,7 @@
 <!DOCTYPE resources [<!ENTITY app_name "Caffeinate">]>
 <resources>
     <string name="app_name">&app_name;</string>
+    <string name="app_icon">&app_name; Icon</string>
     <string name="battery_optimization_not_granted">Battery Optimization: Not Granted!</string>
     <string name="battery_optimization_granted">Battery Optimization: Granted!</string>
     <string name="background_optimization_not_granted">Background Optimization: Not Granted!</string>
@@ -13,13 +14,17 @@
     <string name="dialog_battery_optimization_needed_message">This app requires the Battery Optimization permission to work properly.</string>
     <string name="app_theme_pref">Theme</string>
     <string name="material_you_pref">Material You</string>
-    <string name="material_you_pref_description">Material You theming is only available on Android 12 and up</string>
+    <string name="material_you_pref_description">Material You theming is only available\non Android 12 and up</string>
     <string name="material_you_off">Material You Off</string>
     <string name="material_you_on">Material You On</string>
     <string name="allow_dimming_pref">Allow Dimming</string>
     <string name="allow_dimming_pref_description">Allow screen to dim when &app_name; is on.</string>
     <string name="allow_dimming_on">Allow Dimming Enabled</string>
     <string name="allow_dimming_off">Allow Dimming Disabled</string>
+    <string name="allow_while_locked_pref">Allow While Locked</string>
+    <string name="allow_while_locked_pref_description">Allow &app_name; to keep running while the screen\nis locked</string>
+    <string name="allow_while_locked_off">Allow While Locked Enabled</string>
+    <string name="allow_while_locked_on">Allow While Locked Disabled</string>
     <string name="caffeinate_button_off">OFF</string>
     <string name="quick_tile_off">Off</string>
     <string name="foreground_notification_action_next_timeout">Next Timeout</string>
