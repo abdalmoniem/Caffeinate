@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">كافينيت</string>
+    <string name="app_icon">أيقونة التطبيق</string>
+    <string name="battery_optimization_not_granted">تحسين البطارية: لم يتم منحها!</string>
+    <string name="battery_optimization_granted">تحسين البطارية: تم منحها!</string>
+    <string name="background_optimization_not_granted">تحسين البطارية: لم يتم منحها!</string>
+    <string name="background_optimization_granted">تحسين البطارية: تم منحها!</string>
+    <string name="notifications_permission_not_granted">إذن الإخطارات: غير ممنوح!</string>
+    <string name="notifications_permission_granted">إذن الإخطارات: مُنح!</string>
+    <string name="dialog_battery_optimization_needed_title">تحسين البطارية مطلوب</string>
+    <string name="dialog_battery_optimization_needed_message">يتطلب هذا التطبيق إذن تحسين البطارية للعمل بشكل صحيح.</string>
+    <string name="app_theme_pref">السمة</string>
+    <string name="material_you_pref">ألوان ديناميكية</string>
+    <string name="material_you_pref_description">الألوان الديناميكية متوفرة فقط\nعلى أندرويد ١٢ وما فوق</string>
+    <string name="material_you_off">الألوان الديناميكية مُعطَّلة</string>
+    <string name="material_you_on">الألوان الديناميكية مُفعَّلة</string>
+    <string name="allow_dimming_pref">السماح بالتعتيم</string>
+    <string name="allow_dimming_pref_description">السماح بتعتيم الشاشة عندما يكون التطبيق قيد التشغيل.</string>
+    <string name="allow_dimming_on">السماح بالتعتيم مُفعَّل</string>
+    <string name="allow_dimming_off">السماح بالتعتيم مُعطَّل</string>
+    <string name="allow_while_locked_pref">السماح أثناء القفل</string>
+    <string name="allow_while_locked_pref_description">السماح للتطبيق بالاستمرار في العمل\nبينما تكون الشاشة مقفلة</string>
+    <string name="allow_while_locked_off">السماح أثناء قفل الشاشة مُفعَّل</string>
+    <string name="allow_while_locked_on">السماح أثناء قفل الشاشة مُعطَّل</string>
+    <string name="caffeinate_button_off">مُوقف</string>
+    <string name="quick_tile_off">مُعطَّل</string>
+    <string name="foreground_notification_action_next_timeout">المهلة التالية</string>
+    <string name="foreground_notification_action_disable_dimming">تفعيل التعتيم</string>
+    <string name="foreground_notification_action_enable_dimming">تعطيل التعتيم</string>
+    <string name="foreground_notification_tap_to_turn_off">انقر لإيقاف التشغيل</string>
+    <string name="foreground_notification_title_duration_indefinite">التطبيق سوف يبقى الشاشة قيد التشغيل</string>
+    <string name="foreground_notification_title_duration_definite">التطبيق سيبقي الشاشة قيد التشغيل لمدة %1$s</string>
+    <string name="dialog_button_ok">حسناً</string>
+    <string name="dialog_button_cancel">إلغاء</string>
+    <string name="notifications_permission_required">إذن الإشعارات مطلوب</string>
+    <string name="go_to_settings">الذَّهاب إلى الإعدادات</string>
+    <string name="choose_theme">اختر السمة</string>
+    <string name="choose_theme_dialog_icon">أيقونة مربع حوار اختبار السمة</string>
+    <string name="app_theme_system_default">افتراضى النظام</string>
+    <string name="app_theme_system_light">ساطع</string>
+    <string name="app_theme_system_dark">داكن</string>
+</resources>
