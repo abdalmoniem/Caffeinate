@@ -21,5 +21,5 @@ files:
         he: iw
         id: in
         yi: ji
-  - source: /fastlane/metadata/android/en-US/*.txt
-    translation: /fastlane/metadata/android/%locale%/%original_file_name%
+  - source: /translations/metadata/android/en-US/*.txt
+    translation: /translations/metadata/android/%locale%/%original_file_name%
