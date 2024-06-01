@@ -1,5 +1,5 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate/badge)](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate)
-[![Build App](https://github.com/abdalmoniem/Caffeinate/actions/workflows/android.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/android.yml) [![CodeFactor](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate/badge)](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate) [![Crowdin](https://badges.crowdin.net/caffeinate/localized.svg)](https://crowdin.com/project/caffeinate)
+[![Build App](https://github.com/abdalmoniem/Caffeinate/actions/workflows/android.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/android.yml) [![CodeFactor](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate/badge)](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate)
 
 # Caffeinate
 
