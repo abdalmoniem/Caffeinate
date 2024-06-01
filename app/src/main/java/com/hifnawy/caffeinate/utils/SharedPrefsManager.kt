@@ -7,10 +7,11 @@ import com.hifnawy.caffeinate.CaffeinateApplication
 class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplication) {
     private companion object {
 
-        private const val SHARED_PREFERENCES_ALL_PERMISSIONS_GRANTED = "all.permissions.granted"
-        private const val SHARED_PREFERENCES_ENABLE_DIMMING = "enable.dimming"
         private const val SHARED_PREFERENCES_THEME = "theme"
+        private const val SHARED_PREFERENCES_ENABLE_DIMMING = "enable.dimming"
         private const val SHARED_PREFERENCES_ENABLE_MATERIAL_YOU = "enable.material.you"
+        private const val SHARED_PREFERENCES_ENABLE_WHILE_LOCKED = "enable.while.locked"
+        private const val SHARED_PREFERENCES_ALL_PERMISSIONS_GRANTED = "all.permissions.granted"
     }
 
     private val sharedPreferences by lazy { caffeinateApplication.getSharedPreferences(caffeinateApplication.packageName, Context.MODE_PRIVATE) }
@@ -18,13 +19,19 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         get() = sharedPreferences.getBoolean(SHARED_PREFERENCES_ALL_PERMISSIONS_GRANTED, false)
         set(value) {
             sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_ALL_PERMISSIONS_GRANTED, value).apply()
-            notifyObservers()
+            notifyObservers { observer -> observer.onIsAllPermissionsGrantedChanged(value) }
         }
     var isDimmingEnabled: Boolean
         get() = sharedPreferences.getBoolean(SHARED_PREFERENCES_ENABLE_DIMMING, false)
         set(value) {
             sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_ENABLE_DIMMING, value).apply()
-            notifyObservers()
+            notifyObservers { observer -> observer.onIsDimmingEnabledChanged(value) }
+        }
+    var isWhileLockedEnabled: Boolean
+        get() = sharedPreferences.getBoolean(SHARED_PREFERENCES_ENABLE_WHILE_LOCKED, false)
+        set(value) {
+            sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_ENABLE_WHILE_LOCKED, value).apply()
+            notifyObservers { observer -> observer.onIsWhileLockedEnabledChanged(value) }
         }
     var theme: Theme
         get() = Theme.valueOf(sharedPreferences.getString(SHARED_PREFERENCES_THEME, Theme.SYSTEM_DEFAULT.name) ?: Theme.SYSTEM_DEFAULT.name)
@@ -33,12 +40,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         get() = sharedPreferences.getBoolean(SHARED_PREFERENCES_ENABLE_MATERIAL_YOU, false)
         set(value) = sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_ENABLE_MATERIAL_YOU, value).apply()
 
-    private fun notifyObservers(isAllPermissionsGranted: Boolean = this.isAllPermissionsGranted, isDimmingEnabled: Boolean = this.isDimmingEnabled) {
-        caffeinateApplication.sharedPrefsObservers.forEach { observer ->
-            observer.onIsAllPermissionsGrantedChanged(isAllPermissionsGranted)
-            observer.onIsDimmingEnabledChanged(isDimmingEnabled)
-        }
-    }
+    private fun notifyObservers(notifyCallback: (observer: SharedPrefsChangedListener) -> Unit) = caffeinateApplication.sharedPrefsObservers.forEach(notifyCallback)
 
     enum class Theme(var value: Int) {
         SYSTEM_DEFAULT(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM),
@@ -48,7 +50,8 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
 
     interface SharedPrefsChangedListener {
 
-        fun onIsAllPermissionsGrantedChanged(value: Boolean)
-        fun onIsDimmingEnabledChanged(value: Boolean)
+        fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean)
+        fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean)
+        fun onIsWhileLockedEnabledChanged(isWhileLockedEnabled: Boolean)
     }
 }
