@@ -2,7 +2,8 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate/badge)](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate)
 [![Build App](https://github.com/abdalmoniem/Caffeinate/actions/workflows/android.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/android.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate/badge)](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate)
-![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)
+[![Crowdin](https://badges.crowdin.net/caffeinate/localized.svg)](https://crowdin.com/project/caffeinate)
 
 Keeps the phone's screen awake for a configurable amount of time.
 
