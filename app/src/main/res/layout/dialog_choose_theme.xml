@@ -8,14 +8,15 @@
 
     <ImageView
         android:id="@+id/dialogIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:contentDescription="@string/choose_theme_dialog_icon"
         android:src="@drawable/baseline_coffee_24"
         app:layout_constraintBottom_toBottomOf="@+id/dialogTitle"
         app:layout_constraintEnd_toStartOf="@+id/dialogTitle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/dialogTitle" />
+        app:layout_constraintTop_toTopOf="@+id/dialogTitle"
+        app:tint="#ff815137" />
 
     <TextView
         android:id="@+id/dialogTitle"
