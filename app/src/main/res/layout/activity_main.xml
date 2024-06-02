@@ -52,12 +52,11 @@
                 android:layout_height="64dp"
                 android:layout_marginStart="10dp"
                 android:contentDescription="@string/app_icon"
-                android:src="@drawable/baseline_coffee_24"
+                android:src="@drawable/outline_coffee_24"
                 app:layout_constraintBottom_toBottomOf="@+id/appNameTextView"
-                app:layout_constraintEnd_toStartOf="@+id/appNameTextView"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/appNameTextView"
-                app:tint="#ff815137" />
+                app:tint="#ffc9a26b" />
 
             <TextView
                 android:id="@+id/appNameTextView"
