@@ -1,0 +1,51 @@
+name: Publish Release on Tag
+
+on:
+  push:
+    tags:
+       - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: 17
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2.1.3
+
+      - name: Build APK
+        run: bash gradlew app:assembleRelease
+
+      - uses: r0adkll/sign-android-release@v1.0.4
+        name: Sign APK
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: "generic_key"
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Get Package Name
+        id: get_package_name
+        run: cat app/build.gradle.kts | grep -Po 'applicationId\s*=\s*"[a-zA-Z\.]+"' | sed -E 's/applicationId\s*=\s*"([a-zA-Z\.]+)"/\1/'
+      
+      - uses: svenstaro/upload-release-action@v2
+        name: Upload APK
+        with:
+          file: ${{steps.sign_app.outputs.signedReleaseFile}}
+          asset_name: ${{ steps.tests.outputs.stdout }}_${{ github.ref }}.apk
+          tag: ${{ github.ref }}
+          # repo_token: ${{ secrets.GITHUB_TOKEN }}
