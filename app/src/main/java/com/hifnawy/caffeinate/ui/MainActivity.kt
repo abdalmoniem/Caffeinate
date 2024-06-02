@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.enableEdgeToEdge
@@ -53,7 +54,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         setSupportActionBar(binding.toolbar)
 
         with(binding) {
-            val themeClickListener = View.OnClickListener { showChooseThemeDialog() }
+            val themeClickListener = View.OnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                showChooseThemeDialog()
+            }
 
             appThemeCard.setOnClickListener(themeClickListener)
             appThemeButton.setOnClickListener(themeClickListener)
@@ -66,6 +70,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
             if (DynamicColors.isDynamicColorAvailable()) {
                 val materialYouViewsClickListener = View.OnClickListener {
+                    it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+
                     sharedPreferences.isMaterialYouEnabled = (!sharedPreferences.isMaterialYouEnabled).apply { materialYouSwitch.isChecked = this }
 
                     recreate()
@@ -84,6 +90,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             caffeineButton.setOnClickListener {
                 if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
 
+                it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 KeepAwakeService.startNextDuration(caffeinateApplication)
             }
 
@@ -91,6 +98,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 if (!sharedPreferences.isAllPermissionsGranted) return@setOnLongClickListener false
 
                 KeepAwakeService.startIndefinitely(caffeinateApplication)
+
+                return@setOnLongClickListener true
             }
         }
     }
@@ -113,9 +122,13 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     override fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean) {
         with(binding) {
             val allowDimmingViewsClickListener = View.OnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+
                 sharedPreferences.isDimmingEnabled = (!sharedPreferences.isDimmingEnabled).apply { allowDimmingSwitch.isChecked = this }
             }
             val allowWhileLockedViewsClickListener = View.OnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+
                 sharedPreferences.isWhileLockedEnabled = (!sharedPreferences.isWhileLockedEnabled).apply { allowWhileLockedSwitch.isChecked = this }
             }
 
