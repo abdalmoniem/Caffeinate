@@ -38,14 +38,13 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
 
-      - name: Get Package Name
-        id: get_package_name
-        run: cat app/build.gradle.kts | grep -Po 'applicationId\s*=\s*"[a-zA-Z\.]+"' | sed -E 's/applicationId\s*=\s*"([a-zA-Z\.]+)"/\1/'
+      # - name: Get Package Name
+      #   id: get_package_name
+      #   run: cat app/build.gradle.kts | grep -Po 'applicationId\s*=\s*"[a-zA-Z\.]+"' | sed -E 's/applicationId\s*=\s*"([a-zA-Z\.]+)"/\1/'
       
       - uses: svenstaro/upload-release-action@v2
         name: Upload APK
         with:
           file: ${{steps.sign_app.outputs.signedReleaseFile}}
-          asset_name: ${{ steps.tests.outputs.stdout }}_${{ github.ref }}.apk
           tag: ${{ github.ref }}
           # repo_token: ${{ secrets.GITHUB_TOKEN }}
