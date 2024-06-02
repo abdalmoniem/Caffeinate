@@ -86,6 +86,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
                 KeepAwakeService.startNextDuration(caffeinateApplication)
             }
+
+            caffeineButton.setOnLongClickListener {
+                if (!sharedPreferences.isAllPermissionsGranted) return@setOnLongClickListener false
+
+                KeepAwakeService.startIndefinitely(caffeinateApplication)
+            }
         }
     }
 

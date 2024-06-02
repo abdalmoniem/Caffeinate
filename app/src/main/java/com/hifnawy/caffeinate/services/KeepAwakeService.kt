@@ -1,5 +1,6 @@
 package com.hifnawy.caffeinate.services
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -55,7 +56,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         Log.d(LOG_TAG, "${::onStartCommand.name}() -> intent.action: ${intent?.action}")
         when (intent?.action) {
             ACTION_STOP                   -> {
-                toggleState(this, STATE.STOP)
+                toggleState(caffeinateApplication, STATE.STOP)
                 return START_STICKY
             }
 
@@ -207,6 +208,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         return notificationBuilder.build()
     }
 
+    @SuppressLint("WakelockTimeout")
     private fun acquireWakeLock(duration: Duration) {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
@@ -231,7 +233,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         wakeLock = powerManager.newWakeLock(wakeLockLevel, "${getString(R.string.app_name)}:wakelockTag").apply {
             Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingAllowed: $isDimmingEnabled...")
             setReferenceCounted(false)
-            acquire(duration.inWholeMilliseconds)
+            if (duration == Duration.INFINITE) acquire() else acquire(duration.inWholeMilliseconds)
             Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> ${this@KeepAwakeService::wakeLock.name} acquired, isDimmingAllowed: $isDimmingEnabled!")
         }
     }
@@ -303,32 +305,34 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
         override fun run() {
             CoroutineScope(Dispatchers.Main).launch {
-                when (val status = caffeinateApplication.lastStatusUpdate) {
-                    is ServiceStatus.Running -> {
-                        if (!isIndefinite) duration -= 1.seconds
+                caffeinateApplication.apply {
+                    when (val status = lastStatusUpdate) {
+                        is ServiceStatus.Running -> {
+                            if (!isIndefinite) duration -= 1.seconds
 
-                        Log.d(
-                                LOG_TAG,
-                                "$LOG_TAG::${this@CaffeineTimerTask::run.name}() -> " + "duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: $isIndefinite"
-                        )
+                            Log.d(
+                                    LOG_TAG,
+                                    "$LOG_TAG::${this@CaffeineTimerTask::run.name}() -> " + "duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: $isIndefinite"
+                            )
 
-                        when {
-                            duration <= 0.minutes -> toggleState(this@KeepAwakeService, STATE.STOP)
-                            else                  -> caffeinateApplication.lastStatusUpdate = ServiceStatus.Running(duration)
+                            when {
+                                duration <= 0.minutes -> toggleState(this, STATE.STOP)
+                                else                  -> lastStatusUpdate = ServiceStatus.Running(duration)
+                            }
                         }
-                    }
 
-                    else                     -> toggleState(this@KeepAwakeService, STATE.STOP)
+                        else                     -> toggleState(this, STATE.STOP)
+                    }
                 }
             }
         }
     }
 
-    private class ScreenLockStateReceiver : BroadcastReceiver() {
+    private inner class ScreenLockStateReceiver : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
             Log.d(LOG_TAG, "${this::class.simpleName}::${::onReceive.name}() -> Screen Locked, Stopping...")
-            toggleState(context, KeepAwakeService.Companion.STATE.STOP)
+            toggleState(caffeinateApplication, KeepAwakeService.Companion.STATE.STOP)
         }
     }
 
@@ -345,15 +349,28 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         private val DEBOUNCE_DURATION = 1.seconds
         private val LOG_TAG = KeepAwakeService::class.simpleName
 
+        fun startIndefinitely(caffeinateApplication: CaffeinateApplication): Boolean {
+            caffeinateApplication.apply {
+                if (lastStatusUpdate is ServiceStatus.Running) return false
+
+                timeout = Duration.INFINITE
+                toggleState(this, STATE.START)
+
+                return true
+            }
+        }
+
         fun startNextDuration(caffeinateApplication: CaffeinateApplication) {
-            when (val status = caffeinateApplication.lastStatusUpdate) {
-                is ServiceStatus.Running -> debounceNextDuration(status, caffeinateApplication)
-                else                     -> toggleState(caffeinateApplication.applicationContext, STATE.START)
+            caffeinateApplication.apply {
+                when (val status = lastStatusUpdate) {
+                    is ServiceStatus.Running -> debounceNextDuration(status, this)
+                    else                     -> toggleState(this, STATE.START)
+                }
             }
         }
 
         private fun debounceNextDuration(status: ServiceStatus.Running, caffeinateApplication: CaffeinateApplication) {
-            with(caffeinateApplication) {
+            caffeinateApplication.apply {
                 val state = when (status.remaining) {
                     in 0.seconds..timeout - DEBOUNCE_DURATION / 2 -> STATE.STOP
                     else                                          -> {
@@ -362,7 +379,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                     }
                 }
 
-                toggleState(applicationContext, state)
+                toggleState(this, state)
             }
         }
 
@@ -370,29 +387,31 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             caffeinateApplication.apply {
                 timeout = nextTimeout
 
-                toggleState(applicationContext, STATE.START)
+                toggleState(this, STATE.START)
             }
         }
 
-        private fun toggleState(context: Context, newState: STATE) {
+        private fun toggleState(caffeinateApplication: CaffeinateApplication, newState: STATE) {
             Log.d(LOG_TAG, "${::toggleState.name}() -> newState: $newState")
-            val caffeinateApplication = context.applicationContext as CaffeinateApplication
-            val start = when (newState) {
-                STATE.START  -> true
-                STATE.STOP   -> false
-                STATE.TOGGLE -> caffeinateApplication.lastStatusUpdate is ServiceStatus.Stopped
-            }
-            val intent = Intent(context, KeepAwakeService::class.java)
-            val status = when {
-                start -> ServiceStatus.Running(caffeinateApplication.timeout)
-                else  -> ServiceStatus.Stopped
-            }
 
-            caffeinateApplication.lastStatusUpdate = status
+            caffeinateApplication.apply {
+                val start = when (newState) {
+                    STATE.START  -> true
+                    STATE.STOP   -> false
+                    STATE.TOGGLE -> lastStatusUpdate is ServiceStatus.Stopped
+                }
+                val intent = Intent(applicationContext, KeepAwakeService::class.java)
+                val status = when {
+                    start -> ServiceStatus.Running(timeout)
+                    else  -> ServiceStatus.Stopped
+                }
 
-            when {
-                start -> ContextCompat.startForegroundService(context, intent)
-                else  -> context.stopService(intent)
+                lastStatusUpdate = status
+
+                when {
+                    start -> ContextCompat.startForegroundService(applicationContext, intent)
+                    else  -> applicationContext.stopService(intent)
+                }
             }
         }
 
