@@ -9,122 +9,123 @@ on:
         required: true
         type: choice
         options:
-          - v1.2.7
-          - v1.2.6
-          - v1.2.5
-          - v1.2
-          - v1.1.1
-          - v1.1
-          - v1.0
+        - v1.2.8
+        - v1.2.7
+        - v1.2.6
+        - v1.2.5
+        - v1.2
+        - v1.1.1
+        - v1.1
+        - v1.0
       logLevel:
         description: 'Log level'
         required: true
         default: 'info'
         type: choice
         options:
-          - info
-          - warning
-          - debug
-permissions: { }
+        - info
+        - warning
+        - debug
+permissions: {}
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Tag ${{ inputs.releaseTag }}
-        uses: actions/checkout@v4
-        env:
-          LEVEL: ${{ inputs.logLevel }}
-        with:
-          ref: refs/tags/${{ inputs.releaseTag }}
+    - name: Checkout Tag ${{ inputs.releaseTag }}
+      uses: actions/checkout@v4
+      env:
+        LEVEL: ${{ inputs.logLevel }}
+      with:
+        ref: refs/tags/${{ inputs.releaseTag }}
 
-      - name: Get Commit Message
-        env:
-          LEVEL: ${{ inputs.logLevel }}
-        run: |
-          echo "COMMIT_MESSAGE=$(git show -s --format=%B)"
-          {
-              echo 'COMMIT_MESSAGE<<EOF'
-              git show -s --format=%B
-              echo EOF
-          } >> $GITHUB_ENV
+    - name: Get Commit Message
+      env:
+        LEVEL: ${{ inputs.logLevel }}
+      run: |
+        echo "COMMIT_MESSAGE=$(git show -s --format=%B)"
+        {
+            echo 'COMMIT_MESSAGE<<EOF'
+            git show -s --format=%B
+            echo EOF
+        } >> $GITHUB_ENV
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        env:
-          LEVEL: ${{ inputs.logLevel }}
-        with:
-          distribution: adopt
-          java-version: 17
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      env:
+        LEVEL: ${{ inputs.logLevel }}
+      with:
+        distribution: adopt
+        java-version: 17
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v2.1.3
-        env:
-          LEVEL: ${{ inputs.logLevel }}
+    - name: Validate Gradle Wrapper
+      uses: gradle/wrapper-validation-action@v2.1.3
+      env:
+        LEVEL: ${{ inputs.logLevel }}
 
-      - name: Build APKs
-        run: bash gradlew app:assembleRelease
-        env:
-          LEVEL: ${{ inputs.logLevel }}
+    - name: Build APKs
+      run: bash gradlew app:assembleRelease
+      env:
+        LEVEL: ${{ inputs.logLevel }}
 
-      - name: Install rename
-        run: sudo apt install rename
-        env:
-          LEVEL: ${{ inputs.logLevel }}
+    - name: Install rename
+      run: sudo apt install rename
+      env:
+        LEVEL: ${{ inputs.logLevel }}
 
-      - name: Rename Build APKs
-        env:
-          LEVEL: ${{ inputs.logLevel }}
-        run: |
-          rename -n 's/(.*).apk/${1}-unsigned.apk/' app/build/outputs/apk/release/*.apk
-          rename 's/(.*).apk/${1}-unsigned.apk/' app/build/outputs/apk/release/*.apk
+    - name: Rename Build APKs
+      env:
+        LEVEL: ${{ inputs.logLevel }}
+      run: |
+        rename -n 's/(.*).apk/${1}-unsigned.apk/' app/build/outputs/apk/release/*.apk
+        rename 's/(.*).apk/${1}-unsigned.apk/' app/build/outputs/apk/release/*.apk
 
-      - name: Sign Release APK
-        uses: r0adkll/sign-android-release@v1.0.4
-        env:
-          LEVEL: ${{ inputs.logLevel }}
-          BUILD_TOOLS_VERSION: 34.0.0
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: generic_key
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+    - name: Sign Release APK
+      uses: r0adkll/sign-android-release@v1.0.4
+      env:
+        LEVEL: ${{ inputs.logLevel }}
+        BUILD_TOOLS_VERSION: 34.0.0
+      with:
+        releaseDirectory: app/build/outputs/apk/release
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        alias: generic_key
+        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Rename Signed Release APK
-        env:
-          LEVEL: ${{ inputs.logLevel }}
-        run: |
-          rename -n 's/(.*)-unsigned-signed.apk/${1}.apk/' ${{ env.SIGNED_RELEASE_FILE }}
-          rename 's/(.*)-unsigned-signed.apk/${1}.apk/' ${{ env.SIGNED_RELEASE_FILE }}
+    - name: Rename Signed Release APK
+      env:
+        LEVEL: ${{ inputs.logLevel }}
+      run: |
+        rename -n 's/(.*)-unsigned-signed.apk/${1}.apk/' ${{ env.SIGNED_RELEASE_FILE }}
+        rename 's/(.*)-unsigned-signed.apk/${1}.apk/' ${{ env.SIGNED_RELEASE_FILE }}
 
-      - name: Generate Artifact Name and Path
-        env:
-          LEVEL: ${{ inputs.logLevel }}
-        run: |
-          find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$'
-          echo ARTIFACT_NAME=$(basename $(find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$')) >> $GITHUB_ENV
-          echo ARTIFACT_PATH=$(find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$') >> $GITHUB_ENV
+    - name: Generate Artifact Name and Path
+      env:
+        LEVEL: ${{ inputs.logLevel }}
+      run: |
+        find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$'
+        echo ARTIFACT_NAME=$(basename $(find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$')) >> $GITHUB_ENV
+        echo ARTIFACT_PATH=$(find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$') >> $GITHUB_ENV
 
-      - name: Create Artifact ${{ env.ARTIFACT_NAME }}
-        uses: actions/upload-artifact@v4
-        env:
-          LEVEL: ${{ inputs.logLevel }}
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
-          if-no-files-found: error
+    - name: Create Artifact ${{ env.ARTIFACT_NAME }}
+      uses: actions/upload-artifact@v4
+      env:
+        LEVEL: ${{ inputs.logLevel }}
+      with:
+        name: ${{ env.ARTIFACT_NAME }}
+        path: ${{ env.ARTIFACT_PATH }}
+        if-no-files-found: error
 
-      - name: Publish Release ${{ inputs.releaseTag }}
-        uses: svenstaro/upload-release-action@v2
-        env:
-          LEVEL: ${{ inputs.logLevel }}
-        with:
-          file: ${{ env.ARTIFACT_PATH }}
-          tag: refs/tags/${{ inputs.releaseTag }}
-          draft: false
-          make_latest: true
-          body: \`${{ env.COMMIT_MESSAGE }}\`
-          release_name: ${{ inputs.releaseTag }}
-          repo_token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+    - name: Publish Release ${{ inputs.releaseTag }}
+      uses: svenstaro/upload-release-action@v2
+      env:
+        LEVEL: ${{ inputs.logLevel }}
+      with:
+        file: ${{ env.ARTIFACT_PATH }}
+        tag: refs/tags/${{ inputs.releaseTag }}
+        draft: false
+        make_latest: true
+        body: ${{ env.COMMIT_MESSAGE }}
+        release_name: ${{ inputs.releaseTag }}
+        repo_token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
