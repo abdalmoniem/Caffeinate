@@ -349,14 +349,10 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         private val DEBOUNCE_DURATION = 1.seconds
         private val LOG_TAG = KeepAwakeService::class.simpleName
 
-        fun startIndefinitely(caffeinateApplication: CaffeinateApplication): Boolean {
+        fun startIndefinitely(caffeinateApplication: CaffeinateApplication) {
             caffeinateApplication.apply {
-                if (lastStatusUpdate is ServiceStatus.Running) return false
-
                 timeout = Duration.INFINITE
                 toggleState(this, STATE.START)
-
-                return true
             }
         }
 
