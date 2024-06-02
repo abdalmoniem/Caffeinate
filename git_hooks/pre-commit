@@ -1,0 +1,9 @@
+#!/bin/sh
+
+gitTopLevel=$(git rev-parse --show-toplevel)
+
+python "$gitTopLevel/update_publish_tags.py" "$gitTopLevel"
+
+echo "adding '$gitTopLevel/.github/workflows/publish_release.yml' to git staging..."
+
+git add $gitTopLevel/.github/workflows/publish_release.yml
