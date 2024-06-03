@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">كافينيت</string>
+    <string name="app_icon">أيقونة البرنامج</string>
+    <string name="battery_optimization_not_granted">تظبيط البطارية: مش متاخد!</string>
+    <string name="battery_optimization_granted">تظبيط البطارية: متاخد!</string>
+    <string name="background_optimization_not_granted">تظبيط الشغل فى الخلفية: مش متاخد!</string>
+    <string name="background_optimization_granted">تظبيط الشغل فى الخلفية: متاخد!</string>
+    <string name="notifications_permission_not_granted">إذن الإشعارات: مش متاخد!</string>
+    <string name="notifications_permission_granted">إذن الإشعارات: متاخد!</string>
+    <string name="dialog_battery_optimization_needed_title">محتاجبن نظبط البطارية</string>
+    <string name="dialog_battery_optimization_needed_message">البرنامج ده مجتاج تظبيط البطارية عشان يشتغل كويس.</string>
+    <string name="app_theme_pref">السيم</string>
+    <string name="material_you_pref">ألوان متماشية مع النظام</string>
+    <string name="material_you_pref_description">الألوان المتماشية مع النظام موجودة بس\nعلى أندرويد ١٢ و طالع</string>
+    <string name="material_you_off">الألوان المتماشية مش شغالة</string>
+    <string name="material_you_on">الألوان المتماشية شغالة</string>
+    <string name="allow_dimming_pref">خَفت الشاشة</string>
+    <string name="allow_dimming_pref_description">خلى الشاشة تِخفِت لما البرنامج يكون شغال</string>
+    <string name="allow_dimming_on">خَفت الشاشة شغال</string>
+    <string name="allow_dimming_off">خَفت الشاشة مش شغال</string>
+    <string name="allow_while_locked_pref">كَمِّل شغل</string>
+    <string name="allow_while_locked_pref_description">خلى البرنامج يكمل شغل لما الشاشة تطفى</string>
+    <string name="allow_while_locked_off">تكميل الشغل شغال</string>
+    <string name="allow_while_locked_on">تكميل الشغل مش شغال</string>
+    <string name="caffeinate_button_off">مش شغال</string>
+    <string name="quick_tile_off">مش شغال</string>
+    <string name="foreground_notification_action_next_timeout">المهلة اللى بعدها</string>
+    <string name="foreground_notification_action_disable_dimming">شَغَّل الخَفت</string>
+    <string name="foreground_notification_action_enable_dimming">اطفى الخَفت</string>
+    <string name="foreground_notification_tap_to_turn_off">اضغط عشان يطفى</string>
+    <string name="foreground_notification_title_duration_indefinite">البرنامج هيخلى الشاشة مفتوحة</string>
+    <string name="foreground_notification_title_duration_definite">البرنامج هيخلى الشاشة مفتوحة لمدة %1$s</string>
+    <string name="dialog_button_ok">ماشى، تمام</string>
+    <string name="dialog_button_cancel">الغى</string>
+    <string name="notifications_permission_required">محتاج إذن الإشعارات</string>
+    <string name="go_to_settings">روح ع الإعدادات</string>
+    <string name="choose_theme">اختار السيم</string>
+    <string name="choose_theme_dialog_icon">أيقونة صندوق اختيار السيم</string>
+    <string name="app_theme_system_default">زى النظام</string>
+    <string name="app_theme_system_light">فاتح</string>
+    <string name="app_theme_system_dark">غامق</string>
+    <string name="time_format_hour_letter">س</string>
+    <string name="time_format_minute_letter">د</string>
+    <string name="time_format_second_letter">ث</string>
+</resources>
