@@ -22,9 +22,9 @@
     <string name="allow_while_locked_pref">كَمِّل شغل</string>
     <string name="allow_while_locked_pref_description">خلى البرنامج يكمل شغل لما الشاشة تطفى</string>
     <string name="allow_while_locked_off">تكميل الشغل شغال</string>
-    <string name="allow_while_locked_on">تكميل الشغل مش شغال</string>
+    <string name="allow_while_locked_on">تكميل الشغل مَطفى</string>
     <string name="caffeinate_button_off">مش شغال</string>
-    <string name="quick_tile_off">مش شغال</string>
+    <string name="quick_tile_off">مَطفى</string>
     <string name="foreground_notification_action_next_timeout">المهلة اللى بعدها</string>
     <string name="foreground_notification_action_disable_dimming">اطفى الخَفت</string>
     <string name="foreground_notification_action_enable_dimming">شَغَّل الخَفت</string>
