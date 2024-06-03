@@ -56,7 +56,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/appNameTextView"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/appNameTextView"
-                app:tint="#ffc9a26b" />
+                app:tint="@color/default_app_icon_tint_color" />
 
             <TextView
                 android:id="@+id/appNameTextView"
