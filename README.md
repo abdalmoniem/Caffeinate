@@ -70,7 +70,7 @@ from [GitHub Releases](https://github.com/abdalmoniem/Caffeinate/releases/latest
     </tr>
 </table>
 
-## Translations
+## 🈵 Translations
 
 App strings and the app store description can be translated via
 Crowdin: https://crowdin.com/project/caffeinate
