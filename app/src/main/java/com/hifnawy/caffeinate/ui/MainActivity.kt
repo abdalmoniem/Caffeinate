@@ -74,8 +74,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
             if (DynamicColors.isDynamicColorAvailable()) {
                 val materialYouViewsClickListener = View.OnClickListener {
-                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-
                     sharedPreferences.isMaterialYouEnabled = (!sharedPreferences.isMaterialYouEnabled).apply { materialYouSwitch.isChecked = this }
 
                     recreate()
@@ -89,6 +87,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
                 materialYouCard.setOnClickListener(materialYouViewsClickListener)
                 materialYouSwitch.setOnClickListener(materialYouViewsClickListener)
+                materialYouSwitch.setOnCheckedChangeListener { switch, checked ->
+                    switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    sharedPreferences.isMaterialYouEnabled = checked
+
+                    recreate()
+                }
             }
 
             caffeineButton.setOnClickListener {
@@ -126,13 +130,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     override fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean) {
         with(binding) {
             val allowDimmingViewsClickListener = View.OnClickListener {
-                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-
                 sharedPreferences.isDimmingEnabled = (!sharedPreferences.isDimmingEnabled).apply { allowDimmingSwitch.isChecked = this }
             }
             val allowWhileLockedViewsClickListener = View.OnClickListener {
-                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-
                 sharedPreferences.isWhileLockedEnabled = (!sharedPreferences.isWhileLockedEnabled).apply { allowWhileLockedSwitch.isChecked = this }
             }
 
@@ -146,6 +146,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
             allowDimmingCard.setOnClickListener(allowDimmingViewsClickListener)
             allowDimmingSwitch.setOnClickListener(allowDimmingViewsClickListener)
+            allowDimmingSwitch.setOnCheckedChangeListener { switch, checked ->
+                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                sharedPreferences.isDimmingEnabled = checked
+            }
 
             allowWhileLockedCard.isEnabled = isAllPermissionsGranted
             allowWhileLockedTextView.isEnabled = isAllPermissionsGranted
@@ -155,6 +159,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
             allowWhileLockedCard.setOnClickListener(allowWhileLockedViewsClickListener)
             allowWhileLockedSwitch.setOnClickListener(allowWhileLockedViewsClickListener)
+            allowWhileLockedSwitch.setOnCheckedChangeListener { switch, checked ->
+                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                sharedPreferences.isWhileLockedEnabled = checked
+            }
         }
     }
 
