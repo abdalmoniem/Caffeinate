@@ -9,6 +9,7 @@ on:
         required: true
         type: choice
         options:
+        - v1.3.1
         - v1.3
         - v1.2.8
         - v1.2.7
