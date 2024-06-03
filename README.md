@@ -35,7 +35,7 @@ to change the device settings. It can be toggled at various places:
 For now, you can download the most recent version of Caffeinate
 from [GitHub Releases](https://github.com/abdalmoniem/Caffeinate/releases/latest).
 
-[<img alt="Download from GitHub" height="80" src="assets/direct-apk-download.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
+[<img alt="Download from GitHub" height="80" src="assets/badge_github.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
 
 # 🖼️ Screenshots
 
