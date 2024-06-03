@@ -160,7 +160,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     private fun buildForegroundNotification(): Notification {
         val status = caffeinateApplication.lastStatusUpdate as ServiceStatus.Running
         val channelIdStr = "${getString(R.string.app_name)} Status"
-        val durationStr = status.remaining.toFormattedTime()
+        val durationStr = status.remaining.toFormattedTime(this)
         val notificationStopIntent = NotificationUtils.getPendingIntent(this, KeepAwakeService::class.java, ACTION_STOP, 0)
         val notificationActionNextTimeout = NotificationUtils.getNotificationAction(
                 this,

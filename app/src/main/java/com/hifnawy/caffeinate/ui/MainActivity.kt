@@ -12,18 +12,13 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.ColorInt
-import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -35,8 +30,10 @@ import com.hifnawy.caffeinate.databinding.ActivityMainBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseThemeBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageDrawable
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
+import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
 
 class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedListener, ServiceStatusObserver {
 
@@ -64,7 +61,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 showChooseThemeDialog()
             }
 
-            appIcon.setColoredDrawable(R.drawable.outline_coffee_24, getThemeColor())
+            appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, root.context.theme.themeColor)
 
             appThemeCard.setOnClickListener(themeClickListener)
             appThemeButton.setOnClickListener(themeClickListener)
@@ -174,12 +171,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             when (status) {
                 is ServiceStatus.Stopped -> {
                     caffeineButton.text = getString(R.string.caffeinate_button_off)
-                    appIcon.setColoredDrawable(R.drawable.baseline_coffee_24, getThemeColor())
+                    appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, root.context.theme.themeColor)
                 }
 
                 is ServiceStatus.Running -> {
-                    caffeineButton.text = status.remaining.toFormattedTime()
-                    appIcon.setColoredDrawable(R.drawable.baseline_coffee_24, getThemeColor())
+                    caffeineButton.text = status.remaining.toFormattedTime(root.context)
+                    appIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, root.context.theme.themeColor)
                 }
             }
         }
@@ -334,6 +331,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             }
 
             with(dialogBinding) {
+                when (caffeinateApplication.lastStatusUpdate) {
+                    is ServiceStatus.Stopped -> dialogIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, root.context.theme.themeColor)
+                    is ServiceStatus.Running -> dialogIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, root.context.theme.themeColor)
+                }
+
                 themeRadioGroup.setOnCheckedChangeListener { radioGroup, checkedRadioButtonId ->
                     radioGroup.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
 
@@ -365,25 +367,5 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
             dialog.show()
         }
-    }
-
-    private fun getThemeColor(): Int {
-        with(binding) {
-            val typedValue = TypedValue()
-            root.context.theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true)
-            return typedValue.data
-        }
-    }
-
-    private fun ImageView.setColoredDrawable(
-            @DrawableRes
-            drawableResId: Int,
-            @ColorInt
-            color: Int = ContextCompat.getColor(binding.root.context, R.color.default_app_icon_tint_color)
-    ) {
-        val appIconDrawable = AppCompatResources.getDrawable(this.context, drawableResId)
-
-        this.setImageDrawable(appIconDrawable)
-        this.setColorFilter(color)
     }
 }
