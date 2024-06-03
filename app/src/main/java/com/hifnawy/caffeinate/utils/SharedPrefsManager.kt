@@ -19,19 +19,19 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         get() = sharedPreferences.getBoolean(SHARED_PREFERENCES_ALL_PERMISSIONS_GRANTED, false)
         set(value) {
             sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_ALL_PERMISSIONS_GRANTED, value).apply()
-            notifyObservers { observer -> observer.onIsAllPermissionsGrantedChanged(value) }
+            notifySharedPrefsObservers { observer -> observer.onIsAllPermissionsGrantedChanged(value) }
         }
     var isDimmingEnabled: Boolean
         get() = sharedPreferences.getBoolean(SHARED_PREFERENCES_ENABLE_DIMMING, false)
         set(value) {
             sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_ENABLE_DIMMING, value).apply()
-            notifyObservers { observer -> observer.onIsDimmingEnabledChanged(value) }
+            notifySharedPrefsObservers { observer -> observer.onIsDimmingEnabledChanged(value) }
         }
     var isWhileLockedEnabled: Boolean
         get() = sharedPreferences.getBoolean(SHARED_PREFERENCES_ENABLE_WHILE_LOCKED, false)
         set(value) {
             sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_ENABLE_WHILE_LOCKED, value).apply()
-            notifyObservers { observer -> observer.onIsWhileLockedEnabledChanged(value) }
+            notifySharedPrefsObservers { observer -> observer.onIsWhileLockedEnabledChanged(value) }
         }
     var theme: Theme
         get() = Theme.valueOf(sharedPreferences.getString(SHARED_PREFERENCES_THEME, Theme.SYSTEM_DEFAULT.name) ?: Theme.SYSTEM_DEFAULT.name)
@@ -40,7 +40,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         get() = sharedPreferences.getBoolean(SHARED_PREFERENCES_ENABLE_MATERIAL_YOU, false)
         set(value) = sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_ENABLE_MATERIAL_YOU, value).apply()
 
-    private fun notifyObservers(notifyCallback: (observer: SharedPrefsChangedListener) -> Unit) = caffeinateApplication.sharedPrefsObservers.forEach(notifyCallback)
+    private fun notifySharedPrefsObservers(notifyCallback: (observer: SharedPrefsChangedListener) -> Unit) = caffeinateApplication.sharedPrefsObservers.forEach(notifyCallback)
 
     enum class Theme(var value: Int) {
         SYSTEM_DEFAULT(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM),

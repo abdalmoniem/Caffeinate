@@ -1,6 +1,8 @@
 package com.hifnawy.caffeinate.services
 
 import android.app.PendingIntent
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
@@ -10,14 +12,12 @@ import android.util.Log
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.ServiceStatus
-import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.ui.MainActivity
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
-import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import kotlin.time.Duration
 
-class QuickTileService : TileService(), ServiceStatusObserver {
+class QuickTileService : TileService() {
 
     @Suppress("PrivatePropertyName")
     private val LOG_TAG = QuickTileService::class.java.simpleName
@@ -27,21 +27,11 @@ class QuickTileService : TileService(), ServiceStatusObserver {
     override fun onTileAdded() {
         super.onTileAdded()
 
-        caffeinateApplication.keepAwakeServiceObservers.addObserver(caffeinateApplication::keepAwakeServiceObservers.name, this)
-    }
-
-    override fun onTileRemoved() {
-        super.onTileRemoved()
-
-        Log.d(LOG_TAG, "${::onTileRemoved.name}()")
-
-        caffeinateApplication.keepAwakeServiceObservers.remove(this)
+        updateQuickTile(caffeinateApplication.lastStatusUpdate)
     }
 
     override fun onStartListening() {
         super.onStartListening()
-
-        caffeinateApplication.keepAwakeServiceObservers.addObserver(caffeinateApplication::keepAwakeServiceObservers.name, this)
         val status = caffeinateApplication.lastStatusUpdate
         when (status) {
             is ServiceStatus.Running -> Log.d(
@@ -61,19 +51,6 @@ class QuickTileService : TileService(), ServiceStatusObserver {
         KeepAwakeService.startNextDuration(caffeinateApplication)
     }
 
-    override fun onServiceStatusUpdate(status: ServiceStatus) {
-        when (status) {
-            is ServiceStatus.Running -> Log.d(
-                    LOG_TAG,
-                    "${::onServiceStatusUpdate.name}() -> duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}"
-            )
-
-            ServiceStatus.Stopped    -> Log.d(LOG_TAG, "${::onServiceStatusUpdate.name}() -> status: $status")
-        }
-
-        updateQuickTile(status)
-    }
-
     private fun updateQuickTile(status: ServiceStatus) {
         val quickTile = qsTile ?: return
 
@@ -88,7 +65,7 @@ class QuickTileService : TileService(), ServiceStatusObserver {
 
         val (tileState, tileSubtitle) = when (status) {
             is ServiceStatus.Stopped -> Pair(Tile.STATE_INACTIVE, getString(R.string.quick_tile_off))
-            is ServiceStatus.Running -> Pair(Tile.STATE_ACTIVE, status.remaining.toFormattedTime(this,true))
+            is ServiceStatus.Running -> Pair(Tile.STATE_ACTIVE, status.remaining.toFormattedTime(this, true))
         }
         val iconDrawable = if (tileState == Tile.STATE_ACTIVE) R.drawable.baseline_coffee_24 else R.drawable.outline_coffee_24
 
@@ -124,6 +101,19 @@ class QuickTileService : TileService(), ServiceStatusObserver {
             return false
         } else {
             return true
+        }
+    }
+
+    companion object QuickTileServiceCompanionObject {
+
+        private val LOG_TAG = this::class.java.simpleName
+        fun requestTileStateUpdate(context: Context) {
+            Log.d(LOG_TAG, "${LOG_TAG}::${::requestTileStateUpdate.name}()")
+            try {
+                requestListeningState(context, ComponentName(context, QuickTileService::class.java))
+            } catch (e: Exception) {
+                Log.e(LOG_TAG, "Error while calling ${LOG_TAG}::${::requestTileStateUpdate.name}()", e)
+            }
         }
     }
 }
