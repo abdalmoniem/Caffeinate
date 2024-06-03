@@ -4,6 +4,7 @@ import android.app.Application
 import com.hifnawy.caffeinate.services.QuickTileService
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
+import timber.log.Timber
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -44,6 +45,14 @@ class CaffeinateApplication : Application() {
         }
 
         QuickTileService.requestTileStateUpdate(applicationContext)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
     }
 }
 
