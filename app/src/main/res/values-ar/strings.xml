@@ -40,7 +40,7 @@
     <string name="app_theme_system_default">افتراضى النظام</string>
     <string name="app_theme_system_light">ساطع</string>
     <string name="app_theme_system_dark">داكن</string>
-    <string name="time_format_hour_letter">h</string>
-    <string name="time_format_minute_letter">m</string>
-    <string name="time_format_second_letter">s</string>
+    <string name="time_format_hour_letter">س</string>
+    <string name="time_format_minute_letter">د</string>
+    <string name="time_format_second_letter">ث</string>
 </resources>
