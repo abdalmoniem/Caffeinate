@@ -12,7 +12,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
-import android.util.Log
+import timber.log.Timber as Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.hifnawy.caffeinate.CaffeinateApplication
@@ -53,7 +53,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
         isDimmingEnabled = sharedPreferences.isDimmingEnabled
 
-        Log.d(LOG_TAG, "${::onStartCommand.name}() -> intent.action: ${intent?.action}")
+        Log.d("${::onStartCommand.name}() -> intent.action: ${intent?.action}")
         when (intent?.action) {
             ACTION_STOP                   -> {
                 toggleState(caffeinateApplication, STATE.STOP)
@@ -64,19 +64,19 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             ACTION_CHANGE_DIMMING_ENABLED -> sharedPreferences.isDimmingEnabled = !sharedPreferences.isDimmingEnabled
         }
 
-        Log.d(LOG_TAG, "${::onStartCommand.name}() -> status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
+        Log.d("${::onStartCommand.name}() -> status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
 
-        Log.d(LOG_TAG, "${::onStartCommand.name}() -> sending foreground notification...")
+        Log.d("${::onStartCommand.name}() -> sending foreground notification...")
         startForeground(NOTIFICATION_ID, buildForegroundNotification())
-        Log.d(LOG_TAG, "${::onStartCommand.name}() -> foreground notification sent!")
+        Log.d("${::onStartCommand.name}() -> foreground notification sent!")
 
-        Log.d(LOG_TAG, "${::onStartCommand.name}() -> adding ${this::class.simpleName} to ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
+        Log.d("${::onStartCommand.name}() -> adding ${this::class.simpleName} to ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
         caffeinateApplication.keepAwakeServiceObservers.addObserver(caffeinateApplication::keepAwakeServiceObservers.name, this)
-        Log.d(LOG_TAG, "${::onStartCommand.name}() -> ${this::class.simpleName} added to ${CaffeinateApplication::keepAwakeServiceObservers.name}!")
+        Log.d("${::onStartCommand.name}() -> ${this::class.simpleName} added to ${CaffeinateApplication::keepAwakeServiceObservers.name}!")
 
-        Log.d(LOG_TAG, "${::onStartCommand.name}() -> adding ${this::class.simpleName} to ${CaffeinateApplication::sharedPrefsObservers.name}...")
+        Log.d("${::onStartCommand.name}() -> adding ${this::class.simpleName} to ${CaffeinateApplication::sharedPrefsObservers.name}...")
         caffeinateApplication.sharedPrefsObservers.addObserver(caffeinateApplication::sharedPrefsObservers.name, this)
-        Log.d(LOG_TAG, "${::onStartCommand.name}() -> ${this::class.simpleName} added to ${CaffeinateApplication::sharedPrefsObservers.name}!")
+        Log.d("${::onStartCommand.name}() -> ${this::class.simpleName} added to ${CaffeinateApplication::sharedPrefsObservers.name}!")
 
 
         if (!sharedPreferences.isWhileLockedEnabled) registerScreenLockReceiver()
@@ -88,14 +88,14 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     override fun onDestroy() {
         super.onDestroy()
 
-        Log.d(LOG_TAG, "${::onDestroy.name}() -> stopping ${getString(R.string.app_name)}...")
+        Log.d("${::onDestroy.name}() -> stopping ${getString(R.string.app_name)}...")
         stopCaffeine()
     }
 
     override fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean) = Unit
 
     override fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean) {
-        Log.d(LOG_TAG, "${::onIsDimmingEnabledChanged.name}() -> isDimmingEnabled: $isDimmingEnabled")
+        Log.d("${::onIsDimmingEnabledChanged.name}() -> isDimmingEnabled: $isDimmingEnabled")
 
         when (val status = caffeinateApplication.lastStatusUpdate) {
             is ServiceStatus.Running -> {
@@ -109,7 +109,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     }
 
     override fun onIsWhileLockedEnabledChanged(isWhileLockedEnabled: Boolean) {
-        Log.d(LOG_TAG, "${::onIsWhileLockedEnabledChanged.name}() -> isWhileLockedEnabled: $isWhileLockedEnabled")
+        Log.d("${::onIsWhileLockedEnabledChanged.name}() -> isWhileLockedEnabled: $isWhileLockedEnabled")
 
         when (caffeinateApplication.lastStatusUpdate) {
             is ServiceStatus.Running -> if (isWhileLockedEnabled) unregisterScreenLockReceiver() else registerScreenLockReceiver()
@@ -120,9 +120,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     override fun onServiceStatusUpdate(status: ServiceStatus) {
         when (status) {
             is ServiceStatus.Running -> {
-                Log.d(
-                        LOG_TAG,
-                        "${::onServiceStatusUpdate.name}() -> " +
+                Log.d("${::onServiceStatusUpdate.name}() -> " +
                         "duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}"
                 )
                 notificationManager.notify(NOTIFICATION_ID, buildForegroundNotification())
@@ -134,7 +132,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
     private fun registerScreenLockReceiver() {
         if (!isScreenLockReceiverRegistered) {
-            Log.d(LOG_TAG, "${::registerScreenLockReceiver.name}() -> registering ${this::screenLockReceiver.name}...")
+            Log.d("${::registerScreenLockReceiver.name}() -> registering ${this::screenLockReceiver.name}...")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 registerReceiver(screenLockReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF), RECEIVER_EXPORTED)
@@ -144,16 +142,16 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
             isScreenLockReceiverRegistered = true
 
-            Log.d(LOG_TAG, "${::registerScreenLockReceiver.name}() -> ${this::screenLockReceiver.name} registered!")
+            Log.d("${::registerScreenLockReceiver.name}() -> ${this::screenLockReceiver.name} registered!")
         }
     }
 
     private fun unregisterScreenLockReceiver() {
         if (isScreenLockReceiverRegistered) {
-            Log.d(LOG_TAG, "${::unregisterScreenLockReceiver.name}() -> unregistering ${this::screenLockReceiver.name}...")
+            Log.d("${::unregisterScreenLockReceiver.name}() -> unregistering ${this::screenLockReceiver.name}...")
             unregisterReceiver(screenLockReceiver)
             isScreenLockReceiverRegistered = false
-            Log.d(LOG_TAG, "${::unregisterScreenLockReceiver.name}() -> ${this::screenLockReceiver.name} unregistered!")
+            Log.d("${::unregisterScreenLockReceiver.name}() -> ${this::screenLockReceiver.name} unregistered!")
         }
     }
 
@@ -213,84 +211,84 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
         wakeLock?.apply {
-            Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> releasing ${this@KeepAwakeService::wakeLock.name}...")
+            Log.d("${::acquireWakeLock.name}() -> releasing ${this@KeepAwakeService::wakeLock.name}...")
             releaseSafely(::wakeLock.name)
-            Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> ${this@KeepAwakeService::wakeLock.name} released!")
-        } ?: Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> wakeLock is not held!")
+            Log.d("${::acquireWakeLock.name}() -> ${this@KeepAwakeService::wakeLock.name} released!")
+        } ?: Log.d("${::acquireWakeLock.name}() -> wakeLock is not held!")
         @Suppress("DEPRECATION")
         val wakeLockLevel = when {
             isDimmingEnabled -> {
-                Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> using ${PowerManager::SCREEN_DIM_WAKE_LOCK.name}")
+                Log.d("${::acquireWakeLock.name}() -> using ${PowerManager::SCREEN_DIM_WAKE_LOCK.name}")
                 PowerManager.SCREEN_DIM_WAKE_LOCK
             }
 
             else             -> {
-                Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> using ${PowerManager::SCREEN_BRIGHT_WAKE_LOCK.name}")
+                Log.d("${::acquireWakeLock.name}() -> using ${PowerManager::SCREEN_BRIGHT_WAKE_LOCK.name}")
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK
             }
         }
 
         wakeLock = powerManager.newWakeLock(wakeLockLevel, "${getString(R.string.app_name)}:wakelockTag").apply {
-            Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingAllowed: $isDimmingEnabled...")
+            Log.d("${::acquireWakeLock.name}() -> acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingAllowed: $isDimmingEnabled...")
             setReferenceCounted(false)
             if (duration == Duration.INFINITE) acquire() else acquire(duration.inWholeMilliseconds)
-            Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> ${this@KeepAwakeService::wakeLock.name} acquired, isDimmingAllowed: $isDimmingEnabled!")
+            Log.d("${::acquireWakeLock.name}() -> ${this@KeepAwakeService::wakeLock.name} acquired, isDimmingAllowed: $isDimmingEnabled!")
         }
     }
 
     private fun startCaffeine(duration: Duration) {
         val isIndefinite = duration == Duration.INFINITE
-        Log.d(LOG_TAG, "${::acquireWakeLock.name}() -> starting ${getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
+        Log.d("${::acquireWakeLock.name}() -> starting ${getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
 
         acquireWakeLock(duration)
 
         caffeineTimer?.apply {
-            Log.d(LOG_TAG, "${::startCaffeine.name}() -> cancelling ${this@KeepAwakeService::caffeineTimerTask.name}...")
+            Log.d("${::startCaffeine.name}() -> cancelling ${this@KeepAwakeService::caffeineTimerTask.name}...")
             cancel()
-            Log.d(LOG_TAG, "${::startCaffeine.name}() -> ${this@KeepAwakeService::caffeineTimerTask.name} cancelled!")
+            Log.d("${::startCaffeine.name}() -> ${this@KeepAwakeService::caffeineTimerTask.name} cancelled!")
         }
 
-        Log.d(LOG_TAG, "${::startCaffeine.name}() -> creating ${this::caffeineTimerTask.name}...")
+        Log.d("${::startCaffeine.name}() -> creating ${this::caffeineTimerTask.name}...")
         caffeineTimerTask = CaffeineTimerTask(duration)
-        Log.d(LOG_TAG, "${::startCaffeine.name}() -> ${this::caffeineTimerTask.name} created!")
+        Log.d("${::startCaffeine.name}() -> ${this::caffeineTimerTask.name} created!")
 
         caffeineTimer = Timer().apply {
-            Log.d(LOG_TAG, "${::startCaffeine.name}() -> scheduling ${this@KeepAwakeService::caffeineTimerTask.name}...")
+            Log.d("${::startCaffeine.name}() -> scheduling ${this@KeepAwakeService::caffeineTimerTask.name}...")
             schedule(caffeineTimerTask, DEBOUNCE_DURATION.inWholeMilliseconds, 1000.milliseconds.inWholeMilliseconds)
-            Log.d(LOG_TAG, "${::startCaffeine.name}() -> ${this@KeepAwakeService::caffeineTimerTask.name} scheduled!")
+            Log.d("${::startCaffeine.name}() -> ${this@KeepAwakeService::caffeineTimerTask.name} scheduled!")
         }
     }
 
     private fun stopCaffeine() {
-        Log.d(LOG_TAG, "${::stopCaffeine.name}() -> stopping ${getString(R.string.app_name)}...")
+        Log.d("${::stopCaffeine.name}() -> stopping ${getString(R.string.app_name)}...")
 
         wakeLock?.apply {
-            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> releasing ${this@KeepAwakeService::wakeLock.name}...")
+            Log.d("${::stopCaffeine.name}() -> releasing ${this@KeepAwakeService::wakeLock.name}...")
             releaseSafely(::wakeLock.name)
-            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> ${this@KeepAwakeService::wakeLock.name} released!")
-        } ?: Log.d(LOG_TAG, "${::stopCaffeine.name}() -> wakeLock is not held!")
+            Log.d("${::stopCaffeine.name}() -> ${this@KeepAwakeService::wakeLock.name} released!")
+        } ?: Log.d("${::stopCaffeine.name}() -> wakeLock is not held!")
 
-        Log.d(LOG_TAG, "${::stopCaffeine.name}() -> cancelling ${this::caffeineTimerTask.name}...")
+        Log.d("${::stopCaffeine.name}() -> cancelling ${this::caffeineTimerTask.name}...")
         caffeineTimerTask?.cancel()
-        Log.d(LOG_TAG, "${::stopCaffeine.name}() -> ${this::caffeineTimerTask.name} cancelled!")
+        Log.d("${::stopCaffeine.name}() -> ${this::caffeineTimerTask.name} cancelled!")
 
         unregisterScreenLockReceiver()
 
         with(caffeinateApplication) {
-            Log.d(LOG_TAG, "${::stopCaffeine.name}: removing $LOG_TAG from ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
+            Log.d("${::stopCaffeine.name}: removing $LOG_TAG from ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
             keepAwakeServiceObservers.remove(this@KeepAwakeService)
-            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> $LOG_TAG removed from ${CaffeinateApplication::keepAwakeServiceObservers.name}!")
+            Log.d("${::stopCaffeine.name}() -> $LOG_TAG removed from ${CaffeinateApplication::keepAwakeServiceObservers.name}!")
 
-            Log.d(LOG_TAG, "${::stopCaffeine.name}: removing $LOG_TAG from ${CaffeinateApplication::sharedPrefsObservers.name}...")
+            Log.d("${::stopCaffeine.name}: removing $LOG_TAG from ${CaffeinateApplication::sharedPrefsObservers.name}...")
             sharedPrefsObservers.remove(this@KeepAwakeService)
-            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> $LOG_TAG removed from ${CaffeinateApplication::sharedPrefsObservers.name}!")
+            Log.d("${::stopCaffeine.name}() -> $LOG_TAG removed from ${CaffeinateApplication::sharedPrefsObservers.name}!")
 
-            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> notifying observers...")
+            Log.d("${::stopCaffeine.name}() -> notifying observers...")
             caffeinateApplication.lastStatusUpdate = ServiceStatus.Stopped
-            Log.d(LOG_TAG, "${::stopCaffeine.name}() -> observers notified!")
+            Log.d("${::stopCaffeine.name}() -> observers notified!")
         }
 
-        Log.d(LOG_TAG, "${::stopCaffeine.name}() -> ${getString(R.string.app_name)} stopped!")
+        Log.d("${::stopCaffeine.name}() -> ${getString(R.string.app_name)} stopped!")
     }
 
     private inner class CaffeineTimerTask(private var duration: Duration) : TimerTask() {
@@ -300,7 +298,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         private val isIndefinite = duration == Duration.INFINITE
 
         init {
-            Log.d(LOG_TAG, "$LOG_TAG::init: ${getString(R.string.app_name)} initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
+            Log.d("$LOG_TAG::init: ${getString(R.string.app_name)} initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
         }
 
         override fun run() {
@@ -310,9 +308,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                         is ServiceStatus.Running -> {
                             if (!isIndefinite) duration -= 1.seconds
 
-                            Log.d(
-                                    LOG_TAG,
-                                    "$LOG_TAG::${this@CaffeineTimerTask::run.name}() -> " + "duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: $isIndefinite"
+                            Log.d("$LOG_TAG::${this@CaffeineTimerTask::run.name}() -> " + "duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: $isIndefinite"
                             )
 
                             when {
@@ -331,7 +327,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     private inner class ScreenLockStateReceiver : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d(LOG_TAG, "${this::class.simpleName}::${::onReceive.name}() -> Screen Locked, Stopping...")
+            Log.d("${this::class.simpleName}::${::onReceive.name}() -> Screen Locked, Stopping...")
             toggleState(caffeinateApplication, KeepAwakeService.Companion.STATE.STOP)
         }
     }
@@ -388,7 +384,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
 
         private fun toggleState(caffeinateApplication: CaffeinateApplication, newState: STATE) {
-            Log.d(LOG_TAG, "${::toggleState.name}() -> newState: $newState")
+            Log.d("${::toggleState.name}() -> newState: $newState")
 
             caffeinateApplication.apply {
                 val start = when (newState) {

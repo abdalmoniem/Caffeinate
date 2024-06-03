@@ -1,7 +1,7 @@
 package com.hifnawy.caffeinate.utils
 
 import android.os.PowerManager.WakeLock
-import android.util.Log
+import timber.log.Timber as Log
 
 object WakeLockExtensionFunctions {
 
@@ -10,12 +10,12 @@ object WakeLockExtensionFunctions {
         val methodName = object {}.javaClass.enclosingMethod?.name
         when {
             isHeld -> {
-                Log.d(LOG_TAG, "${methodName}() -> releasing $variableName...")
+                Log.d("${methodName}() -> releasing $variableName...")
                 release()
-                Log.d(LOG_TAG, "${methodName}() -> $variableName released!")
+                Log.d("${methodName}() -> $variableName released!")
             }
 
-            else   -> Log.d(LOG_TAG, "${methodName}() -> $variableName is already released!")
+            else   -> Log.d("${methodName}() -> $variableName is already released!")
         }
     }
 }

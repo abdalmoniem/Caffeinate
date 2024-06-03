@@ -1,6 +1,6 @@
 package com.hifnawy.caffeinate.utils
 
-import android.util.Log
+import timber.log.Timber as Log
 
 object MutableListExtensionFunctions {
 
@@ -11,11 +11,11 @@ object MutableListExtensionFunctions {
         val methodName = object {}.javaClass.enclosingMethod?.name
 
         if (!this.contains(observer)) {
-            Log.d(LOG_TAG, "${methodName}() -> adding ${observer::class.simpleName} to $listName<${ObserverType::class.simpleName}>...")
+            Log.d("${methodName}() -> adding ${observer::class.simpleName} to $listName<${ObserverType::class.simpleName}>...")
             this.add(observer)
-            Log.d(LOG_TAG, "${methodName}() -> ${observer::class.simpleName} added to $listName<${ObserverType::class.simpleName}>!")
+            Log.d("${methodName}() -> ${observer::class.simpleName} added to $listName<${ObserverType::class.simpleName}>!")
         } else {
-            Log.d(LOG_TAG, "${methodName}() -> ${observer::class.simpleName} already added to $listName<${ObserverType::class.simpleName}>!")
+            Log.d("${methodName}() -> ${observer::class.simpleName} already added to $listName<${ObserverType::class.simpleName}>!")
         }
     }
 }

@@ -2,7 +2,7 @@ package com.hifnawy.caffeinate.utils
 
 import android.content.Context
 import android.util.LayoutDirection
-import android.util.Log
+import timber.log.Timber as Log
 import androidx.core.text.layoutDirection
 import com.hifnawy.caffeinate.R
 import java.util.Locale

@@ -8,7 +8,7 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import android.util.Log
+import timber.log.Timber as Log
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.ServiceStatus
@@ -34,12 +34,10 @@ class QuickTileService : TileService() {
         super.onStartListening()
         val status = caffeinateApplication.lastStatusUpdate
         when (status) {
-            is ServiceStatus.Running -> Log.d(
-                    LOG_TAG,
-                    "${::onStartListening.name}() -> duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}"
+            is ServiceStatus.Running -> Log.d("${::onStartListening.name}() -> duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}"
             )
 
-            ServiceStatus.Stopped    -> Log.d(LOG_TAG, "${::onStartListening.name}() -> status: $status")
+            ServiceStatus.Stopped    -> Log.d("${::onStartListening.name}() -> status: $status")
         }
 
         updateQuickTile(status)
@@ -55,12 +53,10 @@ class QuickTileService : TileService() {
         val quickTile = qsTile ?: return
 
         when (status) {
-            is ServiceStatus.Running -> Log.d(
-                    LOG_TAG,
-                    "${::updateQuickTile.name}() -> duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}"
+            is ServiceStatus.Running -> Log.d("${::updateQuickTile.name}() -> duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}"
             )
 
-            ServiceStatus.Stopped    -> Log.d(LOG_TAG, "${::updateQuickTile.name}() -> status: $status")
+            ServiceStatus.Stopped    -> Log.d("${::updateQuickTile.name}() -> status: $status")
         }
 
         val (tileState, tileSubtitle) = when (status) {
@@ -82,7 +78,7 @@ class QuickTileService : TileService() {
     }
 
     private fun checkPermissions(): Boolean {
-        Log.d(LOG_TAG, "${::isAllPermissionsGranted.name}() -> Permissions Granted: $isAllPermissionsGranted")
+        Log.d("${::isAllPermissionsGranted.name}() -> Permissions Granted: $isAllPermissionsGranted")
         if (!isAllPermissionsGranted) {
             val intent =
                     Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT }
@@ -108,11 +104,11 @@ class QuickTileService : TileService() {
 
         private val LOG_TAG = this::class.java.simpleName
         fun requestTileStateUpdate(context: Context) {
-            Log.d(LOG_TAG, "${LOG_TAG}::${::requestTileStateUpdate.name}()")
+            Log.d("${LOG_TAG}::${::requestTileStateUpdate.name}()")
             try {
                 requestListeningState(context, ComponentName(context, QuickTileService::class.java))
             } catch (e: Exception) {
-                Log.e(LOG_TAG, "Error while calling ${LOG_TAG}::${::requestTileStateUpdate.name}()", e)
+                Log.e("Error while calling ${LOG_TAG}::${::requestTileStateUpdate.name}()", e)
             }
         }
     }
