@@ -1,7 +1,7 @@
 package com.hifnawy.caffeinate
 
 import android.app.Application
-import com.google.android.material.color.DynamicColors
+import com.hifnawy.caffeinate.services.QuickTileService
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import kotlin.time.Duration
@@ -33,15 +33,17 @@ class CaffeinateApplication : Application() {
         set(status) {
             field = status
 
-            notifyObservers(status)
+            notifyKeepAwakeServiceObservers(status)
         }
 
-    private fun notifyObservers(status: ServiceStatus) {
+    private fun notifyKeepAwakeServiceObservers(status: ServiceStatus) {
         if (status is ServiceStatus.Stopped) timeout = firstTimeout
 
         keepAwakeServiceObservers.forEach { observer ->
             observer.onServiceStatusUpdate(status)
         }
+
+        QuickTileService.requestTileStateUpdate(applicationContext)
     }
 }
 
