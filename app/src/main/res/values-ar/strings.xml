@@ -12,7 +12,7 @@
     <string name="dialog_battery_optimization_needed_message">يتطلب هذا التطبيق إذن تحسين البطارية للعمل بشكل صحيح.</string>
     <string name="app_theme_pref">السمة</string>
     <string name="material_you_pref">ألوان ديناميكية</string>
-    <string name="material_you_pref_description">الألوان الديناميكية متوفرة فقط\nعلى أندرويد ١٢ وما فوق</string>
+    <string name="material_you_pref_description">الألوان الديناميكية متوفرة فقط\\nعلى أندرويد ١٢ وما فوق</string>
     <string name="material_you_off">الألوان الديناميكية مُعطَّلة</string>
     <string name="material_you_on">الألوان الديناميكية مُفعَّلة</string>
     <string name="allow_dimming_pref">السماح بالتعتيم</string>
@@ -40,4 +40,7 @@
     <string name="app_theme_system_default">افتراضى النظام</string>
     <string name="app_theme_system_light">ساطع</string>
     <string name="app_theme_system_dark">داكن</string>
+    <string name="time_format_hour_letter">س</string>
+    <string name="time_format_minute_letter">د</string>
+    <string name="time_format_second_letter">ث</string>
 </resources>

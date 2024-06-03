@@ -1,9 +1,9 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Theme.Caffeinate" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">#ff6200ee</item>
-        <item name="colorPrimaryVariant">#ff3700b3</item>
-        <item name="colorSecondary">#ff03dac6</item>
-        <item name="colorSecondaryVariant">#ff018786</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
     </style>
 </resources>
