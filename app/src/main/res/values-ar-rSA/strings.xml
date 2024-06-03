@@ -4,8 +4,8 @@
     <string name="app_icon">أيقونة التطبيق</string>
     <string name="battery_optimization_not_granted">تحسين البطارية: لم يتم منحها!</string>
     <string name="battery_optimization_granted">تحسين البطارية: تم منحها!</string>
-    <string name="background_optimization_not_granted">تحسين البطارية: لم يتم منحها!</string>
-    <string name="background_optimization_granted">تحسين البطارية: تم منحها!</string>
+    <string name="background_optimization_not_granted">تحسين العمل فى الخلفية: لم يتم منحها!</string>
+    <string name="background_optimization_granted">تحسين العمل فى الخلفية: تم منحها!</string>
     <string name="notifications_permission_not_granted">إذن الإخطارات: غير ممنوح!</string>
     <string name="notifications_permission_granted">إذن الإخطارات: مُنح!</string>
     <string name="dialog_battery_optimization_needed_title">تحسين البطارية مطلوب</string>
