@@ -1,6 +1,9 @@
 package com.hifnawy.caffeinate.utils
 
 import android.content.Context
+import android.util.LayoutDirection
+import android.util.Log
+import androidx.core.text.layoutDirection
 import com.hifnawy.caffeinate.R
 import java.util.Locale
 import kotlin.time.Duration
@@ -12,8 +15,8 @@ object DurationExtensionFunctions {
             Duration.INFINITE -> "∞"
             else              -> {
                 val format = when {
-                    hideLegend -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
-                    else       -> if (hours == 0L) "%02dm %02ds" else "%02dh %02dm %02ds"
+                    hideLegend || isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
+                    else                -> if (hours == 0L) "%02dm %02ds" else "%02dh %02dm %02ds"
                 }
 
                 when (hours) {
@@ -33,7 +36,7 @@ object DurationExtensionFunctions {
             Duration.INFINITE -> "∞"
             else              -> {
                 val format = when {
-                    hideLegend -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
+                    hideLegend || isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
                     else       -> if (hours == 0L) "%02d${minuteLetter} %02d${secondLetter}" else "%02d${hourLetter} %02d${minuteLetter} %02d${secondLetter}"
                 }
 
@@ -44,4 +47,7 @@ object DurationExtensionFunctions {
             }
         }
     }
+
+    private val isRTL: Boolean
+        get() = Locale.getDefault().layoutDirection == LayoutDirection.RTL
 }
