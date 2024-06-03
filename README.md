@@ -32,7 +32,8 @@ to change the device settings. It can be toggled at various places:
 * Multiple theming options `[light, dark, system default and material you]`
 
 
-For now, you can download the most recent version of Caffeinate from [GitHub Releases](https://github.com/abdalmoniem/Caffeinate/releases/latest).
+For now, you can download the most recent version of Caffeinate
+from [GitHub Releases](https://github.com/abdalmoniem/Caffeinate/releases/latest).
 
 [<img alt="Download from GitHub" height="80" src="assets/direct-apk-download.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
 
@@ -68,3 +69,12 @@ For now, you can download the most recent version of Caffeinate from [GitHub Rel
         </td>
     </tr>
 </table>
+
+## Translations
+
+App strings and the app store description can be translated via
+Crowdin: https://crowdin.com/project/caffeinate
+
+Translations have to be approved before being merged into the app. To become a translator with approval
+rights or to request a new language, please [poke me on Crowdin](https://crowdin.com/profile/abdalmoniem)
+or open an issue here on GitHub.
