@@ -3,6 +3,3 @@ files:
     translation: /app/src/main/res/values-%android_code%/strings.xml
     translate_attributes: 0
     content_segmentation: 0
-    languages_mapping:
-      two_letters_code:
-        ar-rSA: ar
