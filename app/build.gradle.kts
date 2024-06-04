@@ -1,4 +1,6 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -18,12 +20,28 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        val keystoreProperties = Properties()
+        keystoreProperties.load(FileInputStream(localPropertiesFile))
+
+        signingConfigs {
+            println("keystore: ${File(keystoreProperties["storeFile"] as String)}")
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = File(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
+        }
+    }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("debug")
+
+            signingConfig = signingConfigs.findByName("release") ?: error("release signing config not found, add signing config in local.properties")
         }
     }
 
@@ -32,12 +50,7 @@ android {
         variant.outputs.all {
             this as BaseVariantOutputImpl
             val applicationId = variant.buildType.applicationIdSuffix?.let { "${variant.applicationId}.$it" } ?: variant.applicationId
-            // val appName = applicationId.split(".").last()
-            // val formattedDate = SimpleDateFormat("E_dd-MM-yyyy_hh-mm-ss_S_a").format(Date())
-            // val apkName = "${appName}_${variant.buildType.name}_v${android.defaultConfig.versionName}_${formattedDate}.apk"
             val apkName = "${applicationId}_${variant.buildType.name}_v${android.defaultConfig.versionName}.apk"
-
-            println(apkName)
 
             outputFileName = apkName
         }

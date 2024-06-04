@@ -18,19 +18,20 @@ jobs:
       - name: Checkout ${{ github.ref }}
         uses: actions/checkout@v4
 
-      - name: GitHub Ref. ${{ github.ref_name }}
-        run: |
-          echo ${{ github.ref }}
-          echo ${{ github.ref_name }}
+      - name: Check base64
+        run: base64 --version
 
-      - name: Get Commit Message
+      - name: Create local.properties
         run: |
-          echo "COMMIT_MESSAGE=$(git show -s --format=%B)"
           {
-              echo 'COMMIT_MESSAGE<<EOF'
-              git show -s --format=%B
-              echo EOF
-          } >> $GITHUB_ENV
+            echo ${{ secrets.SIGNING_KEY }}
+            echo EOF
+          } | base64 -d > release_keystore.jks
+
+          echo "storePassword=${{ secrets.KEY_STORE_PASSWORD }}" >> local.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> local.properties
+          echo "keyAlias=release_key" >> local.properties
+          echo "storeFile=release_keystore.jks" >> local.properties
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -80,6 +81,15 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
           if-no-files-found: error
+
+      - name: Get Commit Message
+        run: |
+          echo "COMMIT_MESSAGE=$(git show -s --format=%B)"
+          {
+              echo 'COMMIT_MESSAGE<<EOF'
+              git show -s --format=%B
+              echo EOF
+          } >> $GITHUB_ENV
 
       - name: Publish Release ${{ github.ref_name }}
         uses: svenstaro/upload-release-action@v2
