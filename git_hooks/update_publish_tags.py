@@ -22,9 +22,9 @@ with open(publishReleaseYamlPath, 'r') as yamlFile:
 publishReleaseYamlFileName = os.path.basename(publishReleaseYamlPath)
 
 if dataLoaded['on']['workflow_dispatch']['inputs']['releaseTag']['options'] != tags:
-    dataLoaded['on']['workflow_dispatch']['inputs']['releaseTag']['options'] = tags
-
     print(f'tags in "{publishReleaseYamlFileName}":', dataLoaded['on']['workflow_dispatch']['inputs']['releaseTag']['options'])
+
+    dataLoaded['on']['workflow_dispatch']['inputs']['releaseTag']['options'] = tags
 
     with open(publishReleaseYamlPath, 'w') as yamlFile:
         yaml.dump(dataLoaded, yamlFile)
