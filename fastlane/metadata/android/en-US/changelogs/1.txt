@@ -1,0 +1,3 @@
+add option to allow screen dimming while the wakeLock is held
+
+the screen will only dim but not turn off completely
