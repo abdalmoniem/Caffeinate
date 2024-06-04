@@ -70,28 +70,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 SharedPrefsManager.Theme.DARK           -> appThemeButton.text = getString(R.string.app_theme_system_dark)
             }
 
-            if (DynamicColors.isDynamicColorAvailable()) {
-                val materialYouViewsClickListener = View.OnClickListener {
-                    sharedPreferences.isMaterialYouEnabled = (!sharedPreferences.isMaterialYouEnabled).apply { materialYouSwitch.isChecked = this }
-
-                    recreate()
-                }
-
-                materialYouCard.isEnabled = true
-                materialYouTextView.isEnabled = true
-                materialYouSubTextTextView.visibility = View.GONE
-                materialYouSwitch.isEnabled = true
-                materialYouSwitch.isChecked = sharedPreferences.isMaterialYouEnabled
-
-                materialYouCard.setOnClickListener(materialYouViewsClickListener)
-                materialYouSwitch.setOnClickListener(materialYouViewsClickListener)
-                materialYouSwitch.setOnCheckedChangeListener { switch, checked ->
-                    switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                    sharedPreferences.isMaterialYouEnabled = checked
-
-                    recreate()
-                }
-            }
+            if (DynamicColors.isDynamicColorAvailable()) enableMaterialYouPreferences()
 
             caffeineButton.setOnClickListener {
                 if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
@@ -126,42 +105,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     }
 
     override fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean) {
-        with(binding) {
-            val allowDimmingViewsClickListener = View.OnClickListener {
-                sharedPreferences.isDimmingEnabled = (!sharedPreferences.isDimmingEnabled).apply { allowDimmingSwitch.isChecked = this }
-            }
-            val allowWhileLockedViewsClickListener = View.OnClickListener {
-                sharedPreferences.isWhileLockedEnabled = (!sharedPreferences.isWhileLockedEnabled).apply { allowWhileLockedSwitch.isChecked = this }
-            }
+        binding.caffeineButton.isEnabled = isAllPermissionsGranted
 
-            caffeineButton.isEnabled = isAllPermissionsGranted
-
-            allowDimmingCard.isEnabled = isAllPermissionsGranted
-            allowDimmingTextView.isEnabled = isAllPermissionsGranted
-            allowDimmingSubTextTextView.visibility = if (isAllPermissionsGranted) View.VISIBLE else View.GONE
-            allowDimmingSwitch.isEnabled = isAllPermissionsGranted
-            allowDimmingSwitch.isChecked = sharedPreferences.isDimmingEnabled
-
-            allowDimmingCard.setOnClickListener(allowDimmingViewsClickListener)
-            allowDimmingSwitch.setOnClickListener(allowDimmingViewsClickListener)
-            allowDimmingSwitch.setOnCheckedChangeListener { switch, checked ->
-                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                sharedPreferences.isDimmingEnabled = checked
-            }
-
-            allowWhileLockedCard.isEnabled = isAllPermissionsGranted
-            allowWhileLockedTextView.isEnabled = isAllPermissionsGranted
-            allowWhileLockedSubTextTextView.visibility = if (isAllPermissionsGranted) View.VISIBLE else View.GONE
-            allowWhileLockedSwitch.isEnabled = isAllPermissionsGranted
-            allowWhileLockedSwitch.isChecked = sharedPreferences.isWhileLockedEnabled
-
-            allowWhileLockedCard.setOnClickListener(allowWhileLockedViewsClickListener)
-            allowWhileLockedSwitch.setOnClickListener(allowWhileLockedViewsClickListener)
-            allowWhileLockedSwitch.setOnCheckedChangeListener { switch, checked ->
-                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                sharedPreferences.isWhileLockedEnabled = checked
-            }
-        }
+        changeAllowDimmingPreferences(isAllPermissionsGranted)
+        changeAllowWhileLockedPreferences(isAllPermissionsGranted)
     }
 
     override fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean) {
@@ -208,6 +155,55 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             snackbar.show()
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    private fun enableMaterialYouPreferences() {
+        with(binding) {
+            materialYouCard.isEnabled = true
+            materialYouTextView.isEnabled = true
+            materialYouSubTextTextView.visibility = View.GONE
+            materialYouSwitch.isEnabled = true
+            materialYouSwitch.isChecked = sharedPreferences.isMaterialYouEnabled
+
+            materialYouCard.setOnClickListener { materialYouSwitch.isChecked = !sharedPreferences.isMaterialYouEnabled }
+            materialYouSwitch.setOnCheckedChangeListener { switch, isChecked ->
+                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                sharedPreferences.isMaterialYouEnabled = isChecked
+                recreate()
+            }
+        }
+    }
+
+    private fun changeAllowWhileLockedPreferences(isAllPermissionsGranted: Boolean) {
+        with(binding) {
+            allowWhileLockedCard.isEnabled = isAllPermissionsGranted
+            allowWhileLockedTextView.isEnabled = isAllPermissionsGranted
+            allowWhileLockedSubTextTextView.visibility = if (isAllPermissionsGranted) View.VISIBLE else View.GONE
+            allowWhileLockedSwitch.isEnabled = isAllPermissionsGranted
+            allowWhileLockedSwitch.isChecked = sharedPreferences.isWhileLockedEnabled
+
+            allowWhileLockedCard.setOnClickListener { allowWhileLockedSwitch.isChecked = !sharedPreferences.isWhileLockedEnabled }
+            allowWhileLockedSwitch.setOnCheckedChangeListener { switch, isChecked ->
+                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                sharedPreferences.isWhileLockedEnabled = isChecked
+            }
+        }
+    }
+
+    private fun changeAllowDimmingPreferences(isAllPermissionsGranted: Boolean) {
+        with(binding) {
+            allowDimmingCard.isEnabled = isAllPermissionsGranted
+            allowDimmingTextView.isEnabled = isAllPermissionsGranted
+            allowDimmingSubTextTextView.visibility = if (isAllPermissionsGranted) View.VISIBLE else View.GONE
+            allowDimmingSwitch.isEnabled = isAllPermissionsGranted
+            allowDimmingSwitch.isChecked = sharedPreferences.isDimmingEnabled
+
+            allowDimmingCard.setOnClickListener { allowDimmingSwitch.isChecked = !sharedPreferences.isDimmingEnabled }
+            allowDimmingSwitch.setOnCheckedChangeListener { switch, isChecked ->
+                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                sharedPreferences.isDimmingEnabled = isChecked
+            }
+        }
     }
 
     @SuppressLint("BatteryLife")
