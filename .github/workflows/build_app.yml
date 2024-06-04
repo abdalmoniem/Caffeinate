@@ -27,17 +27,15 @@ jobs:
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v2.1.3
 
-      - name: Build
-        run: bash gradlew build
-
-      - name: Build APKs
+      - name: Build Debug APK
         run: bash gradlew app:assembleDebug
 
       - name: Generate Debug APK
         run: |
-          find app/build/outputs/apk/debug/*.apk
-          echo ARTIFACT_NAME=$(basename $(find app/build/outputs/apk/release/*.apk)) >> $GITHUB_ENV
-          echo ARTIFACT_PATH=$(find app/build/outputs/apk/release/*.apk) >> $GITHUB_ENV
+          apk=$(find app/build/outputs/apk/debug/*.apk)
+          echo $apk
+          echo ARTIFACT_NAME=$(basename $apk) >> $GITHUB_ENV
+          echo ARTIFACT_PATH=$apk >> $GITHUB_ENV
 
       - name: Create Artifact ${{ env.ARTIFACT_NAME }}
         uses: actions/upload-artifact@v4
