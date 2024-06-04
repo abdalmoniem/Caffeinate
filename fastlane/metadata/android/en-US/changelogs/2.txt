@@ -1,0 +1,1 @@
+use string resources and dimens resources instead of hardcoded values
