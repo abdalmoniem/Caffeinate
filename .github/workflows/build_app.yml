@@ -23,15 +23,16 @@ jobs:
 
       - name: Create local.properties
         run: |
-          {
-            echo ${{ secrets.SIGNING_KEY }}
-            echo EOF
-          } | base64 -d > release_keystore.jks
-          
+          echo ${{ secrets.SIGNING_KEY }} | base64 -d > release_keystore.jks
+
+          keystoreFile=$(realpath release_keystore.jks)
+
+          echo "keystoreFile: $keystoreFile"
+
           echo "storePassword=${{ secrets.KEY_STORE_PASSWORD }}" >> local.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> local.properties
           echo "keyAlias=release_key" >> local.properties
-          echo "storeFile=release_keystore.jks" >> local.properties
+          echo "storeFile=$keystoreFile" >> local.properties
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -45,12 +46,12 @@ jobs:
       - name: Build Debug APK
         run: bash gradlew app:assembleDebug
 
-      - name: Generate Debug APK
+      - name: Get Debug APK Name
         run: |
-          apk=$(find app/build/outputs/apk/debug/*.apk)
-          echo $apk
-          echo ARTIFACT_NAME=$(basename $apk) >> $GITHUB_ENV
-          echo ARTIFACT_PATH=$apk >> $GITHUB_ENV
+          debugApk=$(find app/build/outputs/apk/debug/*.apk)
+          echo $debugApk
+          echo ARTIFACT_NAME=$(basename $debugApk) >> $GITHUB_ENV
+          echo ARTIFACT_PATH=$debugApk >> $GITHUB_ENV
 
       - name: Create Artifact ${{ env.ARTIFACT_NAME }}
         uses: actions/upload-artifact@v4
