@@ -6,3 +6,6 @@ files:
     languages_mapping:
       two_letters_code:
         ar-EG: ar-rEG
+
+  - source: /fastlane/metadata/android/en-US/*.txt
+    translation: /fastlane/metadata/android/%locale%/%original_file_name%
