@@ -93,10 +93,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         super.onResume()
         if (isAllPermissionsGranted()) onIsAllPermissionsGrantedChanged(true)
 
-        caffeinateApplication.keepAwakeServiceObservers.addObserver(caffeinateApplication::keepAwakeServiceObservers.name, this)
-        caffeinateApplication.sharedPrefsObservers.addObserver(caffeinateApplication::sharedPrefsObservers.name, this)
+        caffeinateApplication.run {
+            applyLocaleConfiguration()
 
-        onServiceStatusUpdate(caffeinateApplication.lastStatusUpdate)
+            keepAwakeServiceObservers.addObserver(::keepAwakeServiceObservers.name, this@MainActivity)
+            sharedPrefsObservers.addObserver(::sharedPrefsObservers.name, this@MainActivity)
+
+            onServiceStatusUpdate(lastStatusUpdate)
+        }
     }
 
     override fun onPause() {
