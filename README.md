@@ -31,45 +31,43 @@ to change the device settings. It can be toggled at various places:
   after unlocking, default behaviour is that the `WakeLock` is released when the screen is locked
 * Multiple theming options `[light, dark, system default and material you]`
 
+# 🖼️ Screenshots
+
+<!--suppress CheckImageSize -->
+<table>
+    <tr>
+        <td><img src="assets/Screenshot_2024-06-01-20-47-55-37.jpg" alt="Caffeinate Screenshot 01" width="180"/></td>
+        <td><img src="assets/Screenshot_2024-06-01-20-48-00-67.jpg" alt="Caffeinate Screenshot 02" width="180"/></td>
+        <td><img src="assets/Screenshot_2024-06-01-20-48-08-85.jpg" alt="Caffeinate Screenshot 03" width="180"/></td>
+        <td><img src="assets/Screenshot_2024-06-01-20-48-16-52.jpg" alt="Caffeinate Screenshot 04" width="180"/></td>
+    </tr>
+    <tr> 
+        <td><img src="assets/Screenshot_2024-06-01-20-48-34-36.jpg" alt="Caffeinate Screenshot 05" width="180"/></td>
+        <td><img src="assets/Screenshot_2024-06-01-20-48-50-46.jpg" alt="Caffeinate Screenshot 06" width="180"/></td>
+        <td><img src="assets/Screenshot_2024-05-30-19-44-41-86.jpg" alt="Caffeinate Screenshot 07" width="180"/></td>
+        <td><img src="assets/Screenshot_2024-05-31-12-15-47-02.jpg" alt="Caffeinate Screenshot 08" width="180"/></td>
+    </tr>
+    <tr>
+      <td><img src="assets/Screenshot_2024-06-04-11-13-20-42.jpg" alt="Caffeinate Screenshot 09" width="180"/></td>
+      <td><img src="assets/Screenshot_2024-06-04-11-13-29-12.jpg" alt="Caffeinate Screenshot 10" width="180"/></td>
+      <td><img src="assets/Screenshot_2024-06-04-11-13-39-34.jpg" alt="Caffeinate Screenshot 11" width="180"/></td>
+      <td><img src="assets/Screenshot_2024-06-04-11-13-46-32.jpg" alt="Caffeinate Screenshot 12" width="180"/></td>
+    </tr>
+    <tr>
+      <td><img src="assets/Screenshot_2024-06-04-11-13-52-85.jpg" alt="Caffeinate Screenshot 13" width="180"/></td>
+      <td><img src="assets/Screenshot_2024-06-04-11-13-55-13.jpg" alt="Caffeinate Screenshot 14" width="180"/></td>
+      <td><img src="assets/Screenshot_2024-06-04-11-15-40-07.jpg" alt="Caffeinate Screenshot 15" width="180"/></td>
+      <td><img src="assets/Screenshot_2024-06-04-11-17-17-47.jpg" alt="Caffeinate Screenshot 16" width="180"/></td>
+    </tr>
+
+</table>
+
 # 🔽 Download
 
 For now, you can download the most recent version of Caffeinate
 from [GitHub Releases](https://github.com/abdalmoniem/Caffeinate/releases/latest).
 
 [<img alt="Download from GitHub" height="80" src="assets/badge_github.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
-
-# 🖼️ Screenshots
-
-<table>
-    <tr>
-        <td>
-            <img src="assets/Screenshot_2024-06-01-20-47-55-37.jpg" alt="Caffeinate Screenshot 01" width="180"/>
-        </td>
-        <td>
-            <img src="assets/Screenshot_2024-06-01-20-48-00-67.jpg" alt="Caffeinate Screenshot 02" width="180"/>
-        </td>
-        <td>
-            <img src="assets/Screenshot_2024-06-01-20-48-08-85.jpg" alt="Caffeinate Screenshot 03" width="180"/>
-        </td>
-        <td>
-            <img src="assets/Screenshot_2024-06-01-20-48-16-52.jpg" alt="Caffeinate Screenshot 04" width="180"/>
-        </td>
-    </tr>
-    <tr> 
-        <td>
-            <img src="assets/Screenshot_2024-06-01-20-48-34-36.jpg" alt="Caffeinate Screenshot 05" width="180"/>
-        </td>
-        <td>
-            <img src="assets/Screenshot_2024-06-01-20-48-50-46.jpg" alt="Caffeinate Screenshot 06" width="180"/>
-        </td>
-        <td>
-            <img src="assets/Screenshot_2024-05-30-19-44-41-86.jpg" alt="Caffeinate Screenshot 07" width="180"/>
-        </td>
-        <td>
-            <img src="assets/Screenshot_2024-05-31-12-15-47-02.jpg" alt="Caffeinate Screenshot 08" width="180"/>
-        </td>
-    </tr>
-</table>
 
 ## 🈵 Translations
 
