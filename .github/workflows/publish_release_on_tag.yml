@@ -23,15 +23,16 @@ jobs:
 
       - name: Create local.properties
         run: |
-          {
-            echo ${{ secrets.SIGNING_KEY }}
-            echo EOF
-          } | base64 -d > release_keystore.jks
+          echo ${{ secrets.SIGNING_KEY }} | base64 -d > release_keystore.jks
+          
+          keystoreFile=$(realpath release_keystore.jks)
+          
+          echo "keystoreFile: $keystoreFile"
 
           echo "storePassword=${{ secrets.KEY_STORE_PASSWORD }}" >> local.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> local.properties
           echo "keyAlias=release_key" >> local.properties
-          echo "storeFile=release_keystore.jks" >> local.properties
+          echo "storeFile=$keystoreFile" >> local.properties
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -45,35 +46,12 @@ jobs:
       - name: Build APKs
         run: bash gradlew app:assembleRelease
 
-      - name: Install rename
-        run: sudo apt install rename
-
-      - name: Rename Build APKs
+      - name: Get Release APK Name
         run: |
-          rename -n 's/(.*).apk/${1}-unsigned.apk/' app/build/outputs/apk/release/*.apk
-          rename 's/(.*).apk/${1}-unsigned.apk/' app/build/outputs/apk/release/*.apk
-
-      - name: Sign Release APK
-        uses: r0adkll/sign-android-release@v1.0.4
-        env:
-          BUILD_TOOLS_VERSION: 34.0.0
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: generic_key
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-
-      - name: Rename Signed Release APK
-        run: |
-          rename -n 's/(.*)-unsigned-signed.apk/${1}.apk/' ${{ env.SIGNED_RELEASE_FILE }}
-          rename 's/(.*)-unsigned-signed.apk/${1}.apk/' ${{ env.SIGNED_RELEASE_FILE }}
-
-      - name: Generate Release APK
-        run: |
-          find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$'
-          echo ARTIFACT_NAME=$(basename $(find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$')) >> $GITHUB_ENV
-          echo ARTIFACT_PATH=$(find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$') >> $GITHUB_ENV
+          releaseApk=$(find app/build/outputs/apk/release/*.apk)
+          echo $releaseApk
+          echo ARTIFACT_NAME=$(basename $releaseApk) >> $GITHUB_ENV
+          echo ARTIFACT_PATH=$releaseApk >> $GITHUB_ENV
 
       - name: Create Artifact ${{ env.ARTIFACT_NAME }}
         uses: actions/upload-artifact@v4

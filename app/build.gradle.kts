@@ -16,7 +16,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 4
-        versionName = "1.3.6"
+        versionName = "1.3.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -26,7 +26,7 @@ android {
         keystoreProperties.load(FileInputStream(localPropertiesFile))
 
         signingConfigs {
-            println("keystore: ${File(keystoreProperties["storeFile"] as String)}")
+            println("keystore: ${File(keystoreProperties["storeFile"] as String).absolutePath}")
             create("release") {
                 keyAlias = keystoreProperties["keyAlias"] as String
                 keyPassword = keystoreProperties["keyPassword"] as String
