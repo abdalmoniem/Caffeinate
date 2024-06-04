@@ -62,7 +62,7 @@ class CaffeinateApplication : Application() {
         }
     }
 
-    private fun applyLocaleConfiguration() {
+    fun applyLocaleConfiguration() {
         val configuration = resources.configuration
         val locale = getCurrentLocale()
 
