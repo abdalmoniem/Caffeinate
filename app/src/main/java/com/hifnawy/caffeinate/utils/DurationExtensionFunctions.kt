@@ -2,10 +2,9 @@ package com.hifnawy.caffeinate.utils
 
 import android.content.Context
 import android.util.LayoutDirection
-import timber.log.Timber as Log
 import androidx.core.text.layoutDirection
+import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import java.util.Locale
 import kotlin.time.Duration
 
 object DurationExtensionFunctions {
@@ -20,8 +19,8 @@ object DurationExtensionFunctions {
                 }
 
                 when (hours) {
-                    0L   -> String.format(Locale.getDefault(), format, minutes, seconds)
-                    else -> String.format(Locale.getDefault(), format, hours, minutes, seconds)
+                    0L   -> String.format(CaffeinateApplication.applicationLocale, format, minutes, seconds)
+                    else -> String.format(CaffeinateApplication.applicationLocale, format, hours, minutes, seconds)
                 }
             }
         }
@@ -37,17 +36,17 @@ object DurationExtensionFunctions {
             else              -> {
                 val format = when {
                     hideLegend || isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
-                    else       -> if (hours == 0L) "%02d${minuteLetter} %02d${secondLetter}" else "%02d${hourLetter} %02d${minuteLetter} %02d${secondLetter}"
+                    else                -> if (hours == 0L) "%02d${minuteLetter} %02d${secondLetter}" else "%02d${hourLetter} %02d${minuteLetter} %02d${secondLetter}"
                 }
 
                 when (hours) {
-                    0L   -> String.format(Locale.getDefault(), format, minutes, seconds)
-                    else -> String.format(Locale.getDefault(), format, hours, minutes, seconds)
+                    0L   -> String.format(CaffeinateApplication.applicationLocale, format, minutes, seconds)
+                    else -> String.format(CaffeinateApplication.applicationLocale, format, hours, minutes, seconds)
                 }
             }
         }
     }
 
     private val isRTL: Boolean
-        get() = Locale.getDefault().layoutDirection == LayoutDirection.RTL
+        get() = CaffeinateApplication.applicationLocale.layoutDirection == LayoutDirection.RTL
 }

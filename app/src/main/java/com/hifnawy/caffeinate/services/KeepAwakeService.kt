@@ -12,7 +12,6 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
-import timber.log.Timber as Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.hifnawy.caffeinate.CaffeinateApplication
@@ -33,6 +32,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import timber.log.Timber as Log
 
 class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListener, ServiceStatusObserver {
 
@@ -88,7 +88,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     override fun onDestroy() {
         super.onDestroy()
 
-        Log.d("${::onDestroy.name}() -> stopping ${getString(R.string.app_name)}...")
+        Log.d("${::onDestroy.name}() -> stopping ${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)}...")
         stopCaffeine()
     }
 
@@ -120,7 +120,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     override fun onServiceStatusUpdate(status: ServiceStatus) {
         when (status) {
             is ServiceStatus.Running -> {
-                Log.d("${::onServiceStatusUpdate.name}() -> " +
+                Log.d(
+                        "${::onServiceStatusUpdate.name}() -> " +
                         "duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}"
                 )
                 notificationManager.notify(NOTIFICATION_ID, buildForegroundNotification())
@@ -156,54 +157,61 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     }
 
     private fun buildForegroundNotification(): Notification {
-        val status = caffeinateApplication.lastStatusUpdate as ServiceStatus.Running
-        val channelIdStr = "${getString(R.string.app_name)} Status"
-        val durationStr = status.remaining.toFormattedTime(this)
-        val notificationStopIntent = NotificationUtils.getPendingIntent(this, KeepAwakeService::class.java, ACTION_STOP, 0)
-        val notificationActionNextTimeout = NotificationUtils.getNotificationAction(
-                this,
-                KeepAwakeService::class.java,
-                ACTION_CHANGE_TIMEOUT,
-                R.drawable.baseline_coffee_24,
-                getString(R.string.foreground_notification_action_next_timeout),
-                1
-        )
-        val notificationActionEnableDimming = NotificationUtils.getNotificationAction(
-                this,
-                KeepAwakeService::class.java,
-                ACTION_CHANGE_DIMMING_ENABLED,
-                R.drawable.baseline_coffee_24,
-                if (isDimmingEnabled) getString(R.string.foreground_notification_action_disable_dimming) else getString(R.string.foreground_notification_action_enable_dimming),
-                2
-        )
-        val notificationBuilder =
-                NotificationCompat.Builder(this, channelIdStr)
-                    .setSilent(true)
-                    .setOngoing(true)
-                    .setSubText(durationStr)
-                    .setContentText(getString(R.string.foreground_notification_tap_to_turn_off))
-                    .setWhen(System.currentTimeMillis())
-                    .setContentIntent(notificationStopIntent)
-                    .addAction(notificationActionNextTimeout)
-                    .addAction(notificationActionEnableDimming)
-                    .setSmallIcon(R.drawable.baseline_coffee_24)
-                    .setContentInfo(getString(R.string.app_name))
-                    .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
-                    .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-                    .setContentTitle(
-                            when (status.remaining) {
-                                Duration.INFINITE -> getString(R.string.foreground_notification_title_duration_indefinite)
-                                else              -> getString(R.string.foreground_notification_title_duration_definite, durationStr)
-                            }
-                    )
+        caffeinateApplication.run {
+            val status = lastStatusUpdate as ServiceStatus.Running
+            val channelIdStr = "${localizedApplicationContext.getString(R.string.app_name)} Status"
+            val durationStr = status.remaining.toFormattedTime(localizedApplicationContext)
+            val notificationStopIntent = NotificationUtils.getPendingIntent(localizedApplicationContext, KeepAwakeService::class.java, ACTION_STOP, 0)
+            val notificationActionNextTimeout = NotificationUtils.getNotificationAction(
+                    localizedApplicationContext,
+                    KeepAwakeService::class.java,
+                    ACTION_CHANGE_TIMEOUT,
+                    R.drawable.baseline_coffee_24,
+                    localizedApplicationContext.getString(R.string.foreground_notification_action_next_timeout),
+                    1
+            )
+            val notificationActionEnableDimming = NotificationUtils.getNotificationAction(
+                    this,
+                    KeepAwakeService::class.java,
+                    ACTION_CHANGE_DIMMING_ENABLED,
+                    R.drawable.baseline_coffee_24,
+                    if (isDimmingEnabled) localizedApplicationContext.getString(R.string.foreground_notification_action_disable_dimming) else localizedApplicationContext.getString(
+                            R.string.foreground_notification_action_enable_dimming
+                    ),
+                    2
+            )
+            val notificationBuilder =
+                    NotificationCompat.Builder(localizedApplicationContext, channelIdStr)
+                        .setSilent(true)
+                        .setOngoing(true)
+                        .setSubText(durationStr)
+                        .setContentText(localizedApplicationContext.getString(R.string.foreground_notification_tap_to_turn_off))
+                        .setWhen(System.currentTimeMillis())
+                        .setContentIntent(notificationStopIntent)
+                        .addAction(notificationActionNextTimeout)
+                        .addAction(notificationActionEnableDimming)
+                        .setSmallIcon(R.drawable.baseline_coffee_24)
+                        .setContentInfo(localizedApplicationContext.getString(R.string.app_name))
+                        .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
+                        .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+                        .setContentTitle(
+                                when (status.remaining) {
+                                    Duration.INFINITE -> localizedApplicationContext.getString(R.string.foreground_notification_title_duration_indefinite)
+                                    else              -> localizedApplicationContext.getString(
+                                            R.string.foreground_notification_title_duration_definite,
+                                            durationStr
+                                    )
+                                }
+                        )
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelIdStr, channelIdStr, NotificationManager.IMPORTANCE_HIGH)
-            notificationBuilder.setChannelId(channel.id)
-            notificationManager.createNotificationChannel(channel)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(channelIdStr, channelIdStr, NotificationManager.IMPORTANCE_HIGH)
+                notificationBuilder.setChannelId(channel.id)
+                notificationManager.createNotificationChannel(channel)
+            }
+
+            return notificationBuilder.build()
         }
-
-        return notificationBuilder.build()
     }
 
     @SuppressLint("WakelockTimeout")
@@ -228,7 +236,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             }
         }
 
-        wakeLock = powerManager.newWakeLock(wakeLockLevel, "${getString(R.string.app_name)}:wakelockTag").apply {
+        wakeLock = powerManager.newWakeLock(wakeLockLevel, "${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)}:wakelockTag").apply {
             Log.d("${::acquireWakeLock.name}() -> acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingAllowed: $isDimmingEnabled...")
             setReferenceCounted(false)
             if (duration == Duration.INFINITE) acquire() else acquire(duration.inWholeMilliseconds)
@@ -238,7 +246,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
     private fun startCaffeine(duration: Duration) {
         val isIndefinite = duration == Duration.INFINITE
-        Log.d("${::acquireWakeLock.name}() -> starting ${getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
+        Log.d("${::acquireWakeLock.name}() -> starting ${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
 
         acquireWakeLock(duration)
 
@@ -260,45 +268,44 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     }
 
     private fun stopCaffeine() {
-        Log.d("${::stopCaffeine.name}() -> stopping ${getString(R.string.app_name)}...")
+        caffeinateApplication.run {
+            Log.d("${::stopCaffeine.name}() -> stopping ${localizedApplicationContext.getString(R.string.app_name)}...")
 
-        wakeLock?.apply {
-            Log.d("${::stopCaffeine.name}() -> releasing ${this@KeepAwakeService::wakeLock.name}...")
-            releaseSafely(::wakeLock.name)
-            Log.d("${::stopCaffeine.name}() -> ${this@KeepAwakeService::wakeLock.name} released!")
-        } ?: Log.d("${::stopCaffeine.name}() -> wakeLock is not held!")
+            wakeLock?.apply {
+                Log.d("${::stopCaffeine.name}() -> releasing ${this@KeepAwakeService::wakeLock.name}...")
+                releaseSafely(::wakeLock.name)
+                Log.d("${::stopCaffeine.name}() -> ${this@KeepAwakeService::wakeLock.name} released!")
+            } ?: Log.d("${::stopCaffeine.name}() -> wakeLock is not held!")
 
-        Log.d("${::stopCaffeine.name}() -> cancelling ${this::caffeineTimerTask.name}...")
-        caffeineTimerTask?.cancel()
-        Log.d("${::stopCaffeine.name}() -> ${this::caffeineTimerTask.name} cancelled!")
+            Log.d("${::stopCaffeine.name}() -> cancelling ${this@KeepAwakeService::caffeineTimerTask.name}...")
+            caffeineTimerTask?.cancel()
+            Log.d("${::stopCaffeine.name}() -> ${this@KeepAwakeService::caffeineTimerTask.name} cancelled!")
 
-        unregisterScreenLockReceiver()
+            unregisterScreenLockReceiver()
 
-        with(caffeinateApplication) {
-            Log.d("${::stopCaffeine.name}: removing $LOG_TAG from ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
+
+            Log.d("${::stopCaffeine.name}: removing from ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
             keepAwakeServiceObservers.remove(this@KeepAwakeService)
-            Log.d("${::stopCaffeine.name}() -> $LOG_TAG removed from ${CaffeinateApplication::keepAwakeServiceObservers.name}!")
+            Log.d("${::stopCaffeine.name}() -> removed from ${CaffeinateApplication::keepAwakeServiceObservers.name}!")
 
-            Log.d("${::stopCaffeine.name}: removing $LOG_TAG from ${CaffeinateApplication::sharedPrefsObservers.name}...")
+            Log.d("${::stopCaffeine.name}: removing from ${CaffeinateApplication::sharedPrefsObservers.name}...")
             sharedPrefsObservers.remove(this@KeepAwakeService)
-            Log.d("${::stopCaffeine.name}() -> $LOG_TAG removed from ${CaffeinateApplication::sharedPrefsObservers.name}!")
+            Log.d("${::stopCaffeine.name}() -> removed from ${CaffeinateApplication::sharedPrefsObservers.name}!")
 
             Log.d("${::stopCaffeine.name}() -> notifying observers...")
             caffeinateApplication.lastStatusUpdate = ServiceStatus.Stopped
             Log.d("${::stopCaffeine.name}() -> observers notified!")
-        }
 
-        Log.d("${::stopCaffeine.name}() -> ${getString(R.string.app_name)} stopped!")
+            Log.d("${::stopCaffeine.name}() -> ${localizedApplicationContext.getString(R.string.app_name)} stopped!")
+        }
     }
 
     private inner class CaffeineTimerTask(private var duration: Duration) : TimerTask() {
-
-        @Suppress("PrivatePropertyName")
-        private val LOG_TAG = CaffeineTimerTask::class.simpleName
+        
         private val isIndefinite = duration == Duration.INFINITE
 
         init {
-            Log.d("$LOG_TAG::init: ${getString(R.string.app_name)} initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
+            Log.d("init: ${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)} initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
         }
 
         override fun run() {
@@ -308,7 +315,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                         is ServiceStatus.Running -> {
                             if (!isIndefinite) duration -= 1.seconds
 
-                            Log.d("$LOG_TAG::${this@CaffeineTimerTask::run.name}() -> " + "duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: $isIndefinite"
+                            Log.d(
+                                    "${this@CaffeineTimerTask::run.name}() -> " + "duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: $isIndefinite"
                             )
 
                             when {
@@ -343,7 +351,6 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         private const val ACTION_CHANGE_TIMEOUT = "change_timeout"
         private const val ACTION_CHANGE_DIMMING_ENABLED = "change_allow_dimming"
         private val DEBOUNCE_DURATION = 1.seconds
-        private val LOG_TAG = KeepAwakeService::class.simpleName
 
         fun startIndefinitely(caffeinateApplication: CaffeinateApplication) {
             caffeinateApplication.apply {
@@ -392,7 +399,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                     STATE.STOP   -> false
                     STATE.TOGGLE -> lastStatusUpdate is ServiceStatus.Stopped
                 }
-                val intent = Intent(applicationContext, KeepAwakeService::class.java)
+                val intent = Intent(localizedApplicationContext, KeepAwakeService::class.java)
                 val status = when {
                     start -> ServiceStatus.Running(timeout)
                     else  -> ServiceStatus.Stopped
@@ -401,8 +408,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                 lastStatusUpdate = status
 
                 when {
-                    start -> ContextCompat.startForegroundService(applicationContext, intent)
-                    else  -> applicationContext.stopService(intent)
+                    start -> ContextCompat.startForegroundService(localizedApplicationContext, intent)
+                    else  -> localizedApplicationContext.stopService(intent)
                 }
             }
         }
