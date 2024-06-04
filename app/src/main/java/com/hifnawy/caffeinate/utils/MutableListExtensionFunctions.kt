@@ -4,8 +4,6 @@ import timber.log.Timber as Log
 
 object MutableListExtensionFunctions {
 
-    private val LOG_TAG = MutableListExtensionFunctions::class.simpleName
-
     @Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
     inline fun <reified ObserverType : Any> MutableList<ObserverType>.addObserver(listName: String, observer: ObserverType) {
         val methodName = object {}.javaClass.enclosingMethod?.name

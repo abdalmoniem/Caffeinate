@@ -5,7 +5,6 @@ import timber.log.Timber as Log
 
 object WakeLockExtensionFunctions {
 
-    private val LOG_TAG = WakeLockExtensionFunctions::class.simpleName
     fun WakeLock.releaseSafely(variableName: String) {
         val methodName = object {}.javaClass.enclosingMethod?.name
         when {
