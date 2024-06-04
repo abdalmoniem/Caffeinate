@@ -37,8 +37,6 @@ import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
 
 class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedListener, ServiceStatusObserver {
 
-    @Suppress("PrivatePropertyName")
-    private val LOG_TAG = MainActivity::class.simpleName
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
@@ -243,11 +241,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     private fun checkBatteryOptimization(): Boolean {
         with(binding) {
             val powerManager = getSystemService(POWER_SERVICE) as PowerManager
-            return if (!powerManager.isIgnoringBatteryOptimizations(applicationContext.packageName)) {
+            return if (!powerManager.isIgnoringBatteryOptimizations(caffeinateApplication.localizedApplicationContext.packageName)) {
                 batteryOptimizationCard.setOnClickListener {
                     startActivity(Intent().apply {
                         action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                        data = Uri.parse("package:${applicationContext.packageName}")
+                        data = Uri.parse("package:${caffeinateApplication.localizedApplicationContext.packageName}")
                     })
                     requestBatteryOptimizationPermission()
                 }
@@ -309,7 +307,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             .setCancelable(false)
             .setMessage(getString(R.string.dialog_battery_optimization_needed_message))
             .setPositiveButton(getString(R.string.dialog_button_ok)) { _, _ ->
-                startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${applicationContext.packageName}")))
+                startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${caffeinateApplication.localizedApplicationContext.packageName}")))
             }
             .setNegativeButton(getString(R.string.dialog_button_cancel), null)
             .show()
