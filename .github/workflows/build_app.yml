@@ -31,37 +31,13 @@ jobs:
         run: bash gradlew build
 
       - name: Build APKs
-        run: bash gradlew app:assembleRelease
+        run: bash gradlew app:assembleDebug
 
-      - name: Install rename
-        run: sudo apt install rename
-
-      - name: Rename Build APKs
+      - name: Generate Debug APK
         run: |
-          rename -n 's/(.*).apk/${1}-unsigned.apk/' app/build/outputs/apk/release/*.apk
-          rename 's/(.*).apk/${1}-unsigned.apk/' app/build/outputs/apk/release/*.apk
-
-      - name: Sign Release APK
-        uses: r0adkll/sign-android-release@v1.0.4
-        env:
-          BUILD_TOOLS_VERSION: 34.0.0
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: generic_key
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-
-      - name: Rename Signed Release APK
-        run: |
-          rename -n 's/(.*)-unsigned-signed.apk/${1}.apk/' ${{ env.SIGNED_RELEASE_FILE }}
-          rename 's/(.*)-unsigned-signed.apk/${1}.apk/' ${{ env.SIGNED_RELEASE_FILE }}
-
-      - name: Generate Release APK
-        run: |
-          find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$'
-          echo ARTIFACT_NAME=$(basename $(find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$')) >> $GITHUB_ENV
-          echo ARTIFACT_PATH=$(find app/build/outputs/apk/release/*.apk | grep -v '\-unsigned\(.*\)\?\.apk$') >> $GITHUB_ENV
+          find app/build/outputs/apk/debug/*.apk
+          echo ARTIFACT_NAME=$(basename $(find app/build/outputs/apk/release/*.apk)) >> $GITHUB_ENV
+          echo ARTIFACT_PATH=$(find app/build/outputs/apk/release/*.apk) >> $GITHUB_ENV
 
       - name: Create Artifact ${{ env.ARTIFACT_NAME }}
         uses: actions/upload-artifact@v4
