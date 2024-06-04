@@ -2,17 +2,17 @@
 <resources>
     <string name="app_name">كافينيت</string>
     <string name="app_icon">أيقونة البرنامج</string>
-    <string name="battery_optimization_not_granted">تظبيط البطارية: مش متاخد!</string>
-    <string name="battery_optimization_granted">تظبيط البطارية: متاخد!</string>
-    <string name="background_optimization_not_granted">تظبيط الشغل فى الخلفية: مش متاخد!</string>
-    <string name="background_optimization_granted">تظبيط الشغل فى الخلفية: متاخد!</string>
-    <string name="notifications_permission_not_granted">إذن الإشعارات: مش متاخد!</string>
-    <string name="notifications_permission_granted">إذن الإشعارات: متاخد!</string>
-    <string name="dialog_battery_optimization_needed_title">محتاجبن نظبط البطارية</string>
-    <string name="dialog_battery_optimization_needed_message">البرنامج ده مجتاج تظبيط البطارية عشان يشتغل كويس.</string>
+    <string name="battery_optimization_not_granted">تظبيط البطارية: مش مِتَّاخِد!</string>
+    <string name="battery_optimization_granted">تظبيط البطارية: مِتَّاخِد!</string>
+    <string name="background_optimization_not_granted">تظبيط الشغل فى الخلفية: مش مِتَّاخِد!</string>
+    <string name="background_optimization_granted">تظبيط الشغل فى الخلفية: مِتَّاخِد!</string>
+    <string name="notifications_permission_not_granted">إذن الإشعارات: مش مِتَّاخِد!</string>
+    <string name="notifications_permission_granted">إذن الإشعارات: مِتَّاخِد!</string>
+    <string name="dialog_battery_optimization_needed_title">محتاجين نِظَبَّط البطارية</string>
+    <string name="dialog_battery_optimization_needed_message">البرنامج ده محتاج تَظبِيط البطارية عشان يشتغل كويس.</string>
     <string name="app_theme_pref">السيم</string>
     <string name="material_you_pref">ألوان متماشية مع النظام</string>
-    <string name="material_you_pref_description">الألوان المتماشية مع النظام موجودة بس\nعلى أندرويد ١٢ و طالع</string>
+    <string name="material_you_pref_description">الألوان المتماشية مع النظام موجودة بس على أندرويد ١٢ و طالع</string>
     <string name="material_you_off">الألوان المتماشية مش شغالة</string>
     <string name="material_you_on">الألوان المتماشية شغالة</string>
     <string name="allow_dimming_pref">خَفت الشاشة</string>
@@ -20,7 +20,7 @@
     <string name="allow_dimming_on">خَفت الشاشة شغال</string>
     <string name="allow_dimming_off">خَفت الشاشة مش شغال</string>
     <string name="allow_while_locked_pref">كَمِّل شغل</string>
-    <string name="allow_while_locked_pref_description">خلى البرنامج يكمل شغل لما الشاشة تطفى</string>
+    <string name="allow_while_locked_pref_description">خلى البرنامج يكَمِّل شغل لما الشاشة تِطفِى</string>
     <string name="allow_while_locked_off">تكميل الشغل شغال</string>
     <string name="allow_while_locked_on">تكميل الشغل مَطفى</string>
     <string name="caffeinate_button_off">مش شغال</string>
