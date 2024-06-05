@@ -76,6 +76,8 @@ jobs:
           tag: ${{ github.ref }}
           draft: false
           make_latest: true
+          overwrite: true
+          promote: true
           body: ${{ env.COMMIT_MESSAGE }}
           release_name: ${{ github.ref_name }}
           repo_token: ${{ secrets.RELEASE_GITHUB_TOKEN }}

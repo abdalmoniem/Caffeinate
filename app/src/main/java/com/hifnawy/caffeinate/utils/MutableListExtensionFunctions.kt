@@ -9,11 +9,11 @@ object MutableListExtensionFunctions {
         val methodName = object {}.javaClass.enclosingMethod?.name
 
         if (!this.contains(observer)) {
-            Log.d("${methodName}() -> adding ${observer::class.simpleName} to $listName<${ObserverType::class.simpleName}>...")
+            Log.d("adding ${observer::class.simpleName} to $listName<${ObserverType::class.simpleName}>...")
             this.add(observer)
-            Log.d("${methodName}() -> ${observer::class.simpleName} added to $listName<${ObserverType::class.simpleName}>!")
+            Log.d("${observer::class.simpleName} added to $listName<${ObserverType::class.simpleName}>!")
         } else {
-            Log.d("${methodName}() -> ${observer::class.simpleName} already added to $listName<${ObserverType::class.simpleName}>!")
+            Log.d("${observer::class.simpleName} already added to $listName<${ObserverType::class.simpleName}>!")
         }
     }
 }
