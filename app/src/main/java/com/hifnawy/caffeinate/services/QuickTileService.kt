@@ -32,11 +32,8 @@ class QuickTileService : TileService() {
         super.onStartListening()
         val status = caffeinateApplication.lastStatusUpdate
         when (status) {
-            is ServiceStatus.Running -> Log.d(
-                    "${::onStartListening.name}() -> duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}"
-            )
-
-            ServiceStatus.Stopped    -> Log.d("${::onStartListening.name}() -> status: $status")
+            is ServiceStatus.Running -> Log.d("duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}")
+            ServiceStatus.Stopped    -> Log.d("status: $status")
         }
 
         updateQuickTile(status)
@@ -45,18 +42,15 @@ class QuickTileService : TileService() {
     override fun onClick() {
         if (!checkPermissions()) return
 
-        KeepAwakeService.startNextDuration(caffeinateApplication)
+        KeepAwakeService.startNextTimeout(caffeinateApplication)
     }
 
     private fun updateQuickTile(status: ServiceStatus) {
         val quickTile = qsTile ?: return
 
         when (status) {
-            is ServiceStatus.Running -> Log.d(
-                    "${::updateQuickTile.name}() -> duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}"
-            )
-
-            ServiceStatus.Stopped    -> Log.d("${::updateQuickTile.name}() -> status: $status")
+            is ServiceStatus.Running -> Log.d("duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}")
+            ServiceStatus.Stopped    -> Log.d("status: $status")
         }
 
         val (tileState, tileSubtitle) = when (status) {
@@ -78,7 +72,7 @@ class QuickTileService : TileService() {
     }
 
     private fun checkPermissions(): Boolean {
-        Log.d("${::isAllPermissionsGranted.name}() -> Permissions Granted: $isAllPermissionsGranted")
+        Log.d("Permissions Granted: $isAllPermissionsGranted")
         if (!isAllPermissionsGranted) {
             val intent =
                     Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT }
@@ -100,14 +94,17 @@ class QuickTileService : TileService() {
         }
     }
 
-    companion object QuickTileServiceCompanionObject {
-        
+    companion object {
+
         fun requestTileStateUpdate(context: Context) {
-            Log.d("${::requestTileStateUpdate.name}()")
             try {
                 requestListeningState(context, ComponentName(context, QuickTileService::class.java))
-            } catch (e: Exception) {
-                Log.e("Error while calling ${::requestTileStateUpdate.name}()", e)
+            } catch (ex: NullPointerException) {
+                Log.e("NullPointerException: An exception was raised while requesting tile state update", ex)
+            } catch (ex: SecurityException) {
+                Log.e("SecurityException: An exception was raised while requesting tile state update", ex)
+            } catch (ex: IllegalArgumentException) {
+                Log.e("IllegalArgumentException: An exception was raised while requesting tile state update", ex)
             }
         }
     }

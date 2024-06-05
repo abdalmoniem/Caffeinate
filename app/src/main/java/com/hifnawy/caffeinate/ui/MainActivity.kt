@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
 
                 it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                KeepAwakeService.startNextDuration(caffeinateApplication)
+                KeepAwakeService.startNextTimeout(caffeinateApplication)
             }
 
             caffeineButton.setOnLongClickListener {
