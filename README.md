@@ -1,10 +1,11 @@
 # 💊 Caffeinate
 
-&nbsp;&nbsp;[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)
-&nbsp;&nbsp;[![Build App](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml)
-&nbsp;&nbsp;[![Publish Release](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release_on_tag.yml)
-&nbsp;&nbsp;[![CodeFactor](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate/badge)](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate)
-&nbsp;&nbsp;[![Crowdin](https://badges.crowdin.net/caffeinate/localized.svg)](https://crowdin.com/project/caffeinate)
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)
+[![Build App](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml)
+[![Publish Release](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release_on_tag.yml)
+[![CodeFactor](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate/badge)](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate)
+[![Crowdin](https://badges.crowdin.net/caffeinate/localized.svg)](https://crowdin.com/project/caffeinate)
+[![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/com.hifnawy.caffeinate)](https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate)
 
 Keeps the phone's screen awake for a configurable amount of time.
 
@@ -30,6 +31,14 @@ to change the device settings. It can be toggled at various places:
 * An option to enable holding the `WakeLock` if the screen is locked, so that the screen will keep on
   after unlocking, default behaviour is that the `WakeLock` is released when the screen is locked
 * Multiple theming options `[light, dark, system default and material you]`
+
+# 🔽 Download
+
+For now, you can download the most recent version of Caffeinate
+from [GitHub Releases](https://github.com/abdalmoniem/Caffeinate/releases/latest).
+
+[<img alt="Download from GitHub" height="80" src="assets/badge_github.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
+[<img alt="Download from GitHub" height="80" src="assets/badge_izzy_on_droid.png"/>](https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate)
 
 # 🖼️ Screenshots
 
@@ -59,15 +68,7 @@ to change the device settings. It can be toggled at various places:
       <td><img src="assets/Screenshot_2024-06-04-11-15-40-07.jpg" alt="Caffeinate Screenshot 15" width="180"/></td>
       <td><img src="assets/Screenshot_2024-06-04-11-17-17-47.jpg" alt="Caffeinate Screenshot 16" width="180"/></td>
     </tr>
-
 </table>
-
-# 🔽 Download
-
-For now, you can download the most recent version of Caffeinate
-from [GitHub Releases](https://github.com/abdalmoniem/Caffeinate/releases/latest).
-
-[<img alt="Download from GitHub" height="80" src="assets/badge_github.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
 
 ## 🈵 Translations
 
