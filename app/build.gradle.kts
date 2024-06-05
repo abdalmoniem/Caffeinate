@@ -21,6 +21,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     val localPropertiesFile = rootProject.file("local.properties")
+    var isDebuggingEnabled = false
+
     if (localPropertiesFile.exists()) {
         val keystoreProperties = Properties()
         keystoreProperties.load(FileInputStream(localPropertiesFile))
@@ -34,12 +36,17 @@ android {
                 storePassword = keystoreProperties["storePassword"] as String
             }
         }
+
+        isDebuggingEnabled = keystoreProperties.getProperty("isDebuggingEnabled")?.toBoolean() ?: false
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             isShrinkResources = false
+            isDebuggable = isDebuggingEnabled
+
+            println("release isDebuggable: $isDebuggingEnabled")
 
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 
