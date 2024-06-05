@@ -1,1 +1,1 @@
-keep your phone's screen On while developing
+在开发过程中保持手机屏幕常亮
