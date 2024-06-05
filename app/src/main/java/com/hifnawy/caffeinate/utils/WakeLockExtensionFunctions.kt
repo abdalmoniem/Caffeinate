@@ -9,12 +9,12 @@ object WakeLockExtensionFunctions {
         val methodName = object {}.javaClass.enclosingMethod?.name
         when {
             isHeld -> {
-                Log.d("${methodName}() -> releasing $variableName...")
+                Log.d("releasing $variableName...")
                 release()
-                Log.d("${methodName}() -> $variableName released!")
+                Log.d("$variableName released!")
             }
 
-            else   -> Log.d("${methodName}() -> $variableName is already released!")
+            else   -> Log.d("$variableName is already released!")
         }
     }
 }
