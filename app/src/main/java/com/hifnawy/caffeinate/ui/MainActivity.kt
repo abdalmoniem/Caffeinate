@@ -19,6 +19,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -28,6 +29,7 @@ import com.hifnawy.caffeinate.ServiceStatus
 import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.databinding.ActivityMainBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseThemeBinding
+import com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageDrawable
@@ -42,6 +44,13 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
     private val grantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.baseline_check_circle_24) }
     private val notGrantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.baseline_cancel_24) }
+    private val Iterable<CheckBoxItem>.enabledDurations: CharSequence
+        get() =
+            filter { checkBoxItem -> checkBoxItem.isChecked }.joinToString(
+                    separator = ", ",
+                    limit = 10,
+                    truncated = "..."
+            ) { checkBoxItem -> checkBoxItem.duration.toFormattedTime(binding.root.context) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,6 +122,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
         changeAllowDimmingPreferences(isAllPermissionsGranted)
         changeAllowWhileLockedPreferences(isAllPermissionsGranted)
+        changeTimeoutsPreferences(isAllPermissionsGranted)
     }
 
     override fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean) {
@@ -207,6 +217,25 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 sharedPreferences.isDimmingEnabled = isChecked
             }
+        }
+    }
+
+    private fun changeTimeoutsPreferences(isAllPermissionsGranted: Boolean) {
+        with(binding) {
+            val timeoutChoiceClickListener = View.OnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                showChooseTimeoutDialog()
+            }
+
+            timeoutChoiceCard.isEnabled = isAllPermissionsGranted
+            timeoutChoiceTextView.isEnabled = isAllPermissionsGranted
+            timeoutChoiceSubTextTextView.isEnabled = true
+            timeoutChoiceSubTextTextView.visibility = if (isAllPermissionsGranted) View.VISIBLE else View.GONE
+            timeoutChoiceSubTextTextView.text = sharedPreferences.timeoutCheckBoxes.enabledDurations
+            timeoutChoiceButton.isEnabled = isAllPermissionsGranted
+
+            timeoutChoiceCard.setOnClickListener(timeoutChoiceClickListener)
+            timeoutChoiceButton.setOnClickListener(timeoutChoiceClickListener)
         }
     }
 
@@ -357,12 +386,41 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
                     dialog.dismiss()
 
-                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-
                     sharedPreferences.theme = theme
                     AppCompatDelegate.setDefaultNightMode(theme.value)
 
                     recreate()
+                }
+
+                dialogButtonCancel.setOnClickListener {
+                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    dialog.dismiss()
+                }
+            }
+
+            dialog.show()
+        }
+    }
+
+    private fun showChooseTimeoutDialog() {
+        with(binding) {
+            val dialogBinding = DialogChooseTimeoutsBinding.inflate(LayoutInflater.from(root.context))
+            val dialog = MaterialAlertDialogBuilder(root.context).setView(dialogBinding.root).create()
+
+            with(dialogBinding) {
+                val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes)
+                timeoutsRecyclerView.layoutManager = LinearLayoutManager(root.context)
+                timeoutsRecyclerView.adapter = checkBoxAdapter
+
+                dialogButtonOk.setOnClickListener {
+                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+
+                    timeoutChoiceSubTextTextView.text = checkBoxAdapter.checkBoxItems.enabledDurations
+                    caffeinateApplication.timeout = checkBoxAdapter.checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+
+                    sharedPreferences.timeoutCheckBoxes = caffeinateApplication.timeoutCheckBoxes
+
+                    dialog.dismiss()
                 }
 
                 dialogButtonCancel.setOnClickListener {
