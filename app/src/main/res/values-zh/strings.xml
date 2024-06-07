@@ -12,7 +12,7 @@
     <string name="dialog_battery_optimization_needed_message">此应用需要设置电池优化才能正常工作。</string>
     <string name="app_theme_pref">主题</string>
     <string name="material_you_pref">质感设计 3</string>
-    <string name="material_you_pref_description">质感设计 3 主题仅在\nAndroid 12 及以上系统可用</string>
+    <string name="material_you_pref_description">质感设计 3 主题仅在 Android 12 及以上系统可用</string>
     <string name="material_you_off">关闭质感设计 3</string>
     <string name="material_you_on">打开质感设计 3</string>
     <string name="allow_dimming_pref">允许暗屏</string>
@@ -20,7 +20,7 @@
     <string name="allow_dimming_on">启用允许暗屏</string>
     <string name="allow_dimming_off">禁用允许暗屏</string>
     <string name="allow_while_locked_pref">允许锁屏时运行</string>
-    <string name="allow_while_locked_pref_description">屏幕锁屏期间，允许应用\n继续运行</string>
+    <string name="allow_while_locked_pref_description">屏幕锁屏期间，允许应用继续运行</string>
     <string name="allow_while_locked_off">启用允许锁屏时运行</string>
     <string name="allow_while_locked_on">禁用允许锁屏时运行</string>
     <string name="caffeinate_button_off">关闭</string>
