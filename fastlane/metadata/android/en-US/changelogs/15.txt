@@ -1,0 +1,3 @@
+fix Locale
+
+fix Locale not changing when the language is changed while the app. is running

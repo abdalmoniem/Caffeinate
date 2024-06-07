@@ -1,0 +1,3 @@
+used Timber for logging
+
+Timber enables the removal of all Log statements in release versions
