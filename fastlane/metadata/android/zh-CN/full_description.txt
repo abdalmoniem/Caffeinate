@@ -1,0 +1,11 @@
+<p><i>咖啡时间</i> 是一个帮助Android 开发人员在不更改设备设置的情况下保持手机常亮显示的应用。 它可以在不同地方切换设置：</p><ul><li> <code></code> 快速设置开关（比如Wi-Fi、蓝牙）。 需要 Android 7 及以上版本。</li>
+<li><code></code> 应用内开关</li></ul>
+<p><b>特性</b></p><ul>
+<li>使用Android <code>唤醒锁</code> <code>SCREEN_DIM_WAKE_LOCK</code> 或 <code>SCREEN_BRIGHT_WAKE_LOCK</code> 基于用户设置的唤醒锁级别</li>
+<li>可调超时时间</li>
+<li>从 <code>快速设置开关</code> 或 <code>应用内按钮</code> 切换超时。 点击，选择倒计时。<code>1秒</code>之后倒计时启动，如果应用启动后点击<code>快速设置开关</code>或<code>按钮</code>，倒计时停止。</li>
+<li>可用超时时间： <code>[30 秒、 5分钟、 10 分钟、 15 分钟、 30 分钟、 60 分钟、∞]</code></li>
+<li><code>唤醒锁</code>启动时可允许暗屏</li>
+<li>屏幕锁屏时可选<code>唤醒锁</code>保持开启，使得屏幕解锁后继续常亮，默认情况下，<code>唤醒锁</code>于屏幕锁定后释放</li>
+<li>多个主题选项： <code>浅色、深色、系统默认、质感设计3</code></li>
+</ul>
