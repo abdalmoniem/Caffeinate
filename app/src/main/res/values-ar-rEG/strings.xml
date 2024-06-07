@@ -23,6 +23,8 @@
     <string name="allow_while_locked_pref_description">خلى البرنامج يكَمِّل شغل لما الشاشة تِطفِى</string>
     <string name="allow_while_locked_off">تكميل الشغل شغال</string>
     <string name="allow_while_locked_on">تكميل الشغل مَطفى</string>
+    <string name="timeouts_pref">المُهَل</string>
+    <string name="timeouts_change">غيَّر</string>
     <string name="caffeinate_button_off">مش شغال</string>
     <string name="quick_tile_off">مَطفى</string>
     <string name="foreground_notification_action_next_timeout">المهلة اللى بعدها</string>
@@ -32,6 +34,8 @@
     <string name="foreground_notification_title_duration_indefinite">البرنامج هيخلى الشاشة مفتوحة</string>
     <string name="foreground_notification_title_duration_definite">البرنامج هيخلى الشاشة مفتوحة لمدة %1$s</string>
     <string name="dialog_button_ok">ماشى، تمام</string>
+    <string name="dialog_button_add_timeout">زَوِّد مُهلة</string>
+    <string name="dialog_button_remove_timeout">شيل المُهلة / المُهَل</string>
     <string name="dialog_button_cancel">الغى</string>
     <string name="notifications_permission_required">محتاج إذن الإشعارات</string>
     <string name="go_to_settings">روح ع الإعدادات</string>
