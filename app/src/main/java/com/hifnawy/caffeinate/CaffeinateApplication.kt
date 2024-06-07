@@ -4,33 +4,43 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import com.hifnawy.caffeinate.services.QuickTileService
+import com.hifnawy.caffeinate.ui.CheckBoxItem
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import java.util.Locale
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 import timber.log.Timber as Log
 
 class CaffeinateApplication : Application() {
 
-    private val durations by lazy { listOf(30.seconds, 5.minutes, 10.minutes, 15.minutes, 30.minutes, 60.minutes, Duration.INFINITE) }
-    val firstTimeout by lazy { durations.first() }
+    private val sharedPreferences by lazy { SharedPrefsManager(this) }
+    lateinit var timeoutCheckBoxes: MutableList<CheckBoxItem>
+        private set
+    val firstTimeout: Duration
+        get() = timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+    val lastTimeout: Duration
+        get() = timeoutCheckBoxes.last { checkBoxItem -> checkBoxItem.isChecked }.duration
     val prevTimeout: Duration
         get() {
-            val index = durations.indexOf(timeout)
-            val prevIndex = (index - 1 + durations.size) % durations.size
+            val timeoutCheckBox = timeoutCheckBoxes.first { timeoutCheckBox -> timeoutCheckBox.duration == timeout }
+            val index = timeoutCheckBoxes.indexOf(timeoutCheckBox)
+            var prevIndex = (index - 1 + timeoutCheckBoxes.size) % timeoutCheckBoxes.size
 
-            return durations[prevIndex]
+            while (!timeoutCheckBoxes[prevIndex].isChecked) prevIndex = (prevIndex - 1 + timeoutCheckBoxes.size) % timeoutCheckBoxes.size
+
+            return timeoutCheckBoxes[prevIndex].duration
         }
     val nextTimeout: Duration
         get() {
-            val index = durations.indexOf(timeout)
-            val nextIndex = (index + 1) % durations.size
+            val timeoutCheckBox = timeoutCheckBoxes.first { timeoutCheckBox -> timeoutCheckBox.duration == timeout }
+            val index = timeoutCheckBoxes.indexOf(timeoutCheckBox)
+            var nextIndex = (index + 1) % timeoutCheckBoxes.size
 
-            return durations[nextIndex]
+            while (!timeoutCheckBoxes[nextIndex].isChecked) nextIndex = (nextIndex + 1) % timeoutCheckBoxes.size
+
+            return timeoutCheckBoxes[nextIndex].duration
         }
-    var timeout = firstTimeout
+    var timeout: Duration = sharedPreferences.timeouts.first()
     var keepAwakeServiceObservers = mutableListOf<ServiceStatusObserver>()
     var sharedPrefsObservers = mutableListOf<SharedPrefsManager.SharedPrefsChangedListener>()
     var lastStatusUpdate: ServiceStatus = ServiceStatus.Stopped
@@ -45,21 +55,14 @@ class CaffeinateApplication : Application() {
     private fun notifyKeepAwakeServiceObservers(status: ServiceStatus) {
         if (status is ServiceStatus.Stopped) timeout = firstTimeout
 
-        keepAwakeServiceObservers.forEach { observer ->
-            observer.onServiceStatusUpdate(status)
-        }
+        keepAwakeServiceObservers.forEach { observer -> observer.onServiceStatusUpdate(status) }
 
         QuickTileService.requestTileStateUpdate(localizedApplicationContext)
     }
 
-    private fun getCurrentLocale(): Locale {
-        // Implement your logic to get the current locale
-        // For example, retrieve it from system settings or app settings
-        // As of Android 13, you can get the current locale directly from the system settings for the app
-        return when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> resources.configuration.locales[0]
-            else                                                  -> Locale.getDefault()
-        }
+    private fun getCurrentLocale(): Locale = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> resources.configuration.locales[0]
+        else                                                  -> Locale.getDefault()
     }
 
     fun applyLocaleConfiguration() {
@@ -81,6 +84,9 @@ class CaffeinateApplication : Application() {
         if (BuildConfig.DEBUG) {
             Log.plant(Log.DebugTree())
         }
+
+        timeoutCheckBoxes = sharedPreferences.timeoutCheckBoxes
+        timeout = firstTimeout
     }
 
     companion object {

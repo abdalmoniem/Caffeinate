@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/timeoutsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:itemCount="10"
+                tools:listitem="@layout/timeout_checkbox_item" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dialogButtonAddTimeout"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/dialog_button_add_timeout"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                android:visibility="gone"
+                app:cornerRadius="30dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/timeoutsRecyclerView"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dialogButtonRemoveTimeout"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:text="@string/dialog_button_remove_timeout"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                android:visibility="gone"
+                app:cornerRadius="30dp"
+                app:layout_constraintBottom_toBottomOf="@+id/dialogButtonAddTimeout"
+                app:layout_constraintEnd_toStartOf="@+id/dialogButtonAddTimeout"
+                app:layout_constraintTop_toTopOf="@+id/dialogButtonAddTimeout"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dialogButtonOk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/dialog_button_ok"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                app:cornerRadius="30dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/dialogButtonAddTimeout" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dialogButtonCancel"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:text="@string/dialog_button_cancel"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                app:cornerRadius="30dp"
+                app:layout_constraintBottom_toBottomOf="@+id/dialogButtonOk"
+                app:layout_constraintEnd_toStartOf="@+id/dialogButtonOk"
+                app:layout_constraintTop_toTopOf="@+id/dialogButtonOk"
+                app:strokeWidth="0dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

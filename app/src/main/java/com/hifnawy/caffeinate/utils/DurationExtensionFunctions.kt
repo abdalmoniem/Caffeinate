@@ -9,7 +9,7 @@ import kotlin.time.Duration
 
 object DurationExtensionFunctions {
 
-    fun Duration.toFormattedTime(hideLegend: Boolean = false): String = this.toComponents { hours, minutes, seconds, _ ->
+    fun Duration.toFormattedTime(hideLegend: Boolean = false): String = toComponents { hours, minutes, seconds, _ ->
         when (this) {
             Duration.INFINITE -> "∞"
             else              -> {
@@ -26,7 +26,7 @@ object DurationExtensionFunctions {
         }
     }
 
-    fun Duration.toFormattedTime(context: Context, hideLegend: Boolean = false): String = this.toComponents { hours, minutes, seconds, _ ->
+    fun Duration.toFormattedTime(context: Context, hideLegend: Boolean = false): String = toComponents { hours, minutes, seconds, _ ->
         val hourLetter = context.getString(R.string.time_format_hour_letter)
         val minuteLetter = context.getString(R.string.time_format_minute_letter)
         val secondLetter = context.getString(R.string.time_format_second_letter)
@@ -46,7 +46,6 @@ object DurationExtensionFunctions {
             }
         }
     }
-
     private val isRTL: Boolean
         get() = CaffeinateApplication.applicationLocale.layoutDirection == LayoutDirection.RTL
 }

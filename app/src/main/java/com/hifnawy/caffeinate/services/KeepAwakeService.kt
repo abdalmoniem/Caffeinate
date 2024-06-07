@@ -317,7 +317,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                 in 0.seconds..timeout - DEBOUNCE_DURATION / 2 -> STATE.STOP
                 else                                          -> {
                     timeout = nextTimeout
-                    if (prevTimeout == Duration.INFINITE) STATE.STOP else STATE.START
+                    if (prevTimeout == lastTimeout) STATE.STOP else STATE.START
                 }
             }
 
@@ -326,8 +326,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
         private fun startWithDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
             when (val status = lastStatusUpdate) {
+                is ServiceStatus.Stopped -> toggleState(this, STATE.START)
                 is ServiceStatus.Running -> debounce(status, this)
-                else                     -> toggleState(this, STATE.START)
             }
         }
 
@@ -337,8 +337,13 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
 
         fun startNextTimeout(caffeinateApplication: CaffeinateApplication, debounce: Boolean = true) = when {
-            debounce -> startWithDebounce(caffeinateApplication)
-            else     -> startWithoutDebounce(caffeinateApplication)
+            caffeinateApplication.timeoutCheckBoxes.size == 1 -> when (caffeinateApplication.lastStatusUpdate) {
+                is ServiceStatus.Stopped -> startWithoutDebounce(caffeinateApplication)
+                is ServiceStatus.Running -> toggleState(caffeinateApplication, STATE.STOP)
+            }
+
+            debounce                                          -> startWithDebounce(caffeinateApplication)
+            else                                              -> startWithoutDebounce(caffeinateApplication)
         }
 
         fun startIndefinitely(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
