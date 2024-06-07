@@ -13,7 +13,7 @@
     <string name="dialog_battery_optimization_needed_message">This app requires the Battery Optimization permission to work properly.</string>
     <string name="app_theme_pref">Theme</string>
     <string name="material_you_pref">Material You</string>
-    <string name="material_you_pref_description">Material You theming is only available\non Android 12 and up</string>
+    <string name="material_you_pref_description">Material You theming is only available on Android 12 and up</string>
     <string name="material_you_off">Material You Off</string>
     <string name="material_you_on">Material You On</string>
     <string name="allow_dimming_pref">Allow Dimming</string>
@@ -21,9 +21,11 @@
     <string name="allow_dimming_on">Allow Dimming Enabled</string>
     <string name="allow_dimming_off">Allow Dimming Disabled</string>
     <string name="allow_while_locked_pref">Allow While Locked</string>
-    <string name="allow_while_locked_pref_description">Allow App. to keep running while the screen\nis locked</string>
+    <string name="allow_while_locked_pref_description">Allow App. to keep running while the screen is locked</string>
     <string name="allow_while_locked_off">Allow While Locked Enabled</string>
     <string name="allow_while_locked_on">Allow While Locked Disabled</string>
+    <string name="timeouts_pref">Timeouts</string>
+    <string name="timeouts_change">Change</string>
     <string name="caffeinate_button_off">OFF</string>
     <string name="quick_tile_off">Off</string>
     <string name="foreground_notification_action_next_timeout">Next Timeout</string>
@@ -33,6 +35,8 @@
     <string name="foreground_notification_title_duration_indefinite">App. will keep the display on</string>
     <string name="foreground_notification_title_duration_definite">App. will keep the display on for %1$s</string>
     <string name="dialog_button_ok">OK</string>
+    <string name="dialog_button_add_timeout">Add Timeout</string>
+    <string name="dialog_button_remove_timeout">Remove Timeout(s)</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="notifications_permission_required">Notifications Permission Required</string>
     <string name="go_to_settings">Go to Settings</string>
