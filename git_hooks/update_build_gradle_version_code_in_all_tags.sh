@@ -1,3 +1,5 @@
+#!/bin/bash
+
 startingVersion=1
 
 HEAD=$(git rev-parse HEAD)
@@ -17,18 +19,18 @@ do
   echo "checking out tag: $tag ..."
 
   # Check out the tag
-  git checkout --quiet $tag
+  git checkout --quiet "$tag"
 
-  commitMessage=$(git show $tag -s --format='%s%n%n%b' | sed -e 's/Change-Id:\s*\w\+//' | sed -e 's/Signed-off-by:\s*.*//')
+  commitMessage=$(git show "$tag" -s --format='%s%n%n%b' | sed -e 's/Change-Id:\s*\w\+//' | sed -e 's/Signed-off-by:\s*.*//')
 
   echo "commit message: $commitMessage"
 
   echo "deleting tag $tag ..."
-  git tag -d $tag
+  git tag -d "$tag"
 
   # Replace the line in the file
   sed -i "s/$filter/\1$startingVersion/" $filename
-  # cat $filename | sed -e "s/$filter/\1$startingVersion/" | grep -e $filter | tr -s ' \n'
+  # sed -e "s/$filter/\1$startingVersion/" < $filename | grep -e $filter | tr -s ' \n' | xargs
 
   ((startingVersion+=1))
 
@@ -36,15 +38,15 @@ do
   echo "adding $filename to git staging..."
   git add $filename
 
-  echo "committing change: $(cat $filename | grep -e $filter | tr -s ' \n') ..."
+  echo "committing change: $(grep -e "$filter" < $filename | tr -s ' \n') ..."
   git commit -sm "updated tag $tag" -m "updated $filename::versionCode=$startingVersion in tag $tag"
 
   echo "adding tag $tag ..."
-  git tag $tag
+  git tag "$tag"
 
   echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   echo
 done
 
 echo "switching back to $currentBranch -> $HEAD..."
-git switch --quiet $currentBranch
+git switch --quiet "$currentBranch"
