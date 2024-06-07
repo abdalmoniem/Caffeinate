@@ -1,0 +1,3 @@
+fix Localization when the app is closed
+
+fixed an issue where, when the app is closed, all localized strings revert to the default localization when the app is closed, and the app's language is different from the system language

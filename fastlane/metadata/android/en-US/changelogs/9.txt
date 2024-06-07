@@ -1,0 +1,3 @@
+Merge pull request #10 from abdalmoniem/main_translated
+
+New Crowdin updates
