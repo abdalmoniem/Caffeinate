@@ -53,7 +53,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         get() = when {
             sharedPreferences.contains(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name) -> sharedPreferences.getSerializableList<MutableList<CheckBoxItem>>(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name)
             else                                                                 -> timeouts.map { timeout ->
-                CheckBoxItem(text = timeout.toFormattedTime(), isChecked = true, isEnabled = true, duration = timeout)
+                CheckBoxItem(text = timeout.toFormattedTime(caffeinateApplication.localizedApplicationContext), isChecked = true, isEnabled = true, duration = timeout)
             }.toMutableList()
         }
         set(value) = sharedPreferences.edit().putSerializableList(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name, value).apply()
