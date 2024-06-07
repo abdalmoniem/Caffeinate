@@ -1,0 +1,3 @@
+added allow whil locked option
+
+if enabled, the wake lock will not be released when the screen is locked

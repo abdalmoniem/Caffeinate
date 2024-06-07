@@ -1,0 +1,5 @@
+Fix Arabic, Egypt Translations
+
+* New translations strings.xml (Arabic, Egypt)
+
+* New translations strings.xml (Arabic, Egypt)
