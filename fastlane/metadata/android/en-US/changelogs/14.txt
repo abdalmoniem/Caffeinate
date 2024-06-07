@@ -1,0 +1,3 @@
+fix preferences switches logic
+
+listeners for preferences are all synchronized

@@ -1,0 +1,1 @@
+bump app version to 1.3.7

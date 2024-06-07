@@ -1,0 +1,1 @@
+New translations strings.xml (Arabic, Egypt)
