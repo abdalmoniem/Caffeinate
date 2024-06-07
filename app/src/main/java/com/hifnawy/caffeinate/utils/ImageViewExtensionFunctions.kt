@@ -13,11 +13,11 @@ object ImageViewExtensionFunctions {
             @DrawableRes
             drawableResId: Int,
             @ColorInt
-            color: Int = ContextCompat.getColor(this.context, R.color.colorPrimary)
+            color: Int = ContextCompat.getColor(context, R.color.colorPrimary)
     ) {
-        val appIconDrawable = AppCompatResources.getDrawable(this.context, drawableResId)
+        val appIconDrawable = AppCompatResources.getDrawable(context, drawableResId)
 
-        this.setImageDrawable(appIconDrawable)
-        this.setColorFilter(color)
+        setImageDrawable(appIconDrawable)
+        setColorFilter(color)
     }
 }

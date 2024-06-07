@@ -5,16 +5,13 @@ import timber.log.Timber as Log
 
 object WakeLockExtensionFunctions {
 
-    fun WakeLock.releaseSafely(variableName: String) {
-        val methodName = object {}.javaClass.enclosingMethod?.name
-        when {
-            isHeld -> {
-                Log.d("releasing $variableName...")
-                release()
-                Log.d("$variableName released!")
-            }
-
-            else   -> Log.d("$variableName is already released!")
+    fun WakeLock.releaseSafely(variableName: String) = when {
+        isHeld -> {
+            Log.d("releasing $variableName...")
+            release()
+            Log.d("$variableName released!")
         }
+
+        else   -> Log.d("$variableName is already released!")
     }
 }
