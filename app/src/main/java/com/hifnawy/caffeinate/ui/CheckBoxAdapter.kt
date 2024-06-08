@@ -1,5 +1,6 @@
 package com.hifnawy.caffeinate.ui
 
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,24 +27,30 @@ class CheckBoxAdapter(val checkBoxItems: List<CheckBoxItem>) :
     )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = checkBoxItems[position]
+        with(holder) {
+            val item = checkBoxItems[position].apply {
+                checkBox.text = text
+                checkBox.isChecked = isChecked
+                checkBox.isEnabled = isEnabled
+            }
 
-        holder.checkBox.text = item.text
-        holder.checkBox.isChecked = item.isChecked
-        holder.checkBox.isEnabled = item.isEnabled
-        holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-            item.isChecked = isChecked
-            val checkedItems = checkBoxItems.filter { checkBoxItem -> checkBoxItem.isChecked }
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                itemView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
 
-            when (checkedItems.size) {
-                1    -> checkBoxItems.firstOrNull { checkBoxItem -> checkBoxItem.isChecked }?.apply {
-                    isEnabled = false
-                    notifyItemChanged(checkBoxItems.indexOf(this))
-                }
+                item.isChecked = isChecked
 
-                else -> checkBoxItems.firstOrNull { checkBoxItem -> !checkBoxItem.isEnabled }?.apply {
-                    isEnabled = true
-                    notifyItemChanged(checkBoxItems.indexOf(this))
+                checkBoxItems.filter { checkBoxItem -> checkBoxItem.isChecked }.apply {
+                    when (size) {
+                        1    -> checkBoxItems.firstOrNull { checkBoxItem -> checkBoxItem.isChecked }?.apply {
+                            isEnabled = false
+                            notifyItemChanged(checkBoxItems.indexOf(this))
+                        }
+
+                        else -> checkBoxItems.firstOrNull { checkBoxItem -> !checkBoxItem.isEnabled }?.apply {
+                            isEnabled = true
+                            notifyItemChanged(checkBoxItems.indexOf(this))
+                        }
+                    }
                 }
             }
         }
