@@ -6,36 +6,13 @@
     android:layout_height="wrap_content"
     android:padding="10dp">
 
-    <ImageView
-        android:id="@+id/dialogIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:contentDescription="@string/choose_theme_dialog_icon"
-        android:src="@drawable/baseline_coffee_24"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/colorPrimary" />
-
-    <TextView
-        android:id="@+id/dialogTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:text="@string/choose_theme"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/dialogIcon"
-        app:layout_constraintStart_toEndOf="@+id/dialogIcon"
-        app:layout_constraintTop_toTopOf="@+id/dialogIcon" />
-
     <RadioGroup
         android:id="@+id/themeRadioGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
         android:checkedButton="@id/themeSystemDefault"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dialogIcon">
+        app:layout_constraintTop_toTopOf="parent">
 
         <RadioButton
             android:id="@+id/themeSystemDefault"

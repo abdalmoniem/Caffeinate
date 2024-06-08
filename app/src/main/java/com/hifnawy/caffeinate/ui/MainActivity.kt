@@ -44,6 +44,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
     private val grantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.baseline_check_circle_24) }
     private val notGrantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.baseline_cancel_24) }
+    private val displayWidth: Int
+        get() = resources.displayMetrics.widthPixels
+    private val displayHeight: Int
+        get() = resources.displayMetrics.heightPixels
     private val Iterable<CheckBoxItem>.enabledDurations: CharSequence
         get() =
             filter { checkBoxItem -> checkBoxItem.isChecked }.joinToString(
@@ -346,7 +350,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         with(binding) {
             var theme = sharedPreferences.theme
             val dialogBinding = DialogChooseThemeBinding.inflate(LayoutInflater.from(root.context))
-            val dialog = MaterialAlertDialogBuilder(root.context).setView(dialogBinding.root).create()
+            val dialog = MaterialAlertDialogBuilder(root.context).setView(dialogBinding.root).create().apply {
+                window?.setLayout((displayWidth * 0.6f).toInt(), (displayHeight * 0.45f).toInt())
+            }
 
             when (theme.value) {
                 AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> {
@@ -366,11 +372,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             }
 
             with(dialogBinding) {
-                when (caffeinateApplication.lastStatusUpdate) {
-                    is ServiceStatus.Stopped -> dialogIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, root.context.theme.themeColor)
-                    is ServiceStatus.Running -> dialogIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, root.context.theme.themeColor)
-                }
-
                 themeRadioGroup.setOnCheckedChangeListener { radioGroup, checkedRadioButtonId ->
                     radioGroup.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
 
@@ -411,6 +412,13 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes)
                 timeoutsRecyclerView.layoutManager = LinearLayoutManager(root.context)
                 timeoutsRecyclerView.adapter = checkBoxAdapter
+                var height = 0f
+
+                checkBoxAdapter.checkBoxItems.forEach {
+                    height += 0.12f
+                }
+
+                dialog.window?.setLayout((displayWidth * 0.8f).toInt(), (displayHeight * height).toInt())
 
                 dialogButtonOk.setOnClickListener {
                     it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
