@@ -1,3 +1,1 @@
-Merge pull request #10 from abdalmoniem/main_translated
-
-New Crowdin updates
+bump app version to 1.3

@@ -1,1 +1,1 @@
-updated publish_release_on_tag.yml
+bump app version to 1.2.7
