@@ -26,7 +26,7 @@ object DurationExtensionFunctions {
         }
     }
 
-    fun Duration.toFormattedTime(context: Context, hideLegend: Boolean = false): String = toComponents { hours, minutes, seconds, _ ->
+    fun Duration.toLocalizedFormattedTime(context: Context, hideLegend: Boolean = false): String = toComponents { hours, minutes, seconds, _ ->
         val hourLetter = context.getString(R.string.time_format_hour_letter)
         val minuteLetter = context.getString(R.string.time_format_minute_letter)
         val secondLetter = context.getString(R.string.time_format_second_letter)

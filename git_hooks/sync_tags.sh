@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Arrays to hold commit hashes and tag names
 declare -a remote_commit_hashes
 declare -a remote_tag_names
@@ -19,7 +21,7 @@ for i in "${!remote_tag_names[@]}"; do
 
    echo "tag: $remote_commit_tag"
 
-   remote_tag_commit_subject=$(git show -s --format=%s $remote_commit_hash)
+   remote_tag_commit_subject=$(git show -s --format=%s "$remote_commit_hash")
 
    echo "remote commit subject: $remote_tag_commit_subject"
    echo "remote commit hash: $remote_commit_hash"
@@ -30,10 +32,10 @@ for i in "${!remote_tag_names[@]}"; do
       echo "local commit hash: $local_hash"
 
       echo "deleting local tag: $remote_commit_tag..."
-      git tag -d $remote_commit_tag
+      git tag -d "$remote_commit_tag"
 
       echo "adding local tag to hash $local_hash..."
-      git tag $remote_commit_tag $local_hash
+      git tag "$remote_commit_tag" "$local_hash"
 
       echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
       echo

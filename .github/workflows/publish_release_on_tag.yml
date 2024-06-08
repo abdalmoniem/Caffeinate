@@ -70,6 +70,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Publish Release ${{ github.ref_name }}
+        # noinspection SpellCheckingInspection
         uses: svenstaro/upload-release-action@v2
         with:
           file: ${{ env.ARTIFACT_PATH }}

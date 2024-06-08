@@ -3,12 +3,14 @@ import sys
 from ruamel.yaml import YAML
 
 if len(sys.argv) != 2:
+    # noinspection SpellCheckingInspection
     print('must supply git top level with `git rev-parse --show-toplevel`')
     exit(93)
 
 gitRepoTopLevelAbsPath = os.path.abspath(sys.argv[1])
 publishReleaseYamlPath = f'{gitRepoTopLevelAbsPath}/.github/workflows/publish_release.yml'
 
+# noinspection SpellCheckingInspection
 tags = os.popen('git tag -l --sort=-v:refname').read().strip().split('\n')
 
 yaml = YAML(typ='rt')

@@ -17,6 +17,7 @@ import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.ServiceStatus
 import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.NotificationUtils
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
@@ -175,7 +176,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             var contentTitle: String? = null
 
             if (status is ServiceStatus.Running) {
-                durationStr = status.remaining.toFormattedTime(localizedApplicationContext)
+                durationStr = status.remaining.toLocalizedFormattedTime(localizedApplicationContext)
                 contentTitle = when (status.remaining) {
                     Duration.INFINITE -> localizedApplicationContext.getString(R.string.foreground_notification_title_duration_indefinite)
                     else              -> localizedApplicationContext.getString(R.string.foreground_notification_title_duration_definite, durationStr)

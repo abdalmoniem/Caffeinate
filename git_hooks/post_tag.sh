@@ -1,13 +1,7 @@
-#!/bin/sh
-
-# add:
-# [alias]
-#   rtag = !git_hooks/post_tag.sh
-# to .git/config or from git config --edit
-# to alias this script to 'rtag'
+#!/bin/bash
 
 if [ "$1" ]; then
-   if git tag $1 &>/dev/null; then
+   if git tag "$1" &>/dev/null; then
       gitTopLevel=$(git rev-parse --show-toplevel)
 
       if python "$gitTopLevel/git_hooks/update_publish_tags.py" "$gitTopLevel"; then

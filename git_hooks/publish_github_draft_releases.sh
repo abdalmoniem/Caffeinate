@@ -14,7 +14,7 @@ reversed_tags=$(echo "$draft_tags" | tac)
 # Iterate over each draft release tag
 for release in $reversed_tags
 do
-  release=$(echo $release | xargs)
+  release=$(echo "$release" | xargs)
 
   # echo "gh release edit "$release" --repo "$OWNER/$REPO" --draft=false"
 

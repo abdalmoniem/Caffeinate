@@ -13,6 +13,7 @@ import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.ServiceStatus
 import com.hifnawy.caffeinate.ui.MainActivity
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import kotlin.time.Duration
 import timber.log.Timber as Log
@@ -55,7 +56,7 @@ class QuickTileService : TileService() {
 
         val (tileState, tileSubtitle) = when (status) {
             is ServiceStatus.Stopped -> Pair(Tile.STATE_INACTIVE, caffeinateApplication.localizedApplicationContext.getString(R.string.quick_tile_off))
-            is ServiceStatus.Running -> Pair(Tile.STATE_ACTIVE, status.remaining.toFormattedTime(this, true))
+            is ServiceStatus.Running -> Pair(Tile.STATE_ACTIVE, status.remaining.toLocalizedFormattedTime(this, true))
         }
         val iconDrawable = if (tileState == Tile.STATE_ACTIVE) R.drawable.baseline_coffee_24 else R.drawable.outline_coffee_24
 

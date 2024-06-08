@@ -31,7 +31,7 @@ import com.hifnawy.caffeinate.databinding.ActivityMainBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseThemeBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
-import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageDrawable
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                     separator = ", ",
                     limit = 10,
                     truncated = "..."
-            ) { checkBoxItem -> checkBoxItem.duration.toFormattedTime(binding.root.context) }
+            ) { checkBoxItem -> checkBoxItem.duration.toLocalizedFormattedTime(binding.root.context) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 }
 
                 is ServiceStatus.Running -> {
-                    caffeineButton.text = status.remaining.toFormattedTime(root.context)
+                    caffeineButton.text = status.remaining.toLocalizedFormattedTime(root.context)
                     appIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, root.context.theme.themeColor)
                 }
             }
@@ -412,11 +412,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes)
                 timeoutsRecyclerView.layoutManager = LinearLayoutManager(root.context)
                 timeoutsRecyclerView.adapter = checkBoxAdapter
-                var height = 0f
-
-                checkBoxAdapter.checkBoxItems.forEach {
-                    height += 0.12f
-                }
+                val height = checkBoxAdapter.checkBoxItems.map { 0f }.fold(0f) { sum, _ -> sum + 0.12f }
 
                 dialog.window?.setLayout((displayWidth * 0.8f).toInt(), (displayHeight * height).toInt())
 

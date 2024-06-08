@@ -72,6 +72,8 @@ class CaffeinateApplication : Application() {
         applicationLocale = locale
 
         Locale.setDefault(locale)
+
+        @Suppress("AppBundleLocaleChanges")
         configuration.setLocale(locale)
         localizedApplicationContext = createConfigurationContext(configuration)
     }
