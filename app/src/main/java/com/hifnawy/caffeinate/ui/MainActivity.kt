@@ -409,22 +409,39 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             val dialog = MaterialAlertDialogBuilder(root.context).setView(dialogBinding.root).create()
 
             with(dialogBinding) {
-                val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes)
+                val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes.map { it.copy() })
                 timeoutsRecyclerView.layoutManager = LinearLayoutManager(root.context)
                 timeoutsRecyclerView.adapter = checkBoxAdapter
-                val height = checkBoxAdapter.checkBoxItems.map { 0f }.fold(0f) { sum, _ -> sum + 0.12f }
+                val height = checkBoxAdapter.timeoutCheckBoxes.map { 0f }.fold(0f) { sum, _ -> sum + 0.12f }
 
                 dialog.window?.setLayout((displayWidth * 0.8f).toInt(), (displayHeight * height).toInt())
 
                 dialogButtonOk.setOnClickListener {
                     it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
 
-                    timeoutChoiceSubTextTextView.text = checkBoxAdapter.checkBoxItems.enabledDurations
-                    caffeinateApplication.timeout = checkBoxAdapter.checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+                    caffeinateApplication.run {
+                        timeoutCheckBoxes.clear()
+                        checkBoxAdapter.timeoutCheckBoxes.forEach { checkBoxItem -> timeoutCheckBoxes.add(checkBoxItem.copy()) }
 
-                    sharedPreferences.timeoutCheckBoxes = caffeinateApplication.timeoutCheckBoxes
+                        timeoutChoiceSubTextTextView.text = timeoutCheckBoxes.enabledDurations
 
-                    dialog.dismiss()
+                        checkBoxAdapter.timeoutCheckBoxes
+                            .find { checkBoxItem -> checkBoxItem.duration == timeout && !checkBoxItem.isChecked }
+                            ?.let {
+                                when (lastStatusUpdate) {
+                                    is ServiceStatus.Running -> KeepAwakeService.startNextTimeout(this, debounce = false)
+                                    else                     -> timeout = checkBoxAdapter.timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+                                }
+                            }
+                        ?: when (lastStatusUpdate) {
+                            is ServiceStatus.Stopped -> timeout = checkBoxAdapter.timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+                            else                     -> Unit // do nothing if the service is running
+                        }
+
+                        sharedPreferences.timeoutCheckBoxes = timeoutCheckBoxes
+
+                        dialog.dismiss()
+                    }
                 }
 
                 dialogButtonCancel.setOnClickListener {

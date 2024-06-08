@@ -13,7 +13,7 @@ import kotlin.time.Duration
 
 data class CheckBoxItem(var text: String, var isChecked: Boolean, var isEnabled: Boolean = false, var duration: Duration) : Serializable
 
-class CheckBoxAdapter(val checkBoxItems: List<CheckBoxItem>) :
+class CheckBoxAdapter(val timeoutCheckBoxes: List<CheckBoxItem>) :
         RecyclerView.Adapter<CheckBoxAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -28,7 +28,7 @@ class CheckBoxAdapter(val checkBoxItems: List<CheckBoxItem>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder) {
-            val item = checkBoxItems[position].apply {
+            val item = timeoutCheckBoxes[position].apply {
                 checkBox.text = text
                 checkBox.isChecked = isChecked
                 checkBox.isEnabled = isEnabled
@@ -39,16 +39,16 @@ class CheckBoxAdapter(val checkBoxItems: List<CheckBoxItem>) :
 
                 item.isChecked = isChecked
 
-                checkBoxItems.filter { checkBoxItem -> checkBoxItem.isChecked }.apply {
+                timeoutCheckBoxes.filter { checkBoxItem -> checkBoxItem.isChecked }.apply {
                     when (size) {
-                        1    -> checkBoxItems.firstOrNull { checkBoxItem -> checkBoxItem.isChecked }?.apply {
+                        1    -> timeoutCheckBoxes.firstOrNull { checkBoxItem -> checkBoxItem.isChecked }?.apply {
                             isEnabled = false
-                            notifyItemChanged(checkBoxItems.indexOf(this))
+                            notifyItemChanged(timeoutCheckBoxes.indexOf(this))
                         }
 
-                        else -> checkBoxItems.firstOrNull { checkBoxItem -> !checkBoxItem.isEnabled }?.apply {
+                        else -> timeoutCheckBoxes.firstOrNull { checkBoxItem -> !checkBoxItem.isEnabled }?.apply {
                             isEnabled = true
-                            notifyItemChanged(checkBoxItems.indexOf(this))
+                            notifyItemChanged(timeoutCheckBoxes.indexOf(this))
                         }
                     }
                 }
@@ -56,5 +56,5 @@ class CheckBoxAdapter(val checkBoxItems: List<CheckBoxItem>) :
         }
     }
 
-    override fun getItemCount() = checkBoxItems.size
+    override fun getItemCount() = timeoutCheckBoxes.size
 }

@@ -314,15 +314,26 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         private val DEBOUNCE_DURATION = 1.seconds
 
         private fun debounce(status: ServiceStatus.Running, caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
-            val state = when (status.remaining) {
-                in 0.seconds..timeout - DEBOUNCE_DURATION / 2 -> STATE.STOP
-                else                                          -> {
-                    timeout = nextTimeout
-                    if (prevTimeout == lastTimeout) STATE.STOP else STATE.START
+            fun nextTimeout(): STATE {
+                timeout = nextTimeout
+                return when (prevTimeout) {
+                    lastTimeout -> STATE.STOP
+                    else        -> STATE.START
                 }
             }
 
+            val debouceOffset = timeout - DEBOUNCE_DURATION / 2
+            val state = when {
+                status.remaining <= debouceOffset -> STATE.STOP
+                else                              -> nextTimeout()
+            }
+
             toggleState(this, state)
+        }
+
+        private fun startWithoutDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
+            timeout = nextTimeout
+            toggleState(this, STATE.START)
         }
 
         private fun startWithDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
@@ -332,19 +343,19 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             }
         }
 
-        private fun startWithoutDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
-            timeout = nextTimeout
-            toggleState(this, STATE.START)
+        private fun startSingleTimeout(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
+            when (lastStatusUpdate) {
+                is ServiceStatus.Stopped -> startWithoutDebounce(this)
+                is ServiceStatus.Running -> toggleState(this, STATE.STOP)
+            }
         }
 
-        fun startNextTimeout(caffeinateApplication: CaffeinateApplication, debounce: Boolean = true) = when {
-            caffeinateApplication.timeoutCheckBoxes.size == 1 -> when (caffeinateApplication.lastStatusUpdate) {
-                is ServiceStatus.Stopped -> startWithoutDebounce(caffeinateApplication)
-                is ServiceStatus.Running -> toggleState(caffeinateApplication, STATE.STOP)
+        fun startNextTimeout(caffeinateApplication: CaffeinateApplication, debounce: Boolean = true) = caffeinateApplication.run {
+            when {
+                timeoutCheckBoxes.size == 1 -> startSingleTimeout(this)
+                debounce                    -> startWithDebounce(this)
+                else                        -> startWithoutDebounce(this)
             }
-
-            debounce                                          -> startWithDebounce(caffeinateApplication)
-            else                                              -> startWithoutDebounce(caffeinateApplication)
         }
 
         fun startIndefinitely(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {

@@ -14,10 +14,10 @@ import timber.log.Timber as Log
 class CaffeinateApplication : Application() {
 
     private val sharedPreferences by lazy { SharedPrefsManager(this) }
+    private val firstTimeout: Duration
+        get() = timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
     lateinit var timeoutCheckBoxes: MutableList<CheckBoxItem>
         private set
-    val firstTimeout: Duration
-        get() = timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
     val lastTimeout: Duration
         get() = timeoutCheckBoxes.last { checkBoxItem -> checkBoxItem.isChecked }.duration
     val prevTimeout: Duration
