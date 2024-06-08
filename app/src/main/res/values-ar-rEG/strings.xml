@@ -39,8 +39,6 @@
     <string name="dialog_button_cancel">الغى</string>
     <string name="notifications_permission_required">محتاج إذن الإشعارات</string>
     <string name="go_to_settings">روح ع الإعدادات</string>
-    <string name="choose_theme">اختار السيم</string>
-    <string name="choose_theme_dialog_icon">أيقونة صندوق اختيار السيم</string>
     <string name="app_theme_system_default">زى النظام</string>
     <string name="app_theme_system_light">فاتح</string>
     <string name="app_theme_system_dark">غامق</string>

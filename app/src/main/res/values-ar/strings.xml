@@ -39,8 +39,6 @@
     <string name="dialog_button_cancel">إلغاء</string>
     <string name="notifications_permission_required">إذن الإشعارات مطلوب</string>
     <string name="go_to_settings">الذَّهاب إلى الإعدادات</string>
-    <string name="choose_theme">اختر السمة</string>
-    <string name="choose_theme_dialog_icon">أيقونة مربع حوار اختبار السمة</string>
     <string name="app_theme_system_default">افتراضى النظام</string>
     <string name="app_theme_system_light">ساطع</string>
     <string name="app_theme_system_dark">داكن</string>
