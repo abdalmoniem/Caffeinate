@@ -40,8 +40,6 @@
     <string name="dialog_button_cancel">Cancel</string>
     <string name="notifications_permission_required">Notifications Permission Required</string>
     <string name="go_to_settings">Go to Settings</string>
-    <string name="choose_theme">Choose Theme</string>
-    <string name="choose_theme_dialog_icon">Choose Theme Dialog Icon</string>
     <string name="app_theme_system_default">System Default</string>
     <string name="app_theme_system_light">Light</string>
     <string name="app_theme_system_dark">Dark</string>
