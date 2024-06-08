@@ -1,1 +1,3 @@
-added publish_release.yml GitHub Workflow
+added haptic feedback to view click listeners
+
+also long clicking the caffeinate button in the app goes directly to infinite timeout

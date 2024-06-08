@@ -1,1 +1,1 @@
-New translations strings.xml (Arabic, Egypt)
+bump app version to 1.3.1

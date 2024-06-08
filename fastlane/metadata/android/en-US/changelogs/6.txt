@@ -1,3 +1,1 @@
-Merge pull request #7 from abdalmoniem/main_translated
-
-New Crowdin updates
+enabled generateLocaleConfig
