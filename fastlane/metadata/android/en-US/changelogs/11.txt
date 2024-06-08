@@ -1,5 +1,3 @@
-Fix Arabic, Egypt Translations
+bump app version to 1.3.2
 
-* New translations strings.xml (Arabic, Egypt)
-
-* New translations strings.xml (Arabic, Egypt)
+changed git hooks from pre-commit to pre-push
