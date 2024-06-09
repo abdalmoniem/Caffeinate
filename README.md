@@ -9,6 +9,7 @@
 [![Build App](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml)
 [![Publish Release](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release_on_tag.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate/badge)](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0beba9b2841c40aa982513161d5febe5)](https://app.codacy.com/gh/abdalmoniem/Caffeinate)
 [![Crowdin](https://badges.crowdin.net/caffeinate/localized.svg)](https://crowdin.com/project/caffeinate)
 [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/abdalmoniem/Caffeinate/total?logo=github&logoSize=auto&label=GitHub%20Downloads)](https://github.com/abdalmoniem/Caffeinate/releases/latest)
 [![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/com.hifnawy.caffeinate)](https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate)
