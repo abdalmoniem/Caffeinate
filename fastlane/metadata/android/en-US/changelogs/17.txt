@@ -1,3 +1,1 @@
-fix timeout selection dialog localization
-
-timeouts now show in the app's locale
+added debug variant

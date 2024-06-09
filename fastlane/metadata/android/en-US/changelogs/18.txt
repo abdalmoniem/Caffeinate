@@ -1,1 +1,3 @@
-added EG Arabic screenshots to fastlane
+fix timeout selection dialog localization
+
+timeouts now show in the app's locale
