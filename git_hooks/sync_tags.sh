@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# Arrays to hold commit hashes and tag names
+# arrays to hold commit hashes and tag names
 declare -a remote_commit_hashes
 declare -a remote_tag_names
 
-# Parse the output of git ls-remote --tags
-while IFS= read -r line; do
+# parse the output of git ls-remote --tags
+while IFS= read -r line
+do
   commit_hash=$(echo "$line" | awk '{print $1}')
   tag_name=$(echo "$line" | awk '{print $2}' | sed 's|refs/tags/||')
 
@@ -28,10 +29,12 @@ for i in "${!remote_tag_names[@]}"; do
 
   local_commit_hash=$(git log main --oneline --no-abbrev-commit --grep="^$remote_tag_commit_subject$" | grep -oE "^\w+\s+" | xargs)
 
-  if [ -n "$local_commit_hash" ]; then
+  if [ -n "$local_commit_hash" ]
+  then
     echo "local commit hash: $local_commit_hash"
 
-    if [ "$local_commit_hash" != "$remote_commit_hash" ]; then
+    if [ "$local_commit_hash" != "$remote_commit_hash" ]
+    then
       echo
       echo "deleting local tag: $remote_commit_tag..."
       git tag -d "$remote_commit_tag"
