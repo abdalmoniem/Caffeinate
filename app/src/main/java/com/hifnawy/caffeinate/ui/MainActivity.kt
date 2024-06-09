@@ -156,7 +156,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     override fun onRequestPermissionsResult(
             requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
-        if (requestCode == 93 && grantResults.isNotEmpty() && (grantResults[0] != PackageManager.PERMISSION_GRANTED)) {
+        if (requestCode == 93 && grantResults.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
             val snackbar = Snackbar.make(binding.root, getString(R.string.notifications_permission_required), Snackbar.LENGTH_INDEFINITE)
 
             snackbar.setAction(getString(R.string.go_to_settings)) {
@@ -316,7 +316,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
     private fun checkNotificationPermission(): Boolean {
         with(binding) {
-            if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                     notificationPermissionCard.setOnClickListener { requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 93) }
                     notificationPermissionTextView.text = getString(R.string.notifications_permission_not_granted)

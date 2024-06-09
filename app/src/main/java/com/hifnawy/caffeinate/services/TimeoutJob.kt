@@ -37,7 +37,7 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
 
             Timber.d("timeout initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
             val durationSequence = when {
-                isIndefinite -> (generateSequence(0L) { it + 1L })
+                isIndefinite -> generateSequence(0L) { it + 1L }
                 else         -> (duration.inWholeSeconds downTo 0).asSequence()
             }
 
