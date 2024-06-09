@@ -1,4 +1,5 @@
 import os
+import git
 import sys
 from ruamel.yaml import YAML
 
@@ -8,10 +9,11 @@ if len(sys.argv) != 2:
     exit(93)
 
 gitRepoTopLevelAbsPath = os.path.abspath(sys.argv[1])
+gitRepo = git.Repo(gitRepoTopLevelAbsPath)
 publishReleaseYamlPath = f'{gitRepoTopLevelAbsPath}/.github/workflows/publish_release.yml'
 
 # noinspection SpellCheckingInspection
-tags = os.popen('git tag -l --sort=-v:refname').read().strip().split('\n')
+tags = gitRepo.git.tag('-l', '--sort=-v:refname').strip().split('\n')
 
 yaml = YAML(typ='rt')
 # yaml.indent(mapping=2, offset=2)
