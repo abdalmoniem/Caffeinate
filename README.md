@@ -5,6 +5,7 @@
     <h1>💊 Caffeinate</h1>
     <p>Caffeinate Keeps the phone's screen awake for a configurable amount of time.</p>
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9810b7aee0ae45649925694d840a72cc)](https://app.codacy.com/gh/abdalmoniem/Caffeinate?utm_source=github.com&utm_medium=referral&utm_content=abdalmoniem/Caffeinate&utm_campaign=Badge_Grade)
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)
 [![Build App](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml)
 [![Publish Release](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release_on_tag.yml)
