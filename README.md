@@ -1,4 +1,4 @@
-<!--suppress CheckImageSize -->
+<!--suppress CheckImageSize, HtmlDeprecatedAttribute -->
 
 <div align=center>
     <img width="200" src="assets/icon_with_background.png" alt="Caffeinate Rounded Icon">
@@ -37,7 +37,7 @@ to change the device settings. It can be toggled at various places:
   after unlocking, default behaviour is that the `WakeLock` is released when the screen is locked
 * Multiple theming options `[light, dark, system default and material you]`
 
-<div style="text-align: center;">
+<div align=center>
     <br/>
     <img src="assets/Screenshot_2024-06-01-20-47-55-37.png" alt="Caffeinate Screenshot 01" width="200"/>
     <img src="assets/Screenshot_2024-06-01-20-48-00-67.png" alt="Caffeinate Screenshot 02" width="200"/>
