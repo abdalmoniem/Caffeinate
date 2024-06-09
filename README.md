@@ -1,10 +1,9 @@
 <!--suppress CheckImageSize -->
 
-<div style="text-align: center;">
+<div align=center>
     <img width="200" src="assets/icon_with_background.png" alt="Caffeinate Rounded Icon">
     <h1>💊 Caffeinate</h1>
     <p>Caffeinate Keeps the phone's screen awake for a configurable amount of time.</p>
-</div>
 
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)
 [![Build App](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml)
@@ -13,6 +12,7 @@
 [![Crowdin](https://badges.crowdin.net/caffeinate/localized.svg)](https://crowdin.com/project/caffeinate)
 [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/abdalmoniem/Caffeinate/total?logo=github&logoSize=auto&label=GitHub%20Downloads)](https://github.com/abdalmoniem/Caffeinate/releases/latest)
 [![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/com.hifnawy.caffeinate)](https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate)
+</div>
 
 # ❓ About
 
