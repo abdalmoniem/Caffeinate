@@ -34,6 +34,18 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     private val notificationManager by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
     private val screenLockReceiver by lazy { ScreenLockReceiver(caffeinateApplication) }
+    private val notificationChannelID by lazy { caffeinateApplication.localizedApplicationContext.getString(R.string.app_name) }
+    private val notificationChannel by lazy {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> notificationManager.getNotificationChannel(notificationChannelID)
+                                                              ?: let {
+                                                                  NotificationChannel(notificationChannelID, notificationChannelID, NotificationManager.IMPORTANCE_HIGH)
+                                                                      .also { channel -> notificationManager.createNotificationChannel(channel) }
+                                                              }
+
+            else                                           -> null
+        }
+    }
     private var isScreenLockReceiverRegistered = false
     private var isDimmingEnabled = false
     private var wakeLock: PowerManager.WakeLock? = null
@@ -41,19 +53,22 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIFICATION_ID, buildForegroundNotification(caffeinateApplication.lastStatusUpdate))
-        val serviceAction = ACTION.valueOfOrNull(intent?.action as String) ?: run {
-            Log.wtf("intent.action: ${intent.action} cannot be parsed to ${ACTION::class.qualifiedName}!")
-            ACTION.STOP
+
+        intent ?: return START_NOT_STICKY
+        val keepAwakeServiceAction = intent.action?.let { action -> KeepAwakeServiceAction.valueOfOrNull(action) } ?: let {
+            Log.wtf("intent.action: ${intent.action} cannot be parsed to ${KeepAwakeServiceAction::class.qualifiedName}!")
+            KeepAwakeServiceAction.STOP
         }
-        Log.d("serviceAction: $serviceAction")
+
+        Log.d("serviceAction: $keepAwakeServiceAction")
 
         isDimmingEnabled = sharedPreferences.isDimmingEnabled
 
-        when (serviceAction) {
-            ACTION.START                  -> startService()
-            ACTION.STOP                   -> stopSelf()
-            ACTION.CHANGE_TIMEOUT         -> startNextTimeout(caffeinateApplication, debounce = false)
-            ACTION.CHANGE_DIMMING_ENABLED -> sharedPreferences.isDimmingEnabled = !sharedPreferences.isDimmingEnabled
+        when (keepAwakeServiceAction) {
+            KeepAwakeServiceAction.START                  -> startService()
+            KeepAwakeServiceAction.STOP                   -> stopSelf()
+            KeepAwakeServiceAction.CHANGE_TIMEOUT         -> startNextTimeout(caffeinateApplication, debounce = false)
+            KeepAwakeServiceAction.CHANGE_DIMMING_ENABLED -> sharedPreferences.isDimmingEnabled = !sharedPreferences.isDimmingEnabled
         }
 
         return START_NOT_STICKY
@@ -150,28 +165,27 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
     private fun buildForegroundNotification(status: ServiceStatus): Notification {
         caffeinateApplication.run {
-            val channelIdStr = "${localizedApplicationContext.getString(R.string.app_name)} Status"
-            val notificationStopIntent = NotificationUtils.getPendingIntent(localizedApplicationContext, KeepAwakeService::class.java, ACTION.STOP.name, 0)
+            val notificationStopIntent = NotificationUtils.getPendingIntent(localizedApplicationContext, KeepAwakeService::class.java, KeepAwakeServiceAction.STOP.name, 0)
             val notificationActionNextTimeoutStr = localizedApplicationContext.getString(R.string.foreground_notification_action_next_timeout)
             val notificationActionDimmingEnabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_enable_dimming)
             val notificationActionDimmingDisabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_disable_dimming)
-            val notificationActionNextTimeout = NotificationUtils.getNotificationAction(
+            val notificationKeepAwakeServiceActionNextTimeout = NotificationUtils.getNotificationAction(
                     localizedApplicationContext,
                     KeepAwakeService::class.java,
-                    ACTION.CHANGE_TIMEOUT.name,
+                    KeepAwakeServiceAction.CHANGE_TIMEOUT.name,
                     R.drawable.baseline_coffee_24,
                     notificationActionNextTimeoutStr,
-                    1
+                    NotificationActionRequestCode.NEXT_TIMEOUT.ordinal
             )
-            val notificationActionToggleDimming = NotificationUtils.getNotificationAction(
+            val notificationKeepAwakeServiceActionToggleDimming = NotificationUtils.getNotificationAction(
                     this,
                     KeepAwakeService::class.java,
-                    ACTION.CHANGE_DIMMING_ENABLED.name,
+                    KeepAwakeServiceAction.CHANGE_DIMMING_ENABLED.name,
                     R.drawable.baseline_coffee_24,
                     if (isDimmingEnabled) notificationActionDimmingEnabledStr else notificationActionDimmingDisabledStr,
-                    2
+                    NotificationActionRequestCode.TOGGLE_DIMMING.ordinal
             )
-            val notificationBuilder = NotificationCompat.Builder(localizedApplicationContext, channelIdStr)
+            val notificationBuilder = NotificationCompat.Builder(localizedApplicationContext, notificationChannelID)
             var durationStr: String? = null
             var contentTitle: String? = null
 
@@ -186,22 +200,17 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                 .setSilent(true)
                 .setOngoing(true)
                 .setSubText(durationStr)
-                .setContentText(localizedApplicationContext.getString(R.string.foreground_notification_tap_to_turn_off))
-                .setWhen(System.currentTimeMillis())
-                .setContentIntent(notificationStopIntent)
-                .addAction(notificationActionNextTimeout)
-                .addAction(notificationActionToggleDimming)
-                .setSmallIcon(R.drawable.baseline_coffee_24)
-                .setContentInfo(localizedApplicationContext.getString(R.string.app_name))
-                .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
-                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
                 .setContentTitle(contentTitle)
+                .setContentIntent(notificationStopIntent)
+                .setSmallIcon(R.drawable.baseline_coffee_24)
+                .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
+                .addAction(notificationKeepAwakeServiceActionNextTimeout)
+                .addAction(notificationKeepAwakeServiceActionToggleDimming)
+                .setContentInfo(localizedApplicationContext.getString(R.string.app_name))
+                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+                .setContentText(localizedApplicationContext.getString(R.string.foreground_notification_tap_to_turn_off))
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(channelIdStr, channelIdStr, NotificationManager.IMPORTANCE_HIGH)
-                notificationBuilder.setChannelId(channel.id)
-                notificationManager.createNotificationChannel(channel)
-            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) notificationChannel?.let { channel -> notificationBuilder.setChannelId(channel.id) }
 
             return notificationBuilder.build()
         }
@@ -293,13 +302,13 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     }
 
     companion object {
-        enum class STATE {
+        enum class KeepAwakeServiceState {
             START,
             STOP,
             TOGGLE
         }
 
-        private enum class ACTION {
+        private enum class KeepAwakeServiceAction {
             START,
             STOP,
             CHANGE_TIMEOUT,
@@ -311,34 +320,39 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             }
         }
 
+        private enum class NotificationActionRequestCode {
+            NEXT_TIMEOUT,
+            TOGGLE_DIMMING
+        }
+
         private val DEBOUNCE_DURATION = 1.seconds
 
         private fun debounce(status: ServiceStatus.Running, caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
-            fun nextTimeout(): STATE {
+            fun nextTimeout(): KeepAwakeServiceState {
                 timeout = nextTimeout
                 return when (prevTimeout) {
-                    lastTimeout -> STATE.STOP
-                    else        -> STATE.START
+                    lastTimeout -> KeepAwakeServiceState.STOP
+                    else        -> KeepAwakeServiceState.START
                 }
             }
 
-            val debouceOffset = timeout - DEBOUNCE_DURATION / 2
-            val state = when {
-                status.remaining <= debouceOffset -> STATE.STOP
-                else                              -> nextTimeout()
+            val debounceOffset = timeout - DEBOUNCE_DURATION / 2
+            val keepAwakeServiceState = when {
+                status.remaining <= debounceOffset -> KeepAwakeServiceState.STOP
+                else                               -> nextTimeout()
             }
 
-            toggleState(this, state)
+            toggleState(this, keepAwakeServiceState)
         }
 
         private fun startWithoutDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
             timeout = nextTimeout
-            toggleState(this, STATE.START)
+            toggleState(this, KeepAwakeServiceState.START)
         }
 
         private fun startWithDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
             when (val status = lastStatusUpdate) {
-                is ServiceStatus.Stopped -> toggleState(this, STATE.START)
+                is ServiceStatus.Stopped -> toggleState(this, KeepAwakeServiceState.START)
                 is ServiceStatus.Running -> debounce(status, this)
             }
         }
@@ -346,7 +360,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         private fun startSingleTimeout(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
             when (lastStatusUpdate) {
                 is ServiceStatus.Stopped -> startWithoutDebounce(this)
-                is ServiceStatus.Running -> toggleState(this, STATE.STOP)
+                is ServiceStatus.Running -> toggleState(this, KeepAwakeServiceState.STOP)
             }
         }
 
@@ -360,17 +374,17 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
         fun startIndefinitely(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
             timeout = Duration.INFINITE
-            toggleState(this, STATE.START)
+            toggleState(this, KeepAwakeServiceState.START)
         }
 
-        fun toggleState(caffeinateApplication: CaffeinateApplication, newState: STATE) {
-            Log.d("newState: $newState")
+        fun toggleState(caffeinateApplication: CaffeinateApplication, newKeepAwakeServiceState: KeepAwakeServiceState) {
+            Log.d("newState: $newKeepAwakeServiceState")
 
             caffeinateApplication.apply {
-                val start = when (newState) {
-                    STATE.START  -> true
-                    STATE.STOP   -> false
-                    STATE.TOGGLE -> lastStatusUpdate is ServiceStatus.Stopped
+                val start = when (newKeepAwakeServiceState) {
+                    KeepAwakeServiceState.START  -> true
+                    KeepAwakeServiceState.STOP   -> false
+                    KeepAwakeServiceState.TOGGLE -> lastStatusUpdate is ServiceStatus.Stopped
                 }
                 val status = when {
                     start -> ServiceStatus.Running(timeout)
@@ -380,8 +394,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                 lastStatusUpdate = status
                 val intent = Intent(localizedApplicationContext, KeepAwakeService::class.java).apply {
                     action = when {
-                        start -> ACTION.START.name
-                        else  -> ACTION.STOP.name
+                        start -> KeepAwakeServiceAction.START.name
+                        else  -> KeepAwakeServiceAction.STOP.name
                     }
                 }
 

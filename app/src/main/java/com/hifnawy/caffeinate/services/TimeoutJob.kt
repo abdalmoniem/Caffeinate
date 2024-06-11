@@ -2,6 +2,7 @@ package com.hifnawy.caffeinate.services
 
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.ServiceStatus
+import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,12 +62,12 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
                     Timber.d("${currentTime}: duration: ${remaining.toFormattedTime()}, status: $lastStatusUpdate, isIndefinite: $isIndefinite")
 
                     when (remaining) {
-                        0.seconds -> KeepAwakeService.toggleState(this, KeepAwakeService.Companion.STATE.STOP)
+                        0.seconds -> KeepAwakeService.toggleState(this, KeepAwakeServiceState.STOP)
                         else      -> lastStatusUpdate = ServiceStatus.Running(remaining)
                     }
                 }
 
-                is ServiceStatus.Stopped -> KeepAwakeService.toggleState(this, KeepAwakeService.Companion.STATE.START)
+                is ServiceStatus.Stopped -> KeepAwakeService.toggleState(this, KeepAwakeServiceState.START)
             }
         }
     }
