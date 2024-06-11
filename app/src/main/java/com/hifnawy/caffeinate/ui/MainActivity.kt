@@ -37,6 +37,7 @@ import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
 
+// This is the only activity in the application
 class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedListener, ServiceStatusObserver {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
