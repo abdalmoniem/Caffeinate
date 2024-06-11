@@ -1,0 +1,3 @@
+optimize notification channel creation
+
+previously the notification manager was creating a notification channel every time the buildForegroundNotification function was called, now the channel is only created when the KeepAwakeService is started and the android API is 26 and above
