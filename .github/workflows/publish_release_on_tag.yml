@@ -65,7 +65,7 @@ jobs:
           echo "COMMIT_MESSAGE=$(git show -s --format=%B)"
           {
               echo 'COMMIT_MESSAGE<<EOF'
-              git show -s --format=%B
+              git show -s --format=%B | sed -e 's/Change-Id:\s*\w\+//' | sed -e 's/Signed-off-by:\s*.*//' | sed ':a;N;$!ba;s/\n*$//'
               echo EOF
           } >> $GITHUB_ENV
 
