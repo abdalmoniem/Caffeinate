@@ -65,6 +65,7 @@ For now, you can download the most recent version of Caffeinate
 from [GitHub Releases](https://github.com/abdalmoniem/Caffeinate/releases/latest).
 
 [<img alt="Download from GitHub" height="80" src="assets/badge_github.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.hifnawy.caffeinate/)
 [<img alt="Download from GitHub" height="80" src="assets/badge_izzy_on_droid.png"/>](https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate)
 
 ## 🈵 Translations
