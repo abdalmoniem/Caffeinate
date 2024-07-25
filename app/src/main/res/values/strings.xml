@@ -21,7 +21,7 @@
     <string name="allow_dimming_on">Allow Dimming Enabled</string>
     <string name="allow_dimming_off">Allow Dimming Disabled</string>
     <string name="allow_while_locked_pref">Allow While Locked</string>
-    <string name="allow_while_locked_pref_description">Allow App to keep running while the screen is locked</string>
+    <string name="allow_while_locked_pref_description">Allow App to keep running while the screen is locked.</string>
     <string name="allow_while_locked_off">Allow While Locked Enabled</string>
     <string name="allow_while_locked_on">Allow While Locked Disabled</string>
     <string name="timeouts_pref">Timeouts</string>
