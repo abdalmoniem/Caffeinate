@@ -167,8 +167,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         caffeinateApplication.run {
             val notificationStopIntent = NotificationUtils.getPendingIntent(localizedApplicationContext, KeepAwakeService::class.java, KeepAwakeServiceAction.STOP.name, 0)
             val notificationActionNextTimeoutStr = localizedApplicationContext.getString(R.string.foreground_notification_action_next_timeout)
-            val notificationActionDimmingEnabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_enable_dimming)
-            val notificationActionDimmingDisabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_disable_dimming)
+            val notificationActionDimmingEnabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_disable_dimming)
+            val notificationActionDimmingDisabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_enable_dimming)
             val notificationKeepAwakeServiceActionNextTimeout = NotificationUtils.getNotificationAction(
                     localizedApplicationContext,
                     KeepAwakeService::class.java,
