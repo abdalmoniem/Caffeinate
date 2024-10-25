@@ -22,22 +22,35 @@ android {
     }
     val localPropertiesFile = rootProject.file("local.properties")
     var isDebuggingEnabled = false
+    var isSigningConfigEnabled = false
 
     if (localPropertiesFile.exists()) {
         val keystoreProperties = Properties()
         keystoreProperties.load(FileInputStream(localPropertiesFile))
 
-        signingConfigs {
-            println("keystore: ${File(keystoreProperties["storeFile"] as String).absolutePath}")
-            create("release") {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = File(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
+        val signingProperties = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+
+        isSigningConfigEnabled =
+            signingProperties.all { property -> property in keystoreProperties.keys }
+
+        if (!isSigningConfigEnabled) {
+            project.logger.warn("WARNING: signing config not found, add signing config in local.properties")
+        } else {
+            val keyStoreFile = File(keystoreProperties["storeFile"] as String)
+            signingConfigs {
+                project.logger.lifecycle("keystore: ${keyStoreFile.absolutePath}")
+
+                create("release") {
+                    keyAlias = keystoreProperties["keyAlias"] as String
+                    keyPassword = keystoreProperties["keyPassword"] as String
+                    storeFile = keyStoreFile
+                    storePassword = keystoreProperties["storePassword"] as String
+                }
             }
         }
 
-        isDebuggingEnabled = keystoreProperties.getProperty("isDebuggingEnabled")?.toBoolean() ?: false
+        isDebuggingEnabled =
+            keystoreProperties.getProperty("isDebuggingEnabled")?.toBoolean() ?: false
     }
 
     buildTypes {
@@ -46,18 +59,30 @@ android {
             isShrinkResources = false
             isDebuggable = isDebuggingEnabled
 
-            println("release isDebuggable: $isDebuggingEnabled")
+            project.logger.lifecycle("release isDebuggable: $isDebuggingEnabled")
 
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
 
-            signingConfig = signingConfigs.findByName("release") ?: error("release signing config not found, add signing config in local.properties")
+            if (isSigningConfigEnabled) {
+                signingConfig = signingConfigs.findByName("release")
+                    ?: error("release signing config not found, add signing config in local.properties")
+
+            } else {
+                project.logger.warn("WARNING: release buildType is not signed, add signing config in local.properties to enable signing.")
+            }
         }
 
         debug {
             isMinifyEnabled = false
             isShrinkResources = false
 
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
 
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-dev"
@@ -68,8 +93,11 @@ android {
         val variant = this
         variant.outputs.all {
             this as BaseVariantOutputImpl
-            val applicationId = variant.buildType.applicationIdSuffix?.let { "${variant.applicationId}.$it" } ?: variant.applicationId
-            val apkName = "${applicationId}_${variant.buildType.name}_v${android.defaultConfig.versionName}.apk"
+            val applicationId =
+                variant.buildType.applicationIdSuffix?.let { "${variant.applicationId}.$it" }
+                    ?: variant.applicationId
+            val apkName =
+                "${applicationId}_${variant.buildType.name}_v${android.defaultConfig.versionName}.apk"
 
             outputFileName = apkName
         }
