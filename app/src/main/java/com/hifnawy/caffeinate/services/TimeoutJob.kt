@@ -10,7 +10,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -19,11 +18,15 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
+import timber.log.Timber as Log
 
 class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : CoroutineScope {
 
     private val currentTime: String
-        get() = SimpleDateFormat("hh:mm:ss.SS a", Locale.ENGLISH).format(Date(System.currentTimeMillis()))
+        get() = SimpleDateFormat(
+            "hh:mm:ss.SS a",
+            Locale.ENGLISH
+        ).format(Date(System.currentTimeMillis()))
     private var job = Job()
     override val coroutineContext
         get() = Dispatchers.Default + job
@@ -36,16 +39,16 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
         launch {
             val isIndefinite = duration == Duration.INFINITE
 
-            Timber.d("timeout initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
+            Log.d("timeout initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
             val durationSequence = when {
                 isIndefinite -> generateSequence(0L) { it + 1L }
-                else         -> (duration.inWholeSeconds downTo 0).asSequence()
+                else -> (duration.inWholeSeconds downTo 0).asSequence()
             }
 
             durationSequence.forEach {
                 when {
                     isIndefinite -> update(Duration.INFINITE)
-                    else         -> update(it.toDuration(DurationUnit.SECONDS))
+                    else -> update(it.toDuration(DurationUnit.SECONDS))
                 }
 
                 delay(1.seconds.inWholeMilliseconds)
@@ -59,15 +62,18 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
         caffeinateApplication.apply {
             when (lastStatusUpdate) {
                 is ServiceStatus.Running -> {
-                    Timber.d("${currentTime}: duration: ${remaining.toFormattedTime()}, status: $lastStatusUpdate, isIndefinite: $isIndefinite")
+                    Log.d("${currentTime}: duration: ${remaining.toFormattedTime()}, status: $lastStatusUpdate, isIndefinite: $isIndefinite")
 
                     when (remaining) {
                         0.seconds -> KeepAwakeService.toggleState(this, KeepAwakeServiceState.STOP)
-                        else      -> lastStatusUpdate = ServiceStatus.Running(remaining)
+                        else -> lastStatusUpdate = ServiceStatus.Running(remaining)
                     }
                 }
 
-                is ServiceStatus.Stopped -> KeepAwakeService.toggleState(this, KeepAwakeServiceState.START)
+                is ServiceStatus.Stopped -> KeepAwakeService.toggleState(
+                    this,
+                    KeepAwakeServiceState.START
+                )
             }
         }
     }

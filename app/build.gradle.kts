@@ -31,19 +31,19 @@ android {
         val signingProperties = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
 
         isSigningConfigEnabled =
-            signingProperties.all { property -> property in keystoreProperties.keys }
+            signingProperties.all { property -> property in keystoreProperties.keys } &&
+                    rootProject.file(keystoreProperties["storeFile"] as String).exists()
 
         if (!isSigningConfigEnabled) {
             project.logger.warn("WARNING: signing config not found, add signing config in local.properties")
         } else {
-            val keyStoreFile = File(keystoreProperties["storeFile"] as String)
             signingConfigs {
-                project.logger.lifecycle("keystore: ${keyStoreFile.absolutePath}")
+                project.logger.lifecycle("keystore: ${rootProject.file(keystoreProperties["storeFile"] as String).absolutePath}")
 
                 create("release") {
                     keyAlias = keystoreProperties["keyAlias"] as String
                     keyPassword = keystoreProperties["keyPassword"] as String
-                    storeFile = keyStoreFile
+                    storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
                     storePassword = keystoreProperties["storePassword"] as String
                 }
             }

@@ -5,12 +5,13 @@ import android.content.Context
 import android.content.Intent
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
-import timber.log.Timber
+import timber.log.Timber as Log
 
-class ScreenLockReceiver(private val caffeinateApplication: CaffeinateApplication) : BroadcastReceiver() {
+class ScreenLockReceiver(private val caffeinateApplication: CaffeinateApplication) :
+    BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Timber.d("Screen Locked, Stopping...")
+        Log.d("Screen Locked, Stopping...")
         KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STOP)
     }
 }
