@@ -1,0 +1,3 @@
+fix WakeLock not working properly on some devices
+
+PowerManager.ACQUIRE_CAUSES_WAKEUP wakeLockLevel was needed to insure the device kept unlocked while the WakeLock was held
