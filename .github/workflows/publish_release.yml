@@ -8,6 +8,7 @@ on:
         required: true
         type: choice
         options:
+          - v1.5.0
           - v1.4.5
           - v1.4.0
           - v1.3.8

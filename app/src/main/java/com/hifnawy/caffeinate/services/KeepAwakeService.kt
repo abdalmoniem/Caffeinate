@@ -236,7 +236,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                 Log.d("using ${PowerManager::SCREEN_BRIGHT_WAKE_LOCK.name}")
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK
             }
-        }
+        } or PowerManager.ACQUIRE_CAUSES_WAKEUP
 
         wakeLock = powerManager.newWakeLock(wakeLockLevel, "${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)}:wakelockTag").apply {
             Log.d("acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingAllowed: $isDimmingEnabled...")

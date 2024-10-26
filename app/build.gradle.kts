@@ -15,8 +15,8 @@ android {
         applicationId = "com.hifnawy.caffeinate"
         minSdk = 24
         targetSdk = 34
-        versionCode = 19
-        versionName = "1.4.5"
+        versionCode = 20
+        versionName = "1.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
