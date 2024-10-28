@@ -1,4 +1,5 @@
 name: Build App
+run-name: ${{ github.workflow }} ${{ github.event.repository.updated_at}}
 
 on:
   workflow_dispatch:
