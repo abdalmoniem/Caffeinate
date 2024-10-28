@@ -33,6 +33,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
     private val notificationManager by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
+    private val localeChangeReceiver by lazy { LocaleChangeReceiver(caffeinateApplication) }
     private val screenLockReceiver by lazy { ScreenLockReceiver(caffeinateApplication) }
     private val notificationChannelID by lazy { caffeinateApplication.localizedApplicationContext.getString(R.string.app_name) }
     private val notificationChannel by lazy {
@@ -46,6 +47,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             else                                           -> null
         }
     }
+    private var isLocaleChangeReceiverRegistered = false
     private var isScreenLockReceiverRegistered = false
     private var isDimmingEnabled = false
     private var wakeLock: PowerManager.WakeLock? = null
@@ -133,9 +135,35 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         caffeinateApplication.sharedPrefsObservers.addObserver(caffeinateApplication::sharedPrefsObservers.name, this)
         Log.d("${this::class.simpleName} added to ${CaffeinateApplication::sharedPrefsObservers.name}!")
 
-
+        registerLocaleChangeReceiver()
         if (!sharedPreferences.isWhileLockedEnabled) registerScreenLockReceiver()
+
         startCaffeine(status.remaining)
+    }
+
+    private fun registerLocaleChangeReceiver() {
+        if (!isLocaleChangeReceiverRegistered) {
+            Log.d("registering ${this::localeChangeReceiver.name}...")
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(localeChangeReceiver, IntentFilter(Intent.ACTION_LOCALE_CHANGED), RECEIVER_EXPORTED)
+            } else {
+                registerReceiver(localeChangeReceiver, IntentFilter(Intent.ACTION_LOCALE_CHANGED))
+            }
+
+            isLocaleChangeReceiverRegistered = true
+
+            Log.d("${this::localeChangeReceiver.name} registered!")
+        }
+    }
+
+    private fun unregisterLocaleChangeReceiver() {
+        if (isLocaleChangeReceiverRegistered) {
+            Log.d("unregistering ${this::localeChangeReceiver.name}...")
+            unregisterReceiver(localeChangeReceiver)
+            isLocaleChangeReceiverRegistered = false
+            Log.d("${this::localeChangeReceiver.name} unregistered!")
+        }
     }
 
     private fun registerScreenLockReceiver() {
@@ -283,6 +311,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                 Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} cancelled!")
             }
 
+            unregisterLocaleChangeReceiver()
             unregisterScreenLockReceiver()
 
             Log.d("${::stopCaffeine.name}: removing from ${CaffeinateApplication::keepAwakeServiceObservers.name}...")

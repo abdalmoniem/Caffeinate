@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.ui.CheckBoxItem
+import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableList
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableList
@@ -53,10 +54,14 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         get() = when {
             sharedPreferences.contains(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name) -> sharedPreferences.getSerializableList<MutableList<CheckBoxItem>>(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name)
             else                                                                 -> timeouts.map { timeout ->
-                CheckBoxItem(text = timeout.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext), isChecked = true, isEnabled = true, duration = timeout)
-            }.toMutableList()
-        }
-        set(value) = sharedPreferences.edit().putSerializableList(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name, value).apply()
+                CheckBoxItem(text = timeout.toFormattedTime(), isChecked = true, isEnabled = true, duration = timeout)
+            }
+        }.map { checkBoxItem ->
+            checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext))
+        }.toMutableList()
+        set(value) = sharedPreferences.edit().putSerializableList(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name, value.map { checkBoxItem ->
+            checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext))
+        }).apply()
 
     private fun notifySharedPrefsObservers(notifyCallback: (observer: SharedPrefsChangedListener) -> Unit) = caffeinateApplication.sharedPrefsObservers.forEach(notifyCallback)
 

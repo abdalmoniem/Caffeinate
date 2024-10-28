@@ -104,10 +104,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
     override fun onResume() {
         super.onResume()
-        if (isAllPermissionsGranted()) onIsAllPermissionsGrantedChanged(true)
 
         caffeinateApplication.run {
             applyLocaleConfiguration()
+
+            if (isAllPermissionsGranted()) onIsAllPermissionsGrantedChanged(true)
 
             keepAwakeServiceObservers.addObserver(::keepAwakeServiceObservers.name, this@MainActivity)
             sharedPrefsObservers.addObserver(::sharedPrefsObservers.name, this@MainActivity)

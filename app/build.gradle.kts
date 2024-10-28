@@ -15,8 +15,8 @@ android {
         applicationId = "com.hifnawy.caffeinate"
         minSdk = 24
         targetSdk = 34
-        versionCode = 20
-        versionName = "1.5.0"
+        versionCode = 21
+        versionName = "1.5.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -94,8 +94,7 @@ android {
         variant.outputs.all {
             this as BaseVariantOutputImpl
             val applicationId =
-                variant.buildType.applicationIdSuffix?.let { "${variant.applicationId}.$it" }
-                    ?: variant.applicationId
+                if (variant.buildType.name == "release") "$applicationId.release" else applicationId
             val apkName =
                 "${applicationId}_${variant.buildType.name}_v${android.defaultConfig.versionName}.apk"
 

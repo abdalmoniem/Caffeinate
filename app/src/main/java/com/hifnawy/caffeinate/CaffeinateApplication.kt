@@ -16,8 +16,6 @@ class CaffeinateApplication : Application() {
     private val sharedPreferences by lazy { SharedPrefsManager(this) }
     private val firstTimeout: Duration
         get() = timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
-    lateinit var timeoutCheckBoxes: MutableList<CheckBoxItem>
-        private set
     val lastTimeout: Duration
         get() = timeoutCheckBoxes.last { checkBoxItem -> checkBoxItem.isChecked }.duration
     val prevTimeout: Duration
@@ -49,6 +47,8 @@ class CaffeinateApplication : Application() {
 
             notifyKeepAwakeServiceObservers(status)
         }
+    lateinit var timeoutCheckBoxes: MutableList<CheckBoxItem>
+        private set
     lateinit var localizedApplicationContext: Context
         private set
 
@@ -76,18 +76,19 @@ class CaffeinateApplication : Application() {
         @Suppress("AppBundleLocaleChanges")
         configuration.setLocale(locale)
         localizedApplicationContext = createConfigurationContext(configuration)
+
+        timeoutCheckBoxes = sharedPreferences.timeoutCheckBoxes
     }
 
     override fun onCreate() {
         super.onCreate()
 
-        applyLocaleConfiguration()
-
         if (BuildConfig.DEBUG) {
             Log.plant(Log.DebugTree())
         }
 
-        timeoutCheckBoxes = sharedPreferences.timeoutCheckBoxes
+        applyLocaleConfiguration()
+
         timeout = firstTimeout
     }
 
