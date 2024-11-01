@@ -9,10 +9,10 @@ import timber.log.Timber as Log
 /**
  * A BroadcastReceiver that listens for the ACTION_LOCALE_CHANGED intent, which is broadcast whenever the system locale changes.
  *
- * @param caffeinateApplication [CaffeinateApplication] The application instance.
- *
  * @constructor Creates an instance of [LocaleChangeReceiver] with the provided [CaffeinateApplication].
  *
+ * @param caffeinateApplication [CaffeinateApplication] The application instance.
+ * 
  * @author AbdAlMoniem AlHifnawy
  *
  * @see CaffeinateApplication

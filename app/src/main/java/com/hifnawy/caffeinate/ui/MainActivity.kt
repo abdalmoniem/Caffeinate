@@ -22,6 +22,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.animation.addListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.stephenvinouze.materialnumberpickercore.MaterialNumberPicker
 import com.google.android.material.color.DynamicColors
@@ -52,6 +53,8 @@ import kotlin.time.Duration.Companion.seconds
  * The main activity of the application, which is responsible for displaying the list of timeouts that can be used to keep the screen on. It also
  * handles the logic of starting and stopping the [KeepAwakeService].
  *
+ * @author AbdAlMoniem AlHifnawy
+ *
  * @see KeepAwakeService
  * @see SharedPrefsManager
  */
@@ -77,7 +80,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Called when the activity is starting.
      *
-     * @param savedInstanceState If the activity is being re-initialized after
+     * @param savedInstanceState [Bundle] If the activity is being re-initialized after
      *     previously being shut down then this Bundle contains the data it most
      *     recently supplied in [onSaveInstanceState].
      *     Note: Otherwise it is null.
@@ -171,7 +174,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Called when there is a change in the permission state indicating whether all necessary permissions have been granted.
      *
-     * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
+     * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
      */
     override fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean) {
         binding.caffeineButton.isEnabled = isAllPermissionsGranted
@@ -188,7 +191,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Called when the user has changed the preference of whether the screen should be dimmed while it is being kept awake.
      *
-     * @param isDimmingEnabled true if the screen should be dimmed while it is being kept awake, false otherwise.
+     * @param isDimmingEnabled [Boolean] `true` if the screen should be dimmed while it is being kept awake, `false` otherwise.
      */
     override fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean) {
         binding.allowDimmingSwitch.isChecked = isDimmingEnabled
@@ -197,7 +200,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Called when the user has changed the preference of whether the keep awake screen should be enabled while the screen is locked.
      *
-     * @param isWhileLockedEnabled true if the keep awake screen should be enabled while the screen is locked, false otherwise.
+     * @param isWhileLockedEnabled [Boolean] `true` if the keep awake screen should be enabled while the screen is locked, `false` otherwise.
      */
     override fun onIsWhileLockedEnabledChanged(isWhileLockedEnabled: Boolean) {
         binding.allowWhileLockedSwitch.isChecked = isWhileLockedEnabled
@@ -206,7 +209,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Updates the UI to match the given service status.
      *
-     * @param status the service status to update the UI for
+     * @param status [ServiceStatus] the service status to update the UI for
      */
     override fun onServiceStatusUpdate(status: ServiceStatus) {
         with(binding) {
@@ -229,10 +232,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
      *
      * This method is invoked for every call on [requestPermissions(String[], int)][requestPermissions].
      *
-     * @param requestCode  The request code passed in [requestPermissions(String[], int)][requestPermissions].
-     * @param permissions  The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions which is either [PERMISSION_GRANTED][PackageManager.PERMISSION_GRANTED]
-     * or [PERMISSION_DENIED][PackageManager.PERMISSION_DENIED]. Never null.
+     * @param requestCode [Int] The request code passed in [requestPermissions(String[], int)][requestPermissions].
+     * @param permissions [Array] The requested permissions. Never null.
+     * @param grantResults [IntArray] The grant results for the corresponding permissions which is either
+     * [PERMISSION_GRANTED][PackageManager.PERMISSION_GRANTED] or [PERMISSION_DENIED][PackageManager.PERMISSION_DENIED]. Never null.
      */
     override fun onRequestPermissionsResult(
             requestCode: Int, permissions: Array<out String>, grantResults: IntArray
@@ -290,7 +293,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
      * and [allowWhileLockedSwitch][com.google.android.material.materialswitch.MaterialSwitch] based on whether the user has granted all necessary
      * permissions.
      *
-     * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
+     * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
      */
     private fun changeAllowWhileLockedPreferences(isAllPermissionsGranted: Boolean) {
         with(binding) {
@@ -313,7 +316,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
      * [allowDimmingSubTextTextView][android.widget.TextView], and [allowDimmingSwitch][com.google.android.material.materialswitch.MaterialSwitch]
      * based on whether the user has granted all necessary permissions.
      *
-     * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
+     * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
      */
     private fun changeAllowDimmingPreferences(isAllPermissionsGranted: Boolean) {
         with(binding) {
@@ -336,7 +339,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
      * [timeoutChoiceSubTextTextView][android.widget.TextView], and [timeoutChoiceButton][com.google.android.material.materialswitch.MaterialSwitch]
      * based on whether the user has granted all necessary permissions.
      *
-     * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
+     * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
      */
     private fun changeTimeoutsPreferences(isAllPermissionsGranted: Boolean) {
         with(binding) {
@@ -360,7 +363,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Returns true if all necessary permissions are granted.
      *
-     * @return true if all permissions are granted, false otherwise.
+     * @return [Boolean] `true` if all permissions are granted, `false` otherwise.
      */
     @SuppressLint("BatteryLife")
     private fun isAllPermissionsGranted(): Boolean {
@@ -392,7 +395,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Checks if the battery optimization is granted.
      *
-     * @return true if the battery optimization is granted, false otherwise.
+     * @return [Boolean] `true` if the battery optimization is granted, `false` otherwise.
      */
     @SuppressLint("BatteryLife")
     private fun checkBatteryOptimization(): Boolean {
@@ -420,7 +423,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Checks if the background optimization is granted.
      *
-     * @return true if the background optimization is granted, false otherwise.
+     * @return [Boolean] `true` if the background optimization is granted, `false` otherwise.
      */
     private fun checkBackgroundOptimization(): Boolean {
         with(binding) {
@@ -446,7 +449,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Checks if the app has permission to post notifications.
      *
-     * @return true if permission is granted, false otherwise
+     * @return [Boolean] `true` if permission is granted, `false` otherwise
      */
     private fun checkNotificationPermission(): Boolean {
         with(binding) {
@@ -586,7 +589,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             }
 
             with(dialogBinding) {
-                val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes)
+                val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes) { checkBoxItems ->
+                    checkBoxItems.isEmpty().let { isEmpty ->
+                        dialogButtonOk.isEnabled = !isEmpty
+                        dialogButtonRemoveTimeout.isEnabled = !isEmpty
+                    }
+                }
 
                 timeoutsRecyclerView.layoutManager = LinearLayoutManager(root.context)
                 timeoutsRecyclerView.adapter = checkBoxAdapter
@@ -608,16 +616,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
                 dialogButtonRemoveTimeout.setOnClickListener { buttonView ->
                     buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                    val sizeBeforeDeletion = checkBoxAdapter.checkBoxItems.size
 
                     checkBoxAdapter.checkBoxItems
                         .filter { checkBoxItem -> checkBoxItem.isChecked }
-                        .apply {
-                            if (sizeBeforeDeletion == size) {
-                                dialogButtonOk.isEnabled = false
-                                dialogButtonRemoveTimeout.isEnabled = false
-                            }
-                        }
                         .forEach { checkBoxItem -> checkBoxAdapter.removeCheckBox(checkBoxItem) }
                 }
 
@@ -664,7 +665,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Shows a dialog to the user to let them choose a custom timeout.
      *
-     * @param valueSetCallback a callback that will be called when the user sets a value; the callback will be passed the number of hours, minutes and
+     * @param valueSetCallback [(timeout: Duration) -> Unit][valueSetCallback] a callback that will be called when the user sets a value; the callback
+     * will be passed the number of hours, minutes and
      * seconds that the user has chosen
      */
     private fun showSetCustomTimeoutDialog(valueSetCallback: (timeout: Duration) -> Unit) {
@@ -700,12 +702,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                         secondsNumberPicker.setOnValueChangedListener(this)
                     }
 
-                hoursNumberPicker.animateValues(Random.nextInt(hoursNumberPicker.minValue, hoursNumberPicker.maxValue))
-                minutesNumberPicker.animateValues(Random.nextInt(minutesNumberPicker.minValue, minutesNumberPicker.maxValue))
-                secondsNumberPicker.animateValues(Random.nextInt(secondsNumberPicker.minValue, secondsNumberPicker.maxValue))
-                // hoursNumberPicker.animateValues(maxTimeout?.inWholeHours?.toInt())
-                // minutesNumberPicker.animateValues(maxTimeout?.inWholeMinutes?.rem(60)?.toInt())
-                // secondsNumberPicker.animateValues(maxTimeout?.inWholeSeconds?.rem(60)?.toInt())
+                hoursNumberPicker.animateRandom(dependentView = dialogButtonRandomTimeout)
+                minutesNumberPicker.animateRandom(dependentView = dialogButtonRandomTimeout)
+                secondsNumberPicker.animateRandom(dependentView = dialogButtonRandomTimeout)
+
                 dialogButtonOk.setOnClickListener { buttonView ->
                     buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                     val timeout = when {
@@ -721,6 +721,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                     buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                     dialog.dismiss()
                 }
+
+                dialogButtonRandomTimeout.setOnClickListener { buttonView ->
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+
+                    hoursNumberPicker.animateFrom(hoursNumberPicker.value, dependentView = dialogButtonRandomTimeout)
+                    minutesNumberPicker.animateFrom(minutesNumberPicker.value, dependentView = dialogButtonRandomTimeout)
+                    secondsNumberPicker.animateFrom(secondsNumberPicker.value, dependentView = dialogButtonRandomTimeout)
+                }
             }
 
             dialog.show()
@@ -729,18 +737,20 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
     /**
      * Animates the value of this [MaterialNumberPicker] from the closest boundary (either [maxValue][MaterialNumberPicker.getMaxValue] or
-     * [minValue][MaterialNumberPicker.getMinValue]) to the provided [toValue] if it is closer to that boundary.
+     * [minValue][MaterialNumberPicker.getMinValue]) to a value chosen randomly between [minValue][MaterialNumberPicker.getMinValue] and
+     * [maxValue][MaterialNumberPicker.getMaxValue]. if it is closer to that boundary.
      *
-     * @param toValue The value to animate towards. The closest boundary is used as the starting point.
-     * @param animationDuration The duration of the animation in milliseconds.
+     * @param animationDuration [Long] The duration of the animation in milliseconds. Defaults to `1000L`.
+     * @param dependentView [View] An optional [View] that should be `disabled` while the animation is running and re-`enabled` when the animation is
+     * finished. Defaults to `null`.
      */
-    private fun MaterialNumberPicker.animateValues(toValue: Int?, currentValue: Int = value, animationDuration: Long = 1000L) {
-        // Determine the start and end values based on which boundary is closer
+    private fun MaterialNumberPicker.animateRandom(animationDuration: Long = 1000L, dependentView: View? = null) {
+        val toValue = Random.nextInt(minValue, maxValue)
+
         val (startValue, endValue) = when {
-            toValue == null                                   -> minValue to currentValue
-            // If fromValue is closer to minValue, animate from maxValue to fromValue
+            // fromValue is closer to minValue
             abs(toValue - minValue) < abs(toValue - maxValue) -> maxValue to toValue
-            // If fromValue is closer to maxValue, animate from minValue to fromValue
+            // fromValue is closer to maxValue
             else                                              -> minValue to toValue
         }
 
@@ -749,7 +759,47 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 value = animator.animatedValue as Int
             }
+
+            addListener(onStart = { dependentView?.isEnabled = false },
+                        onEnd = { dependentView?.isEnabled = true })
+
             duration = animationDuration
+
+            start()
+        }
+    }
+
+    /**
+     * Animates the value of this [MaterialNumberPicker] from the given [fromValue] to a random value that's at least at a distance of
+     *  -\+(([minValue][MaterialNumberPicker.getMinValue] + [maxValue][MaterialNumberPicker.getMaxValue]) / 2) from the current
+     * [value][MaterialNumberPicker.getValue].
+     *
+     * @param fromValue [Int] The starting value of the animation.
+     * @param animationDuration [Long] The duration of the animation in milliseconds. Defaults to `1000L`.
+     * @param dependentView [View] An optional [View] that should be `disabled` while the animation is running and re-`enabled` when the animation is
+     * finished. Defaults to `null`.
+     */
+    private fun MaterialNumberPicker.animateFrom(fromValue: Int, animationDuration: Long = 1000L, dependentView: View? = null) {
+        val minDistance = (minValue + maxValue) / 2
+
+        val (startValue, endValue) = when {
+            // fromValue is closer to minValue
+            abs(value - minValue) < abs(value - maxValue) -> fromValue to Random.nextInt(minDistance, maxValue)
+            // fromValue is closer to maxValue
+            else                                          -> fromValue to Random.nextInt(minValue, minDistance)
+        }
+
+        ValueAnimator.ofInt(startValue, endValue).apply {
+            addUpdateListener { animator ->
+                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                value = animator.animatedValue as Int
+            }
+
+            addListener(onStart = { dependentView?.isEnabled = false },
+                        onEnd = { dependentView?.isEnabled = true })
+
+            duration = animationDuration
+
             start()
         }
     }

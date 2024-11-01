@@ -7,8 +7,23 @@ import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import kotlin.time.Duration
 
+/**
+ * Provides extension functions for [Duration] that provide human-readable representations of the duration.
+ *
+ * @author AbdAlMoniem AlHifnawy
+ */
 object DurationExtensionFunctions {
 
+    /**
+     * Converts the duration to a formatted string suitable for display to the user.
+     *
+     * The format of the string is determined by the current locale. If the locale is a right-to-left locale, the format will be `HH:mm:ss`.
+     * Otherwise, the format will be `HH MM SS`.
+     *
+     * @param hideLegend [Boolean] if `true`, the string will not include the `hour`, `minute`, or `second` labels.
+     *
+     * @return [String] the formatted string.
+     */
     fun Duration.toFormattedTime(hideLegend: Boolean = false): String = toComponents { hours, minutes, seconds, _ ->
         when (this) {
             Duration.INFINITE -> "∞"
@@ -26,6 +41,17 @@ object DurationExtensionFunctions {
         }
     }
 
+    /**
+     * Formats the duration in a localized string that is suitable for display to the user.
+     *
+     * The format of the string is determined by the current locale. If the locale is a right-to-left locale, the format will be `HH:mm:ss`.
+     * Otherwise, the format will be `HH MM SS`.
+     *
+     * @param context [Context] the context to use for resolving the string resources.
+     * @param hideLegend [Boolean] if `true`, the string will not include the `hour`, `minute`, or `second` labels.
+     *
+     * @return [String] the formatted string.
+     */
     fun Duration.toLocalizedFormattedTime(context: Context, hideLegend: Boolean = false): String = toComponents { hours, minutes, seconds, _ ->
         val hourLetter = context.getString(R.string.time_format_hour_letter)
         val minuteLetter = context.getString(R.string.time_format_minute_letter)
@@ -46,6 +72,12 @@ object DurationExtensionFunctions {
             }
         }
     }
+
+    /**
+     * Checks if the current locale is right-to-left.
+     *
+     * @return [Boolean] `true` if the current locale is right-to-left, `false` otherwise.
+     */
     private val isRTL: Boolean
         get() = CaffeinateApplication.applicationLocale.layoutDirection == LayoutDirection.RTL
 }

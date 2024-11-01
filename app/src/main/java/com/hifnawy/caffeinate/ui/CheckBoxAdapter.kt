@@ -16,12 +16,14 @@ import kotlin.time.Duration
  *
  * Each item in the list has a text, a checked state, an enabled state, and a duration.
  *
- * @property text the text displayed in the CheckBox
- * @property isChecked the checked state of the CheckBox
- * @property isEnabled the enabled state of the CheckBox. When the enabled state is false, the CheckBox is grayed out.
- * @property duration the duration associated with the item, which is used to sort the items in ascending order.
- *
  * This class implements [Serializable] to enable it to be stored in SharedPreferences.
+ *
+ * @property text [String] the text displayed in the CheckBox
+ * @property isChecked [Boolean] the checked state of the CheckBox
+ * @property isEnabled [Boolean] the enabled state of the CheckBox. When the enabled state is false, the CheckBox is grayed out.
+ * @property duration [Duration] the duration associated with the item, which is used to sort the items in ascending order.
+ *
+ * @author AbdAlMoniem AlHifnawy
  */
 data class CheckBoxItem(
         /**
@@ -45,28 +47,49 @@ data class CheckBoxItem(
 /**
  * Adapter class for managing a list of [CheckBoxItem] in a RecyclerView.
  *
- * This adapter provides functionality to add, remove, and update [CheckBoxItem]s, as well as callbacks to notify changes in the checked states of
- * the items.
+ * This adapter provides functionality to add, remove, and update [CheckBoxItem]s, as well as callbacks to notify changes in the [CheckBoxItem]s.
  *
- * @property timeoutCheckBoxes The list of [CheckBoxItem]s to be managed by the adapter.
- * @property onCheckedChangeListener Optional listener to handle checked state changes of the items.
+ * @param onItemsChangedListener [OnItemsChangedListener] Optional listener to handle changes in the [CheckBoxItem]s.
+ *
+ * @property checkBoxItems [List] The list of [CheckBoxItem]s to be managed by the adapter.
+ *
+ * @author AbdAlMoniem AlHifnawy
  */
-class CheckBoxAdapter(timeoutCheckBoxes: MutableList<CheckBoxItem>, private val onCheckedChangeListener: OnCheckedChangeListener? = null) :
+class CheckBoxAdapter(timeoutCheckBoxes: List<CheckBoxItem>, private val onItemsChangedListener: OnItemsChangedListener? = null) :
         RecyclerView.Adapter<CheckBoxAdapter.ViewHolder>() {
 
-    fun interface OnCheckedChangeListener {
+    /**
+     * Listener interface for observing changes to the list of [CheckBoxItem]s.
+     *
+     * This interface should be implemented by classes that wish to be notified when the list of [CheckBoxItem]s changes.
+     * The implementing class can register itself as a listener and respond to changes in the list by overriding the
+     * methods provided in this interface.
+     */
+    fun interface OnItemsChangedListener {
 
-        fun onCheckedChanged(checkBoxItems: List<CheckBoxItem>)
+        /**
+         * Called when the list of [CheckBoxItem]s changes.
+         *
+         * This method is called whenever the list of [CheckBoxItem]s changes, such as when an item is added or removed.
+         * The implementing class should override this method to perform any necessary actions, such as updating the UI.
+         *
+         * @param checkBoxItems [List] The new list of [CheckBoxItem]s after the change.
+         */
+        fun onItemChanged(checkBoxItems: List<CheckBoxItem>)
     }
 
     private val timeoutCheckBoxes: MutableList<CheckBoxItem> = timeoutCheckBoxes.map { it.copy() }.toMutableList()
+
+    /**
+     * The list of [CheckBoxItem]s to be managed by the adapter.
+     */
     val checkBoxItems: List<CheckBoxItem>
         get() = timeoutCheckBoxes
 
     /**
      * A ViewHolder for the adapter's items.
      *
-     * @param itemView The view of the ViewHolder.
+     * @param itemView [View] The view of the ViewHolder.
      */
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -77,9 +100,10 @@ class CheckBoxAdapter(timeoutCheckBoxes: MutableList<CheckBoxItem>, private val 
     /**
      * Creates a new ViewHolder for the specified view type.
      *
-     * @param parent The parent ViewGroup that the new View will be added to after it is bound to an adapter position.
-     * @param viewType The view type of the new View.
-     * @return A new ViewHolder that holds a View representing a single item in the adapter.
+     * @param parent [ViewGroup] The parent ViewGroup that the new View will be added to after it is bound to an adapter position.
+     * @param viewType [Int] The view type of the new View.
+     *
+     * @return [ViewHolder] A new [ViewHolder] that holds a View representing a single item in the adapter.
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.timeout_checkbox_item, parent, false)
@@ -88,8 +112,8 @@ class CheckBoxAdapter(timeoutCheckBoxes: MutableList<CheckBoxItem>, private val 
     /**
      * Binds the data to the ViewHolder at the specified position.
      *
-     * @param holder The ViewHolder to bind the data to.
-     * @param position The position of the item within the adapter's data set.
+     * @param holder [ViewHolder] The ViewHolder to bind the data to.
+     * @param position [Int] The position of the item within the adapter's data set.
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder) {
@@ -105,9 +129,9 @@ class CheckBoxAdapter(timeoutCheckBoxes: MutableList<CheckBoxItem>, private val 
 
                 item.isChecked = isChecked
 
-                onCheckedChangeListener?.onCheckedChanged(timeoutCheckBoxes)
-
                 timeoutCheckBoxes.updateFirstItem()
+
+                onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
             }
         }
     }
@@ -115,7 +139,7 @@ class CheckBoxAdapter(timeoutCheckBoxes: MutableList<CheckBoxItem>, private val 
     /**
      * Returns the size of the list of [CheckBoxItem]s.
      *
-     * @return the size of the list of [CheckBoxItem]s
+     * @return [Int] the [size][List.size] of the list of [CheckBoxItem]s
      */
     override fun getItemCount(): Int = timeoutCheckBoxes.size
 
@@ -129,16 +153,19 @@ class CheckBoxAdapter(timeoutCheckBoxes: MutableList<CheckBoxItem>, private val 
      * of [timeoutCheckBoxes.size][List.size] after the list is modified.
      * - The [updateFirstItem][List.updateFirstItem] method will be called after the list is modified.
      *
-     * @param checkBoxItem the item to be added
+     * @param checkBoxItem [CheckBoxItem] the item to be added
      */
     fun addCheckBox(checkBoxItem: CheckBoxItem) {
         val isInList = timeoutCheckBoxes.firstOrNull { item -> item.duration == checkBoxItem.duration } != null
 
         if (!isInList && timeoutCheckBoxes.add(checkBoxItem)) {
             timeoutCheckBoxes.sortBy { checkBox -> checkBox.duration }
+
             notifyItemRangeChanged(0, timeoutCheckBoxes.size)
 
             timeoutCheckBoxes.updateFirstItem()
+
+            onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
         }
     }
 
@@ -151,7 +178,7 @@ class CheckBoxAdapter(timeoutCheckBoxes: MutableList<CheckBoxItem>, private val 
      * - If the list has more than one item and the specified item is not the first item in the list, the item will be removed and the list will remain
      * unchanged.
      *
-     * @param checkBoxItem the item to be removed
+     * @param checkBoxItem [CheckBoxItem] the item to be removed
      */
     fun removeCheckBox(checkBoxItem: CheckBoxItem) {
         val index = timeoutCheckBoxes.indexOf(checkBoxItem)
@@ -164,6 +191,8 @@ class CheckBoxAdapter(timeoutCheckBoxes: MutableList<CheckBoxItem>, private val 
             }
 
             notifyItemChanged(0)
+
+            onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
         }
     }
 

@@ -26,33 +26,221 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import timber.log.Timber as Log
 
+/**
+ * A [Service] that keeps the device awake by managing wake locks and notifications.
+ *
+ * This service is responsible for maintaining a wake lock to prevent the device from going to sleep
+ * while the Caffeinate application is active. It manages the foreground notification to ensure the
+ * service is running in the foreground, complying with Android's background execution limits.
+ *
+ * The service observes changes in shared preferences and updates its behavior accordingly, including
+ * responding to changes in the application's status and locale.
+ *
+ * @throws IllegalStateException if the application state is not properly initialized.
+ *
+ * @author AbdAlMoniem AlHifnawy
+ *
+ * @see Service
+ * @see SharedPrefsManager
+ * @see ServiceStatusObserver
+ * @see LocaleChangeReceiver
+ */
 class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListener, ServiceStatusObserver {
 
-    override fun onBind(intent: Intent): IBinder? = null
-
+    /**
+     * A lazy delegate that provides a reference to the [CaffeinateApplication] instance that owns this service.
+     *
+     * This delegate is used to access properties and methods of the owning application, such as the
+     * [CaffeinateApplication.sharedPreferences] and [CaffeinateApplication.applicationLocale].
+     *
+     * @return [CaffeinateApplication] the owning application instance.
+     *
+     * @see CaffeinateApplication
+     */
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
+
+    /**
+     * A lazy delegate that provides a reference to the [NotificationManager] instance that handles notifications
+     * for this service.
+     *
+     * This delegate is used to access the notification manager's methods, such as [NotificationManager.notify] and
+     * [NotificationManager.cancel].
+     *
+     * @return [NotificationManager] the notification manager instance.
+     *
+     * @see NotificationManager
+     */
     private val notificationManager by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+
+    /**
+     * A lazy delegate that provides an instance of [SharedPrefsManager] for managing shared preferences.
+     *
+     * This delegate is used to access and modify the application's shared preferences, allowing the service
+     * to respond to changes in settings such as theme, permissions, and other user preferences.
+     *
+     * @return [SharedPrefsManager] the instance for handling shared preferences.
+     *
+     * @see SharedPrefsManager
+     */
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
+
+    /**
+     * A lazy delegate that provides a reference to the [LocaleChangeReceiver] instance that handles Locale changes.
+     *
+     * This delegate is used to register and unregister a [LocaleChangeReceiver] instance with the system,
+     * allowing the service to respond to changes in the system locale.
+     *
+     * @return [LocaleChangeReceiver] the instance handling Locale changes.
+     *
+     * @see LocaleChangeReceiver
+     */
     private val localeChangeReceiver by lazy { LocaleChangeReceiver(caffeinateApplication) }
+
+    /**
+     * A lazy delegate that provides a reference to the [ScreenLockReceiver] instance that handles screen lock events.
+     *
+     * This delegate is used to register and unregister a [ScreenLockReceiver] instance with the system,
+     * allowing the service to respond to changes in the device's screen state.
+     *
+     * @return [ScreenLockReceiver] the instance handling screen lock events.
+     *
+     * @see ScreenLockReceiver
+     */
     private val screenLockReceiver by lazy { ScreenLockReceiver(caffeinateApplication) }
+
+    /**
+     * A lazy delegate that provides the notification channel ID for the service's notifications.
+     *
+     * This delegate initializes the notification channel ID using the application's localized name,
+     * which is used to create and manage notification channels.
+     *
+     * @return [String] the notification channel ID derived from the application's name.
+     *
+     * @see NotificationChannel
+     */
     private val notificationChannelID by lazy { caffeinateApplication.localizedApplicationContext.getString(R.string.app_name) }
+
+    /**
+     * A lazy delegate that provides a reference to the [NotificationChannel] instance that represents the service's notification channel.
+     *
+     * This delegate is used to access the notification channel's properties and methods, allowing the service
+     * to create and manage its notifications.
+     *
+     * The notification channel is created when the service is initialized and is used to specify the
+     * notification channel's name, description, and importance level.
+     *
+     * @return [NotificationChannel] the notification channel instance.
+     *
+     * @see NotificationChannel
+     */
     private val notificationChannel by lazy {
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> notificationManager.getNotificationChannel(notificationChannelID)
                                                               ?: let {
-                                                                  NotificationChannel(notificationChannelID, notificationChannelID, NotificationManager.IMPORTANCE_HIGH)
+                                                                  NotificationChannel(
+                                                                          notificationChannelID,
+                                                                          notificationChannelID,
+                                                                          NotificationManager.IMPORTANCE_HIGH
+                                                                  )
                                                                       .also { channel -> notificationManager.createNotificationChannel(channel) }
                                                               }
 
             else                                           -> null
         }
     }
+
+    /**
+     * A flag indicating whether the [LocaleChangeReceiver] is registered.
+     *
+     * This flag is used to track whether the [LocaleChangeReceiver] is currently registered to receive
+     * [Intent.ACTION_LOCALE_CHANGED] broadcasts, which are sent when the system locale changes.
+     *
+     * @see LocaleChangeReceiver
+     * @see Intent.ACTION_LOCALE_CHANGED
+     */
     private var isLocaleChangeReceiverRegistered = false
+
+    /**
+     * A flag indicating whether the [ScreenLockReceiver] is registered.
+     *
+     * This flag is used to track whether the [ScreenLockReceiver] is currently registered to receive
+     * [Intent.ACTION_SCREEN_OFF] broadcasts, which are sent when the screen is turned off.
+     *
+     * @see ScreenLockReceiver
+     * @see Intent.ACTION_SCREEN_OFF
+     */
     private var isScreenLockReceiverRegistered = false
+
+    /**
+     * A flag indicating whether the screen should be dimmed while it is being kept awake.
+     *
+     * This flag is used to determine whether the screen should be dimmed while it is being kept awake.
+     * When the flag is set to `true`, the screen is dimmed to a level that is specified by the system setting.
+     * When the flag is set to `false`, the screen is not dimmed.
+     *
+     * This flag is initially set to the value that is stored in the shared preferences.
+     * The value of this flag is updated whenever the preference is changed by the user.
+     */
     private var isDimmingEnabled = false
+
+    /**
+     * A [PowerManager.WakeLock] that is used to keep the device awake while this service is running.
+     *
+     * This wake lock is used to prevent the device from going to sleep while the service is running.
+     * It is acquired when the service is started and released when the service is stopped.
+     *
+     * @see startService
+     * @see stopService
+     */
     private var wakeLock: PowerManager.WakeLock? = null
+
+    /**
+     * A [TimeoutJob] that manages the timing of the caffeine session.
+     *
+     * This job is responsible for handling the countdown and updating the service status
+     * as the timeout duration progresses. It is created when a caffeine session starts
+     * and is cancelled when the session stops.
+     *
+     * @see startCaffeine
+     * @see stopCaffeine
+     */
     private var caffeineTimeoutJob: TimeoutJob? = null
 
+    /**
+     * This method is called when a client is binding to the service with bindService().
+     * Currently, this service does not support binding, so it returns null.
+     *
+     * @param intent [Intent] The Intent that was used to bind to this service.
+     *
+     * @return [IBinder] `null` as this service does not support binding.
+     */
+    override fun onBind(intent: Intent): IBinder? = null
+
+    /**
+     * Called by the system when the service is first created. Do not call this method directly.
+     *
+     * For backwards compatibility, the default implementation calls [onStart] and returns either
+     * [START_STICKY][Service.START_STICKY] or [START_STICKY_COMPATIBILITY][Service.START_STICKY_COMPATIBILITY].
+     *
+     * If you need your application to run on platform versions prior to API level 5, you can
+     * override this method to handle the older [Intent] parameter. Or, if you can target API level 5
+     * or later, you can override [onStartCommand], which is the preferred implementation.
+     *
+     * All implementations must be thread-safe.
+     *
+     * @param intent [Intent] The [Intent] supplied to [startService], as given.
+     * This may be `null` if the service is being restarted after its process has gone away, and
+     * it had previously returned anything except [START_STICKY_COMPATIBILITY][Service.START_STICKY_COMPATIBILITY].
+     * @param flags [Int] Additional data about this start request.
+     * @param startId [Int] A unique integer representing this specific request to start.
+     *
+     * @return [Int] The result of the call described above. This must be one of the following
+     * constants:
+     * - [START_STICKY_COMPATIBILITY][Service.START_STICKY_COMPATIBILITY],
+     * - [START_STICKY][Service.START_STICKY],
+     * - [START_NOT_STICKY][Service.START_NOT_STICKY],
+     * - [START_REDELIVER_INTENT][Service.START_REDELIVER_INTENT]
+     */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIFICATION_ID, buildForegroundNotification(caffeinateApplication.lastStatusUpdate))
 
@@ -193,7 +381,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
 
     private fun buildForegroundNotification(status: ServiceStatus): Notification {
         caffeinateApplication.run {
-            val notificationStopIntent = NotificationUtils.getPendingIntent(localizedApplicationContext, KeepAwakeService::class.java, KeepAwakeServiceAction.STOP.name, 0)
+            val notificationStopIntent =
+                    NotificationUtils.getPendingIntent(localizedApplicationContext, KeepAwakeService::class.java, KeepAwakeServiceAction.STOP.name, 0)
             val notificationActionNextTimeoutStr = localizedApplicationContext.getString(R.string.foreground_notification_action_next_timeout)
             val notificationActionDimmingEnabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_disable_dimming)
             val notificationActionDimmingDisabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_enable_dimming)
@@ -266,7 +455,10 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             }
         } or PowerManager.ACQUIRE_CAUSES_WAKEUP
 
-        wakeLock = powerManager.newWakeLock(wakeLockLevel, "${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)}:wakelockTag").apply {
+        wakeLock = powerManager.newWakeLock(
+                wakeLockLevel,
+                "${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)}:wakelockTag"
+        ).apply {
             Log.d("acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingAllowed: $isDimmingEnabled...")
             setReferenceCounted(false)
             if (duration == Duration.INFINITE) acquire() else acquire(duration.inWholeMilliseconds)

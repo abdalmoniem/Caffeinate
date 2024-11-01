@@ -156,4 +156,22 @@
         app:layout_constraintEnd_toStartOf="@+id/dialogButtonOk"
         app:layout_constraintTop_toTopOf="@+id/dialogButtonOk"
         app:strokeWidth="0dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/dialogButtonRandomTimeout"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="30dp"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        app:cornerRadius="50dp"
+        app:icon="@drawable/baseline_shuffle_24"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/dialogButtonCancel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/dialogButtonCancel" />
 </androidx.constraintlayout.widget.ConstraintLayout>

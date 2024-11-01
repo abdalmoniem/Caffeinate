@@ -128,6 +128,7 @@ class QuickTileService : TileService() {
         }
     }
 
+
     /**
      * A companion object for [QuickTileService].
      *
@@ -145,7 +146,7 @@ class QuickTileService : TileService() {
          * [requestListeningState][TileService.requestListeningState] method.
          *
          * @param context [Context] the context in which the tile state update is requested
-         *
+         * 
          * @throws NullPointerException if the context is null
          * @throws SecurityException if the app does not have the necessary permissions to request a tile state update
          * @throws IllegalArgumentException if the tile is not available
