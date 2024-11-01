@@ -45,13 +45,13 @@ data class CheckBoxItem(
 /**
  * Adapter class for managing a list of [CheckBoxItem] in a RecyclerView.
  *
- * This adapter provides functionality to add, remove, and update [CheckBoxItem]s, as well as
- * callbacks to notify changes in the checked states of the items.
+ * This adapter provides functionality to add, remove, and update [CheckBoxItem]s, as well as callbacks to notify changes in the checked states of
+ * the items.
  *
  * @property timeoutCheckBoxes The list of [CheckBoxItem]s to be managed by the adapter.
  * @property onCheckedChangeListener Optional listener to handle checked state changes of the items.
  */
-class CheckBoxAdapter(private val timeoutCheckBoxes: MutableList<CheckBoxItem>, private val onCheckedChangeListener: OnCheckedChangeListener? = null) :
+class CheckBoxAdapter(timeoutCheckBoxes: MutableList<CheckBoxItem>, private val onCheckedChangeListener: OnCheckedChangeListener? = null) :
         RecyclerView.Adapter<CheckBoxAdapter.ViewHolder>() {
 
     fun interface OnCheckedChangeListener {
@@ -59,6 +59,7 @@ class CheckBoxAdapter(private val timeoutCheckBoxes: MutableList<CheckBoxItem>, 
         fun onCheckedChanged(checkBoxItems: List<CheckBoxItem>)
     }
 
+    private val timeoutCheckBoxes: MutableList<CheckBoxItem> = timeoutCheckBoxes.map { it.copy() }.toMutableList()
     val checkBoxItems: List<CheckBoxItem>
         get() = timeoutCheckBoxes
 
@@ -121,11 +122,12 @@ class CheckBoxAdapter(private val timeoutCheckBoxes: MutableList<CheckBoxItem>, 
     /**
      * Adds the specified [checkBoxItem] to the list if it doesn't already exist.
      *
-     * If the list doesn't already contain the specified [checkBoxItem], it will be added to the list.
-     * The list will be sorted by the [CheckBoxItem.duration] in ascending order after the new item is added.
-     * The [RecyclerView.Adapter.notifyDataSetChanged] method will be called after the list is modified.
-     * The [RecyclerView.Adapter.notifyItemRangeChanged] method will be called with the start index of 0 and the item count of [timeoutCheckBoxes.size] after the list is modified.
-     * The [List<CheckBoxItem>.updateFirstItem] method will be called after the list is modified.
+     * - If the list doesn't already contain the specified [checkBoxItem], it will be added to the list.
+     * - The list will be sorted by the [duration][CheckBoxItem.duration] in ascending order after the new item is added.
+     * - The [notifyDataSetChanged][RecyclerView.Adapter.notifyDataSetChanged] method will be called after the list is modified.
+     * - The [notifyItemRangeChanged][RecyclerView.Adapter.notifyItemRangeChanged] method will be called with the start index of 0 and the item count
+     * of [timeoutCheckBoxes.size][List.size] after the list is modified.
+     * - The [updateFirstItem][List.updateFirstItem] method will be called after the list is modified.
      *
      * @param checkBoxItem the item to be added
      */
@@ -143,9 +145,11 @@ class CheckBoxAdapter(private val timeoutCheckBoxes: MutableList<CheckBoxItem>, 
     /**
      * Removes the specified [checkBoxItem] from the list if it exists.
      *
-     * If the list has only one item and it is the specified item, the item will be removed and the list will be empty.
-     * If the list has more than one item and the specified item is the first item in the list, the item will be removed and the new first item will be enabled and checked.
-     * If the list has more than one item and the specified item is not the first item in the list, the item will be removed and the list will remain unchanged.
+     * - If the list has only one item and it is the specified item, the item will be removed and the list will be empty.
+     * - If the list has more than one item and the specified item is the first item in the list, the item will be removed and the new first item will
+     * be enabled and checked.
+     * - If the list has more than one item and the specified item is not the first item in the list, the item will be removed and the list will remain
+     * unchanged.
      *
      * @param checkBoxItem the item to be removed
      */
@@ -164,9 +168,11 @@ class CheckBoxAdapter(private val timeoutCheckBoxes: MutableList<CheckBoxItem>, 
     }
 
     /**
-     * Updates the **_[firstOrNull]_** item of the list to be **_`enabled`_** or **_`disabled`_**.
-     * If the **_[List.size]_** is **_`1`_**, the **_[firstOrNull]_** item will be **_`disabled`_**.
-     * If the **_[List.size]_** is greater than **_`1`_**, the **_[firstOrNull]_** item will be **_`enabled`_** if it is currently **_`disabled`_**
+     * Updates the [firstOrNull] item of the list to be [enabled][CheckBoxItem.isEnabled] or [disabled][CheckBoxItem.isEnabled].
+     *
+     * - If the [size][List.size] is `1`, the [firstOrNull] item will be [disabled][CheckBoxItem.isEnabled].
+     * - If the [size][List.size] is greater than `1`, the [firstOrNull] item will be [enabled][CheckBoxItem.isEnabled] if it is currently
+     * [disabled][CheckBoxItem.isEnabled]
      */
     private fun List<CheckBoxItem>.updateFirstItem() {
         filter { checkBoxItem -> checkBoxItem.isChecked }.apply {

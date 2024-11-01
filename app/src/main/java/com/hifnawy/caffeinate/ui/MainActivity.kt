@@ -41,15 +41,16 @@ import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageD
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
+import kotlin.math.abs
+import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * The main activity of the application, which is responsible for displaying the list of timeouts that can
- * be used to keep the screen on. It also handles the logic of starting and stopping the
- * [KeepAwakeService].
+ * The main activity of the application, which is responsible for displaying the list of timeouts that can be used to keep the screen on. It also
+ * handles the logic of starting and stopping the [KeepAwakeService].
  *
  * @see KeepAwakeService
  * @see SharedPrefsManager
@@ -128,12 +129,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     }
 
     /**
-     * Called after [onRestoreInstanceState], [onRestart], or [onPause],
-     * for your activity to start interacting with the user. This is a good place to
+     * Called after [onRestoreInstanceState], [onRestart], or [onPause], for your activity to start interacting with the user. This is a good place to
      * begin animations, open exclusive-access devices (such as the camera), etc.
      *
-     * Keep in mind that onResume is not the best indicator that your activity is
-     * visible to the user (as described in the ActivityLifecycle document).
+     * Keep in mind that onResume is not the best indicator that your activity is visible to the user (as described in the ActivityLifecycle document).
      *
      * @see [onPause]
      * @see [onStop]
@@ -155,12 +154,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     }
 
     /**
-     * Called as part of the activity lifecycle when an activity is going into the background, but has not
-     * (yet) been destroyed. Use this method to release resources, such as broadcast receivers, that will not
-     * be needed while the activity is paused.
+     * Called as part of the activity lifecycle when an activity is going into the background, but has not (yet) been destroyed. Use this method to
+     * release resources, such as broadcast receivers, that will not be needed while the activity is paused.
      *
-     * This is usually a good place to commit unsaved changes to persistent data, stop animations and other
-     * ongoing actions, etc.
+     * This is usually a good place to commit unsaved changes to persistent data, stop animations and other ongoing actions, etc.
      *
      * @see [onResume]
      * @see [onStop]
@@ -172,8 +169,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     }
 
     /**
-     * Called when there is a change in the permission state indicating whether all necessary permissions
-     * have been granted.
+     * Called when there is a change in the permission state indicating whether all necessary permissions have been granted.
      *
      * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
      */
@@ -190,22 +186,18 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     }
 
     /**
-     * Called when the user has changed the preference of whether the screen should be dimmed while it is
-     * being kept awake.
+     * Called when the user has changed the preference of whether the screen should be dimmed while it is being kept awake.
      *
-     * @param isDimmingEnabled true if the screen should be dimmed while it is being kept awake, false
-     * otherwise.
+     * @param isDimmingEnabled true if the screen should be dimmed while it is being kept awake, false otherwise.
      */
     override fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean) {
         binding.allowDimmingSwitch.isChecked = isDimmingEnabled
     }
 
     /**
-     * Called when the user has changed the preference of whether the keep awake screen should be enabled
-     * while the screen is locked.
+     * Called when the user has changed the preference of whether the keep awake screen should be enabled while the screen is locked.
      *
-     * @param isWhileLockedEnabled true if the keep awake screen should be enabled while the screen is
-     * locked, false otherwise.
+     * @param isWhileLockedEnabled true if the keep awake screen should be enabled while the screen is locked, false otherwise.
      */
     override fun onIsWhileLockedEnabledChanged(isWhileLockedEnabled: Boolean) {
         binding.allowWhileLockedSwitch.isChecked = isWhileLockedEnabled
@@ -235,11 +227,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Callback for the result from requesting permissions.
      *
-     * This method is invoked for every call on {@link #requestPermissions(String[], int)}.
+     * This method is invoked for every call on [requestPermissions(String[], int)][requestPermissions].
      *
-     * @param requestCode  The request code passed in {@link #requestPermissions(String[], int)}.
+     * @param requestCode  The request code passed in [requestPermissions(String[], int)][requestPermissions].
      * @param permissions  The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions which is either {@link PackageManager#PERMISSION_GRANTED} or {@link PackageManager#PERMISSION_DENIED}. Never null.
+     * @param grantResults The grant results for the corresponding permissions which is either [PERMISSION_GRANTED][PackageManager.PERMISSION_GRANTED]
+     * or [PERMISSION_DENIED][PackageManager.PERMISSION_DENIED]. Never null.
      */
     override fun onRequestPermissionsResult(
             requestCode: Int, permissions: Array<out String>, grantResults: IntArray
@@ -267,13 +260,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
      * Enables the Material You preferences.
      *
      * The Material You preferences are:
-     * 1. A [com.google.android.material.card.MaterialCardView] that shows the Material You preferences.
-     * 2. A [android.widget.TextView] that shows the Material You preferences title.
-     * 3. A [android.widget.TextView] that shows the Material You preferences subtitle.
-     * 4. A [android.widget.Switch] that toggles the Material You preferences.
+     * 1. A [MaterialCardView][com.google.android.material.card.MaterialCardView] that shows the Material You preferences.
+     * 2. A [TextView][android.widget.TextView] that shows the Material You preferences title.
+     * 3. A [TextView][android.widget.TextView] that shows the Material You preferences subtitle.
+     * 4. A [MaterialSwitch][com.google.android.material.materialswitch.MaterialSwitch] that toggles the Material You preferences.
      *
-     * The Material You preferences are enabled when the user has granted the
-     * [Manifest.permission.POST_NOTIFICATIONS] permission.
+     * The Material You preferences are enabled when the user has granted the [POST_NOTIFICATIONS][Manifest.permission.POST_NOTIFICATIONS] permission.
      */
     private fun enableMaterialYouPreferences() {
         with(binding) {
@@ -293,8 +285,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     }
 
     /**
-     * Enable or disable the [allowWhileLockedCard], [allowWhileLockedTextView], [allowWhileLockedSubTextTextView],
-     * and [allowWhileLockedSwitch] based on whether the user has granted all necessary permissions.
+     * Enable or disable the [allowWhileLockedCard][com.google.android.material.card.MaterialCardView],
+     * [allowWhileLockedTextView][android.widget.TextView], [allowWhileLockedSubTextTextView][android.widget.TextView],
+     * and [allowWhileLockedSwitch][com.google.android.material.materialswitch.MaterialSwitch] based on whether the user has granted all necessary
+     * permissions.
      *
      * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
      */
@@ -315,8 +309,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     }
 
     /**
-     * Enable or disable the [allowDimmingCard], [allowDimmingTextView], [allowDimmingSubTextTextView],
-     * and [allowDimmingSwitch] based on whether the user has granted all necessary permissions.
+     * Enable or disable the [allowDimmingCard][com.google.android.material.card.MaterialCardView], [allowDimmingTextView][android.widget.TextView],
+     * [allowDimmingSubTextTextView][android.widget.TextView], and [allowDimmingSwitch][com.google.android.material.materialswitch.MaterialSwitch]
+     * based on whether the user has granted all necessary permissions.
      *
      * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
      */
@@ -337,8 +332,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     }
 
     /**
-     * Enable or disable the [timeoutChoiceCard], [timeoutChoiceTextView], [timeoutChoiceSubTextTextView],
-     * and [timeoutChoiceButton] based on whether the user has granted all necessary permissions.
+     * Enable or disable the [timeoutChoiceCard][com.google.android.material.card.MaterialCardView], [timeoutChoiceTextView][android.widget.TextView],
+     * [timeoutChoiceSubTextTextView][android.widget.TextView], and [timeoutChoiceButton][com.google.android.material.materialswitch.MaterialSwitch]
+     * based on whether the user has granted all necessary permissions.
      *
      * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
      */
@@ -474,10 +470,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Requests the user to grant the battery optimization permission.
      *
-     * This will start the {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}
+     * This will start the [ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS][android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS]
      * intent which will open the "Battery optimization" settings screen.
      *
-     * This method does nothing if the Android version is less than [android.os.Build.VERSION_CODES.M].
+     * This method does nothing if the Android Version is less than [M][android.os.Build.VERSION_CODES.M].
      *
      * @see checkBatteryOptimization
      */
@@ -488,7 +484,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             .setCancelable(false)
             .setMessage(getString(R.string.dialog_battery_optimization_needed_message))
             .setPositiveButton(getString(R.string.dialog_button_ok)) { _, _ ->
-                startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${caffeinateApplication.localizedApplicationContext.packageName}")))
+                startActivity(
+                        Intent(
+                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                Uri.parse("package:${caffeinateApplication.localizedApplicationContext.packageName}")
+                        )
+                )
             }
             .setNegativeButton(getString(R.string.dialog_button_cancel), null)
             .show()
@@ -563,15 +564,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Shows a dialog to allow the user to choose a timeout duration.
      *
-     * This dialog will contain a list of checkboxes, each representing a different timeout duration
-     * that the user can select. The list of durations is stored in the app's SharedPreferences.
+     * This dialog will contain a list of checkboxes, each representing a different timeout duration that the user can select. The list of durations
+     * is stored in the app's SharedPreferences.
      *
-     * When the dialog is shown, the currently selected timeout duration is checked in the list.
-     * When the user selects a new timeout duration, the app will start a new {@link TimeoutJob} with
-     * the selected duration.
+     * When the dialog is shown, the currently selected timeout duration is checked in the list. When the user selects a new timeout duration, the app
+     * will start a new [TimeoutJob][com.hifnawy.caffeinate.services.TimeoutJob] with the selected duration.
      *
-     * If the user has not selected any timeout durations before, the dialog will be empty and the
-     * user will be prompted to select at least one duration.
+     * If the user has not selected any timeout durations before, the dialog will be empty and the user will be prompted to select at least one
+     * duration.
      *
      * This method is called when the user clicks the "Choose timeout" button in the app's UI.
      */
@@ -586,22 +586,15 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             }
 
             with(dialogBinding) {
-                val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes.map { it.copy() }.toMutableList())
+                val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes)
 
                 timeoutsRecyclerView.layoutManager = LinearLayoutManager(root.context)
                 timeoutsRecyclerView.adapter = checkBoxAdapter
 
                 dialogButtonAddTimeout.setOnClickListener { buttonView ->
                     buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                    val maxTimeout = checkBoxAdapter.checkBoxItems
-                                         .filter { checkBoxItem -> checkBoxItem.duration != Duration.INFINITE }
-                                         .maxOfOrNull { checkBoxItem -> checkBoxItem.duration }
-                                     ?: checkBoxAdapter.checkBoxItems.firstOrNull()?.duration
-                    showSetCustomTimeoutDialog(maxTimeout) { hours, minutes, seconds ->
-                        val timeout = when {
-                            hours == 0 && minutes == 0 && seconds == 0 -> Duration.INFINITE
-                            else                                       -> hours.hours + minutes.minutes + seconds.seconds
-                        }
+
+                    showSetCustomTimeoutDialog { timeout ->
                         checkBoxAdapter.addCheckBox(
                                 CheckBoxItem(
                                         text = timeout.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext),
@@ -642,11 +635,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                             ?.let {
                                 when (lastStatusUpdate) {
                                     is ServiceStatus.Running -> KeepAwakeService.startNextTimeout(this, debounce = false)
-                                    else                     -> timeout = checkBoxAdapter.checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+                                    else                     -> timeout =
+                                            checkBoxAdapter.checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
                                 }
                             }
                         ?: when (lastStatusUpdate) {
-                            is ServiceStatus.Stopped -> timeout = checkBoxAdapter.checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+                            is ServiceStatus.Stopped -> timeout =
+                                    checkBoxAdapter.checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+
                             else                     -> Unit // do nothing if the service is running
                         }
 
@@ -668,11 +664,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     /**
      * Shows a dialog to the user to let them choose a custom timeout.
      *
-     * @param maxTimeout the maximum allowed timeout, or null if there is no limit
-     * @param valueSetCallback a callback that will be called when the user sets a value; the callback will be passed the
-     * number of hours, minutes and seconds that the user has chosen
+     * @param valueSetCallback a callback that will be called when the user sets a value; the callback will be passed the number of hours, minutes and
+     * seconds that the user has chosen
      */
-    private fun showSetCustomTimeoutDialog(maxTimeout: Duration?, valueSetCallback: (hours: Int, minutes: Int, seconds: Int) -> Unit) {
+    private fun showSetCustomTimeoutDialog(valueSetCallback: (timeout: Duration) -> Unit) {
         with(binding) {
             val dialogBinding = DialogSetCustomTimeoutBinding.inflate(LayoutInflater.from(root.context))
             val dialog = MaterialAlertDialogBuilder(root.context).setView(dialogBinding.root).create().apply {
@@ -694,29 +689,31 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 hoursSeparator.setTextColor(root.context.theme.themeColor)
                 minutesSeparator.setTextColor(root.context.theme.themeColor)
 
-                maxTimeout?.run {
-                    hoursNumberPicker.value = inWholeHours.toInt()
-                    minutesNumberPicker.value = inWholeMinutes.rem(60).toInt()
-                    secondsNumberPicker.value = inWholeSeconds.rem(60).toInt()
-                }
-
                 hoursNumberPicker.setFormatter { value -> "%02d".format(value) }
                 minutesNumberPicker.setFormatter { value -> "%02d".format(value) }
                 secondsNumberPicker.setFormatter { value -> "%02d".format(value) }
 
-                NumberPicker.OnValueChangeListener { numberPicker, _, _ -> numberPicker.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY) }.run {
-                    hoursNumberPicker.setOnValueChangedListener(this)
-                    minutesNumberPicker.setOnValueChangedListener(this)
-                    secondsNumberPicker.setOnValueChangedListener(this)
-                }
+                NumberPicker.OnValueChangeListener { numberPicker, _, _ -> numberPicker.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY) }
+                    .run {
+                        hoursNumberPicker.setOnValueChangedListener(this)
+                        minutesNumberPicker.setOnValueChangedListener(this)
+                        secondsNumberPicker.setOnValueChangedListener(this)
+                    }
 
-                hoursNumberPicker.animateValues(maxTimeout?.inWholeHours?.toInt())
-                minutesNumberPicker.animateValues(maxTimeout?.inWholeMinutes?.rem(60)?.toInt())
-                secondsNumberPicker.animateValues(maxTimeout?.inWholeSeconds?.rem(60)?.toInt())
-
+                hoursNumberPicker.animateValues(Random.nextInt(hoursNumberPicker.minValue, hoursNumberPicker.maxValue))
+                minutesNumberPicker.animateValues(Random.nextInt(minutesNumberPicker.minValue, minutesNumberPicker.maxValue))
+                secondsNumberPicker.animateValues(Random.nextInt(secondsNumberPicker.minValue, secondsNumberPicker.maxValue))
+                // hoursNumberPicker.animateValues(maxTimeout?.inWholeHours?.toInt())
+                // minutesNumberPicker.animateValues(maxTimeout?.inWholeMinutes?.rem(60)?.toInt())
+                // secondsNumberPicker.animateValues(maxTimeout?.inWholeSeconds?.rem(60)?.toInt())
                 dialogButtonOk.setOnClickListener { buttonView ->
                     buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                    valueSetCallback(hoursNumberPicker.value, minutesNumberPicker.value, secondsNumberPicker.value)
+                    val timeout = when {
+                        hoursNumberPicker.value + minutesNumberPicker.value + secondsNumberPicker.value == 0 -> Duration.INFINITE
+                        else                                                                                 ->
+                            hoursNumberPicker.value.hours + minutesNumberPicker.value.minutes + secondsNumberPicker.value.seconds
+                    }
+                    valueSetCallback(timeout)
                     dialog.dismiss()
                 }
 
@@ -731,17 +728,23 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     }
 
     /**
-     * Animates the value of this [MaterialNumberPicker] from the provided [fromValue] to the
-     * current [MaterialNumberPicker.getValue] of this [MaterialNumberPicker].
+     * Animates the value of this [MaterialNumberPicker] from the closest boundary (either [maxValue][MaterialNumberPicker.getMaxValue] or
+     * [minValue][MaterialNumberPicker.getMinValue]) to the provided [toValue] if it is closer to that boundary.
      *
-     * @param fromValue The value to animate from. If 0, the current [MaterialNumberPicker.getMaxValue] is used.
+     * @param toValue The value to animate towards. The closest boundary is used as the starting point.
      * @param animationDuration The duration of the animation in milliseconds.
      */
-    private fun MaterialNumberPicker.animateValues(fromValue: Int?, animationDuration: Long = 1000L) {
-        ValueAnimator.ofInt(
-                if (fromValue == 0) maxValue else 0,
-                if (fromValue == 0) 0 else fromValue ?: value
-        ).apply {
+    private fun MaterialNumberPicker.animateValues(toValue: Int?, currentValue: Int = value, animationDuration: Long = 1000L) {
+        // Determine the start and end values based on which boundary is closer
+        val (startValue, endValue) = when {
+            toValue == null                                   -> minValue to currentValue
+            // If fromValue is closer to minValue, animate from maxValue to fromValue
+            abs(toValue - minValue) < abs(toValue - maxValue) -> maxValue to toValue
+            // If fromValue is closer to maxValue, animate from minValue to fromValue
+            else                                              -> minValue to toValue
+        }
+
+        ValueAnimator.ofInt(startValue, endValue).apply {
             addUpdateListener { animator ->
                 performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 value = animator.animatedValue as Int
