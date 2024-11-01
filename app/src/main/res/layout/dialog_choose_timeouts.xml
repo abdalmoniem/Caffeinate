@@ -7,8 +7,12 @@
     android:padding="20dp">
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -17,7 +21,13 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/timeoutsRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:isScrollContainer="true"
+                android:nestedScrollingEnabled="true"
+                android:overScrollMode="always"
+                android:scrollbarSize="10dp"
+                android:scrollbars="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:itemCount="10"
@@ -28,12 +38,12 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="15dp"
                 android:text="@string/dialog_button_add_timeout"
                 android:textAllCaps="false"
                 android:textSize="13sp"
-                android:visibility="gone"
                 app:cornerRadius="30dp"
+                app:layout_constraintBottom_toTopOf="@+id/dialogButtonOk"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/timeoutsRecyclerView"
                 app:strokeWidth="1dp" />
@@ -47,7 +57,6 @@
                 android:text="@string/dialog_button_remove_timeout"
                 android:textAllCaps="false"
                 android:textSize="13sp"
-                android:visibility="gone"
                 app:cornerRadius="30dp"
                 app:layout_constraintBottom_toBottomOf="@+id/dialogButtonAddTimeout"
                 app:layout_constraintEnd_toStartOf="@+id/dialogButtonAddTimeout"
@@ -58,11 +67,11 @@
                 android:id="@+id/dialogButtonOk"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 android:text="@string/dialog_button_ok"
                 android:textAllCaps="false"
                 android:textSize="13sp"
                 app:cornerRadius="30dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/dialogButtonAddTimeout" />
 
@@ -82,5 +91,4 @@
                 app:strokeWidth="0dp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

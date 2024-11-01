@@ -11,24 +11,89 @@ import com.hifnawy.caffeinate.databinding.TimeoutCheckboxItemBinding
 import java.io.Serializable
 import kotlin.time.Duration
 
-data class CheckBoxItem(var text: String, var isChecked: Boolean, var isEnabled: Boolean = false, var duration: Duration) : Serializable
+/**
+ * Data class representing a single item in the RecyclerView list.
+ *
+ * Each item in the list has a text, a checked state, an enabled state, and a duration.
+ *
+ * @property text the text displayed in the CheckBox
+ * @property isChecked the checked state of the CheckBox
+ * @property isEnabled the enabled state of the CheckBox. When the enabled state is false, the CheckBox is grayed out.
+ * @property duration the duration associated with the item, which is used to sort the items in ascending order.
+ *
+ * This class implements [Serializable] to enable it to be stored in SharedPreferences.
+ */
+data class CheckBoxItem(
+        /**
+         * the text displayed in the CheckBox
+         */
+        var text: String,
+        /**
+         * the checked state of the CheckBox
+         */
+        var isChecked: Boolean,
+        /**
+         * the enabled state of the CheckBox. When the enabled state is false, the CheckBox is grayed out.
+         */
+        var isEnabled: Boolean = false,
+        /**
+         * the duration associated with the item, which is used to sort the items in ascending order.
+         */
+        var duration: Duration
+) : Serializable
 
-class CheckBoxAdapter(val timeoutCheckBoxes: List<CheckBoxItem>) :
+/**
+ * Adapter class for managing a list of [CheckBoxItem] in a RecyclerView.
+ *
+ * This adapter provides functionality to add, remove, and update [CheckBoxItem]s, as well as
+ * callbacks to notify changes in the checked states of the items.
+ *
+ * @property timeoutCheckBoxes The list of [CheckBoxItem]s to be managed by the adapter.
+ * @property onCheckedChangeListener Optional listener to handle checked state changes of the items.
+ */
+class CheckBoxAdapter(private val timeoutCheckBoxes: MutableList<CheckBoxItem>, private val onCheckedChangeListener: OnCheckedChangeListener? = null) :
         RecyclerView.Adapter<CheckBoxAdapter.ViewHolder>() {
 
+    fun interface OnCheckedChangeListener {
+
+        fun onCheckedChanged(checkBoxItems: List<CheckBoxItem>)
+    }
+
+    val checkBoxItems: List<CheckBoxItem>
+        get() = timeoutCheckBoxes
+
+    /**
+     * A ViewHolder for the adapter's items.
+     *
+     * @param itemView The view of the ViewHolder.
+     */
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val binding = TimeoutCheckboxItemBinding.bind(itemView)
         val checkBox: CheckBox = binding.timeoutCheckBox
     }
 
+    /**
+     * Creates a new ViewHolder for the specified view type.
+     *
+     * @param parent The parent ViewGroup that the new View will be added to after it is bound to an adapter position.
+     * @param viewType The view type of the new View.
+     * @return A new ViewHolder that holds a View representing a single item in the adapter.
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.timeout_checkbox_item, parent, false)
     )
 
+    /**
+     * Binds the data to the ViewHolder at the specified position.
+     *
+     * @param holder The ViewHolder to bind the data to.
+     * @param position The position of the item within the adapter's data set.
+     */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder) {
-            val item = timeoutCheckBoxes[position].apply {
+            checkBox.setOnCheckedChangeListener(null)
+            val item = timeoutCheckBoxes[adapterPosition].apply {
                 checkBox.text = text
                 checkBox.isChecked = isChecked
                 checkBox.isEnabled = isEnabled
@@ -39,22 +104,76 @@ class CheckBoxAdapter(val timeoutCheckBoxes: List<CheckBoxItem>) :
 
                 item.isChecked = isChecked
 
-                timeoutCheckBoxes.filter { checkBoxItem -> checkBoxItem.isChecked }.apply {
-                    when (size) {
-                        1    -> timeoutCheckBoxes.firstOrNull { checkBoxItem -> checkBoxItem.isChecked }?.apply {
-                            isEnabled = false
-                            notifyItemChanged(timeoutCheckBoxes.indexOf(this))
-                        }
+                onCheckedChangeListener?.onCheckedChanged(timeoutCheckBoxes)
 
-                        else -> timeoutCheckBoxes.firstOrNull { checkBoxItem -> !checkBoxItem.isEnabled }?.apply {
-                            isEnabled = true
-                            notifyItemChanged(timeoutCheckBoxes.indexOf(this))
-                        }
-                    }
-                }
+                timeoutCheckBoxes.updateFirstItem()
             }
         }
     }
 
-    override fun getItemCount() = timeoutCheckBoxes.size
+    /**
+     * Returns the size of the list of [CheckBoxItem]s.
+     *
+     * @return the size of the list of [CheckBoxItem]s
+     */
+    override fun getItemCount(): Int = timeoutCheckBoxes.size
+
+    /**
+     * Adds the specified [checkBoxItem] to the list if it doesn't already exist.
+     *
+     * If the list doesn't already contain the specified [checkBoxItem], it will be added to the list.
+     * The list will be sorted by the [CheckBoxItem.duration] in ascending order after the new item is added.
+     * The [RecyclerView.Adapter.notifyDataSetChanged] method will be called after the list is modified.
+     * The [RecyclerView.Adapter.notifyItemRangeChanged] method will be called with the start index of 0 and the item count of [timeoutCheckBoxes.size] after the list is modified.
+     * The [List<CheckBoxItem>.updateFirstItem] method will be called after the list is modified.
+     *
+     * @param checkBoxItem the item to be added
+     */
+    fun addCheckBox(checkBoxItem: CheckBoxItem) {
+        val isInList = timeoutCheckBoxes.firstOrNull { item -> item.duration == checkBoxItem.duration } != null
+
+        if (!isInList && timeoutCheckBoxes.add(checkBoxItem)) {
+            timeoutCheckBoxes.sortBy { checkBox -> checkBox.duration }
+            notifyItemRangeChanged(0, timeoutCheckBoxes.size)
+
+            timeoutCheckBoxes.updateFirstItem()
+        }
+    }
+
+    /**
+     * Removes the specified [checkBoxItem] from the list if it exists.
+     *
+     * If the list has only one item and it is the specified item, the item will be removed and the list will be empty.
+     * If the list has more than one item and the specified item is the first item in the list, the item will be removed and the new first item will be enabled and checked.
+     * If the list has more than one item and the specified item is not the first item in the list, the item will be removed and the list will remain unchanged.
+     *
+     * @param checkBoxItem the item to be removed
+     */
+    fun removeCheckBox(checkBoxItem: CheckBoxItem) {
+        val index = timeoutCheckBoxes.indexOf(checkBoxItem)
+        if (timeoutCheckBoxes.remove(checkBoxItem)) {
+            notifyItemRemoved(index)
+
+            timeoutCheckBoxes.firstOrNull()?.apply {
+                isChecked = true
+                isEnabled = false
+            }
+
+            notifyItemChanged(0)
+        }
+    }
+
+    /**
+     * Updates the **_[firstOrNull]_** item of the list to be **_`enabled`_** or **_`disabled`_**.
+     * If the **_[List.size]_** is **_`1`_**, the **_[firstOrNull]_** item will be **_`disabled`_**.
+     * If the **_[List.size]_** is greater than **_`1`_**, the **_[firstOrNull]_** item will be **_`enabled`_** if it is currently **_`disabled`_**
+     */
+    private fun List<CheckBoxItem>.updateFirstItem() {
+        filter { checkBoxItem -> checkBoxItem.isChecked }.apply {
+            when (size) {
+                1    -> firstOrNull { checkBoxItem -> checkBoxItem.isChecked }?.apply { isEnabled = false }
+                else -> firstOrNull { checkBoxItem -> !checkBoxItem.isEnabled }?.apply { isEnabled = true }
+            }.apply { notifyItemChanged(this@updateFirstItem.indexOf(this)) }
+        }
+    }
 }

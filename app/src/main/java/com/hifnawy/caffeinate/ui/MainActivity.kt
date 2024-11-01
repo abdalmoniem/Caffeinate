@@ -1,6 +1,7 @@
 package com.hifnawy.caffeinate.ui
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.ActivityNotFoundException
@@ -15,11 +16,14 @@ import android.provider.Settings
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.NumberPicker
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.github.stephenvinouze.materialnumberpickercore.MaterialNumberPicker
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -30,13 +34,26 @@ import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.databinding.ActivityMainBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseThemeBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding
+import com.hifnawy.caffeinate.databinding.DialogSetCustomTimeoutBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageDrawable
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
+/**
+ * The main activity of the application, which is responsible for displaying the list of timeouts that can
+ * be used to keep the screen on. It also handles the logic of starting and stopping the
+ * [KeepAwakeService].
+ *
+ * @see KeepAwakeService
+ * @see SharedPrefsManager
+ */
 class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedListener, ServiceStatusObserver {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
@@ -56,6 +73,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                     truncated = "..."
             ) { checkBoxItem -> checkBoxItem.duration.toLocalizedFormattedTime(binding.root.context) }
 
+    /**
+     * Called when the activity is starting.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in [onSaveInstanceState].
+     *     Note: Otherwise it is null.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -102,6 +127,18 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Called after [onRestoreInstanceState], [onRestart], or [onPause],
+     * for your activity to start interacting with the user. This is a good place to
+     * begin animations, open exclusive-access devices (such as the camera), etc.
+     *
+     * Keep in mind that onResume is not the best indicator that your activity is
+     * visible to the user (as described in the ActivityLifecycle document).
+     *
+     * @see [onPause]
+     * @see [onStop]
+     * @see [onDestroy]
+     */
     override fun onResume() {
         super.onResume()
 
@@ -117,12 +154,34 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Called as part of the activity lifecycle when an activity is going into the background, but has not
+     * (yet) been destroyed. Use this method to release resources, such as broadcast receivers, that will not
+     * be needed while the activity is paused.
+     *
+     * This is usually a good place to commit unsaved changes to persistent data, stop animations and other
+     * ongoing actions, etc.
+     *
+     * @see [onResume]
+     * @see [onStop]
+     * @see [onDestroy]
+     */
     override fun onPause() {
         super.onPause()
         caffeinateApplication.keepAwakeServiceObservers.remove(this)
     }
 
+    /**
+     * Called when there is a change in the permission state indicating whether all necessary permissions
+     * have been granted.
+     *
+     * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
+     */
     override fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean) {
+        binding.caffeineButton.isEnabled = isAllPermissionsGranted
+
+        changeAllowDimmingPreferences(isAllPermissionsGranted)
+        changeAllowWhileLockedPreferences(isAllPermissionsGranted)
         binding.caffeineButton.isEnabled = isAllPermissionsGranted
 
         changeAllowDimmingPreferences(isAllPermissionsGranted)
@@ -130,14 +189,33 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         changeTimeoutsPreferences(isAllPermissionsGranted)
     }
 
+    /**
+     * Called when the user has changed the preference of whether the screen should be dimmed while it is
+     * being kept awake.
+     *
+     * @param isDimmingEnabled true if the screen should be dimmed while it is being kept awake, false
+     * otherwise.
+     */
     override fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean) {
         binding.allowDimmingSwitch.isChecked = isDimmingEnabled
     }
 
+    /**
+     * Called when the user has changed the preference of whether the keep awake screen should be enabled
+     * while the screen is locked.
+     *
+     * @param isWhileLockedEnabled true if the keep awake screen should be enabled while the screen is
+     * locked, false otherwise.
+     */
     override fun onIsWhileLockedEnabledChanged(isWhileLockedEnabled: Boolean) {
         binding.allowWhileLockedSwitch.isChecked = isWhileLockedEnabled
     }
 
+    /**
+     * Updates the UI to match the given service status.
+     *
+     * @param status the service status to update the UI for
+     */
     override fun onServiceStatusUpdate(status: ServiceStatus) {
         with(binding) {
             when (status) {
@@ -154,6 +232,15 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Callback for the result from requesting permissions.
+     *
+     * This method is invoked for every call on {@link #requestPermissions(String[], int)}.
+     *
+     * @param requestCode  The request code passed in {@link #requestPermissions(String[], int)}.
+     * @param permissions  The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions which is either {@link PackageManager#PERMISSION_GRANTED} or {@link PackageManager#PERMISSION_DENIED}. Never null.
+     */
     override fun onRequestPermissionsResult(
             requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
@@ -176,6 +263,18 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
+    /**
+     * Enables the Material You preferences.
+     *
+     * The Material You preferences are:
+     * 1. A [com.google.android.material.card.MaterialCardView] that shows the Material You preferences.
+     * 2. A [android.widget.TextView] that shows the Material You preferences title.
+     * 3. A [android.widget.TextView] that shows the Material You preferences subtitle.
+     * 4. A [android.widget.Switch] that toggles the Material You preferences.
+     *
+     * The Material You preferences are enabled when the user has granted the
+     * [Manifest.permission.POST_NOTIFICATIONS] permission.
+     */
     private fun enableMaterialYouPreferences() {
         with(binding) {
             materialYouCard.isEnabled = true
@@ -193,6 +292,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Enable or disable the [allowWhileLockedCard], [allowWhileLockedTextView], [allowWhileLockedSubTextTextView],
+     * and [allowWhileLockedSwitch] based on whether the user has granted all necessary permissions.
+     *
+     * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
+     */
     private fun changeAllowWhileLockedPreferences(isAllPermissionsGranted: Boolean) {
         with(binding) {
             allowWhileLockedCard.isEnabled = isAllPermissionsGranted
@@ -209,6 +314,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Enable or disable the [allowDimmingCard], [allowDimmingTextView], [allowDimmingSubTextTextView],
+     * and [allowDimmingSwitch] based on whether the user has granted all necessary permissions.
+     *
+     * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
+     */
     private fun changeAllowDimmingPreferences(isAllPermissionsGranted: Boolean) {
         with(binding) {
             allowDimmingCard.isEnabled = isAllPermissionsGranted
@@ -225,6 +336,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Enable or disable the [timeoutChoiceCard], [timeoutChoiceTextView], [timeoutChoiceSubTextTextView],
+     * and [timeoutChoiceButton] based on whether the user has granted all necessary permissions.
+     *
+     * @param isAllPermissionsGranted true if all necessary permissions have been granted, false otherwise.
+     */
     private fun changeTimeoutsPreferences(isAllPermissionsGranted: Boolean) {
         with(binding) {
             val timeoutChoiceClickListener = View.OnClickListener {
@@ -244,6 +361,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Returns true if all necessary permissions are granted.
+     *
+     * @return true if all permissions are granted, false otherwise.
+     */
     @SuppressLint("BatteryLife")
     private fun isAllPermissionsGranted(): Boolean {
         with(binding) {
@@ -271,6 +393,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Checks if the battery optimization is granted.
+     *
+     * @return true if the battery optimization is granted, false otherwise.
+     */
     @SuppressLint("BatteryLife")
     private fun checkBatteryOptimization(): Boolean {
         with(binding) {
@@ -294,6 +421,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Checks if the background optimization is granted.
+     *
+     * @return true if the background optimization is granted, false otherwise.
+     */
     private fun checkBackgroundOptimization(): Boolean {
         with(binding) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -315,6 +447,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Checks if the app has permission to post notifications.
+     *
+     * @return true if permission is granted, false otherwise
+     */
     private fun checkNotificationPermission(): Boolean {
         with(binding) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -334,6 +471,16 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Requests the user to grant the battery optimization permission.
+     *
+     * This will start the {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}
+     * intent which will open the "Battery optimization" settings screen.
+     *
+     * This method does nothing if the Android version is less than [android.os.Build.VERSION_CODES.M].
+     *
+     * @see checkBatteryOptimization
+     */
     private fun requestBatteryOptimizationPermission() {
         MaterialAlertDialogBuilder(this)
             .setTitle(getString(R.string.dialog_battery_optimization_needed_title))
@@ -347,6 +494,15 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             .show()
     }
 
+    /**
+     * Shows a dialog to the user to let them choose a theme.
+     *
+     * The dialog has 4 options to choose from:
+     * 1. System default
+     * 2. Light
+     * 3. Dark
+     * 4. Material You (only available on Android 12+)
+     */
     private fun showChooseThemeDialog() {
         with(binding) {
             var theme = sharedPreferences.theme
@@ -404,38 +560,93 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         }
     }
 
+    /**
+     * Shows a dialog to allow the user to choose a timeout duration.
+     *
+     * This dialog will contain a list of checkboxes, each representing a different timeout duration
+     * that the user can select. The list of durations is stored in the app's SharedPreferences.
+     *
+     * When the dialog is shown, the currently selected timeout duration is checked in the list.
+     * When the user selects a new timeout duration, the app will start a new {@link TimeoutJob} with
+     * the selected duration.
+     *
+     * If the user has not selected any timeout durations before, the dialog will be empty and the
+     * user will be prompted to select at least one duration.
+     *
+     * This method is called when the user clicks the "Choose timeout" button in the app's UI.
+     */
     private fun showChooseTimeoutDialog() {
         with(binding) {
             val dialogBinding = DialogChooseTimeoutsBinding.inflate(LayoutInflater.from(root.context))
-            val dialog = MaterialAlertDialogBuilder(root.context).setView(dialogBinding.root).create()
+            val dialog = MaterialAlertDialogBuilder(root.context).setView(dialogBinding.root).create().apply {
+                window?.setLayout(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
 
             with(dialogBinding) {
-                val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes.map { it.copy() })
+                val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes.map { it.copy() }.toMutableList())
+
                 timeoutsRecyclerView.layoutManager = LinearLayoutManager(root.context)
                 timeoutsRecyclerView.adapter = checkBoxAdapter
-                val height = checkBoxAdapter.timeoutCheckBoxes.map { 0f }.fold(0f) { sum, _ -> sum + 0.12f }
 
-                dialog.window?.setLayout((displayWidth * 0.8f).toInt(), (displayHeight * height).toInt())
+                dialogButtonAddTimeout.setOnClickListener { buttonView ->
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    val maxTimeout = checkBoxAdapter.checkBoxItems
+                                         .filter { checkBoxItem -> checkBoxItem.duration != Duration.INFINITE }
+                                         .maxOfOrNull { checkBoxItem -> checkBoxItem.duration }
+                                     ?: checkBoxAdapter.checkBoxItems.firstOrNull()?.duration
+                    showSetCustomTimeoutDialog(maxTimeout) { hours, minutes, seconds ->
+                        val timeout = when {
+                            hours == 0 && minutes == 0 && seconds == 0 -> Duration.INFINITE
+                            else                                       -> hours.hours + minutes.minutes + seconds.seconds
+                        }
+                        checkBoxAdapter.addCheckBox(
+                                CheckBoxItem(
+                                        text = timeout.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext),
+                                        isChecked = true,
+                                        isEnabled = true,
+                                        duration = timeout
+                                )
+                        )
+                    }
+                }
 
-                dialogButtonOk.setOnClickListener {
-                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                dialogButtonRemoveTimeout.setOnClickListener { buttonView ->
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    val sizeBeforeDeletion = checkBoxAdapter.checkBoxItems.size
+
+                    checkBoxAdapter.checkBoxItems
+                        .filter { checkBoxItem -> checkBoxItem.isChecked }
+                        .apply {
+                            if (sizeBeforeDeletion == size) {
+                                dialogButtonOk.isEnabled = false
+                                dialogButtonRemoveTimeout.isEnabled = false
+                            }
+                        }
+                        .forEach { checkBoxItem -> checkBoxAdapter.removeCheckBox(checkBoxItem) }
+                }
+
+                dialogButtonOk.setOnClickListener { buttonView ->
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
 
                     caffeinateApplication.run {
                         timeoutCheckBoxes.clear()
-                        checkBoxAdapter.timeoutCheckBoxes.forEach { checkBoxItem -> timeoutCheckBoxes.add(checkBoxItem.copy()) }
+                        checkBoxAdapter.checkBoxItems.forEach { checkBoxItem -> timeoutCheckBoxes.add(checkBoxItem.copy()) }
 
                         timeoutChoiceSubTextTextView.text = timeoutCheckBoxes.enabledDurations
 
-                        checkBoxAdapter.timeoutCheckBoxes
+                        checkBoxAdapter.checkBoxItems
                             .find { checkBoxItem -> checkBoxItem.duration == timeout && !checkBoxItem.isChecked }
                             ?.let {
                                 when (lastStatusUpdate) {
                                     is ServiceStatus.Running -> KeepAwakeService.startNextTimeout(this, debounce = false)
-                                    else                     -> timeout = checkBoxAdapter.timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+                                    else                     -> timeout = checkBoxAdapter.checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
                                 }
                             }
                         ?: when (lastStatusUpdate) {
-                            is ServiceStatus.Stopped -> timeout = checkBoxAdapter.timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+                            is ServiceStatus.Stopped -> timeout = checkBoxAdapter.checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
                             else                     -> Unit // do nothing if the service is running
                         }
 
@@ -445,13 +656,98 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                     }
                 }
 
-                dialogButtonCancel.setOnClickListener {
-                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                dialogButtonCancel.setOnClickListener { buttonView ->
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    dialog.dismiss()
+                }
+            }
+            dialog.show()
+        }
+    }
+
+    /**
+     * Shows a dialog to the user to let them choose a custom timeout.
+     *
+     * @param maxTimeout the maximum allowed timeout, or null if there is no limit
+     * @param valueSetCallback a callback that will be called when the user sets a value; the callback will be passed the
+     * number of hours, minutes and seconds that the user has chosen
+     */
+    private fun showSetCustomTimeoutDialog(maxTimeout: Duration?, valueSetCallback: (hours: Int, minutes: Int, seconds: Int) -> Unit) {
+        with(binding) {
+            val dialogBinding = DialogSetCustomTimeoutBinding.inflate(LayoutInflater.from(root.context))
+            val dialog = MaterialAlertDialogBuilder(root.context).setView(dialogBinding.root).create().apply {
+                window?.setLayout(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            with(dialogBinding) {
+                hoursNumberPicker.textColor = root.context.theme.themeColor
+                minutesNumberPicker.textColor = root.context.theme.themeColor
+                secondsNumberPicker.textColor = root.context.theme.themeColor
+
+                hoursLabel.setTextColor(root.context.theme.themeColor)
+                minutesLabel.setTextColor(root.context.theme.themeColor)
+                secondsLabel.setTextColor(root.context.theme.themeColor)
+
+                hoursSeparator.setTextColor(root.context.theme.themeColor)
+                minutesSeparator.setTextColor(root.context.theme.themeColor)
+
+                maxTimeout?.run {
+                    hoursNumberPicker.value = inWholeHours.toInt()
+                    minutesNumberPicker.value = inWholeMinutes.rem(60).toInt()
+                    secondsNumberPicker.value = inWholeSeconds.rem(60).toInt()
+                }
+
+                hoursNumberPicker.setFormatter { value -> "%02d".format(value) }
+                minutesNumberPicker.setFormatter { value -> "%02d".format(value) }
+                secondsNumberPicker.setFormatter { value -> "%02d".format(value) }
+
+                NumberPicker.OnValueChangeListener { numberPicker, _, _ -> numberPicker.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY) }.run {
+                    hoursNumberPicker.setOnValueChangedListener(this)
+                    minutesNumberPicker.setOnValueChangedListener(this)
+                    secondsNumberPicker.setOnValueChangedListener(this)
+                }
+
+                hoursNumberPicker.animateValues(maxTimeout?.inWholeHours?.toInt())
+                minutesNumberPicker.animateValues(maxTimeout?.inWholeMinutes?.rem(60)?.toInt())
+                secondsNumberPicker.animateValues(maxTimeout?.inWholeSeconds?.rem(60)?.toInt())
+
+                dialogButtonOk.setOnClickListener { buttonView ->
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    valueSetCallback(hoursNumberPicker.value, minutesNumberPicker.value, secondsNumberPicker.value)
+                    dialog.dismiss()
+                }
+
+                dialogButtonCancel.setOnClickListener { buttonView ->
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                     dialog.dismiss()
                 }
             }
 
             dialog.show()
+        }
+    }
+
+    /**
+     * Animates the value of this [MaterialNumberPicker] from the provided [fromValue] to the
+     * current [MaterialNumberPicker.getValue] of this [MaterialNumberPicker].
+     *
+     * @param fromValue The value to animate from. If 0, the current [MaterialNumberPicker.getMaxValue] is used.
+     * @param animationDuration The duration of the animation in milliseconds.
+     */
+    private fun MaterialNumberPicker.animateValues(fromValue: Int?, animationDuration: Long = 1000L) {
+        ValueAnimator.ofInt(
+                if (fromValue == 0) maxValue else 0,
+                if (fromValue == 0) 0 else fromValue ?: value
+        ).apply {
+            addUpdateListener { animator ->
+                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                value = animator.animatedValue as Int
+            }
+            duration = animationDuration
+            start()
         }
     }
 }

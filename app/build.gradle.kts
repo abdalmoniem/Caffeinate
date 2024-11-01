@@ -3,20 +3,20 @@ import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.jetbrainsKotlinAndroid)
 }
 
 android {
     namespace = "com.hifnawy.caffeinate"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.hifnawy.caffeinate"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 21
-        versionName = "1.5.1"
+        targetSdk = 35
+        versionCode = 22
+        versionName = "1.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -25,16 +25,17 @@ android {
     var isSigningConfigEnabled = false
 
     if (localPropertiesFile.exists()) {
-        val keystoreProperties = Properties()
-        keystoreProperties.load(FileInputStream(localPropertiesFile))
-
+        val keystoreProperties = Properties().apply { load(FileInputStream(localPropertiesFile)) }
         val signingProperties = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
 
         isSigningConfigEnabled =
-            signingProperties.all { property -> property in keystoreProperties.keys } &&
-                    rootProject.file(keystoreProperties["storeFile"] as String).exists()
+                signingProperties.all { property -> property in keystoreProperties.keys } &&
+                rootProject.file(keystoreProperties["storeFile"] as String).exists()
 
         if (!isSigningConfigEnabled) {
+            signingProperties
+                .filter { property -> property !in keystoreProperties.keys }
+                .forEach { missingKey -> project.logger.warn("WARNING: missing key in '${localPropertiesFile.absolutePath}': $missingKey") }
             project.logger.warn("WARNING: signing config not found, add signing config in local.properties")
         } else {
             signingConfigs {
@@ -50,7 +51,9 @@ android {
         }
 
         isDebuggingEnabled =
-            keystoreProperties.getProperty("isDebuggingEnabled")?.toBoolean() ?: false
+                keystoreProperties.getProperty("isDebuggingEnabled")?.toBoolean() ?: false
+    } else {
+        project.logger.warn("WARNING: local.properties not found, add local.properties in root directory to enable signing.")
     }
 
     buildTypes {
@@ -62,14 +65,13 @@ android {
             project.logger.lifecycle("release isDebuggable: $isDebuggingEnabled")
 
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
             )
 
             if (isSigningConfigEnabled) {
                 signingConfig = signingConfigs.findByName("release")
-                    ?: error("release signing config not found, add signing config in local.properties")
-
+                                ?: error("release signing config not found, add signing config in local.properties")
             } else {
                 project.logger.warn("WARNING: release buildType is not signed, add signing config in local.properties to enable signing.")
             }
@@ -80,8 +82,8 @@ android {
             isShrinkResources = false
 
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
             )
 
             applicationIdSuffix = ".debug"
@@ -94,21 +96,21 @@ android {
         variant.outputs.all {
             this as BaseVariantOutputImpl
             val applicationId =
-                if (variant.buildType.name == "release") "$applicationId.release" else applicationId
+                    if (variant.buildType.name == "release") "$applicationId.release" else applicationId
             val apkName =
-                "${applicationId}_${variant.buildType.name}_v${android.defaultConfig.versionName}.apk"
+                    "${applicationId}_${variant.buildType.name}_v${android.defaultConfig.versionName}.apk"
 
             outputFileName = apkName
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "21"
     }
 
     buildFeatures {
@@ -123,13 +125,14 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
+    implementation(libs.androidxCoreKtx)
+    implementation(libs.androidxAppCompat)
     implementation(libs.material)
-    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidxConstraintLayout)
     implementation(libs.timber)
     implementation(libs.gson)
+    implementation(libs.materialNumberPicker)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidxJunit)
+    androidTestImplementation(libs.androidxEspressoCore)
 }
