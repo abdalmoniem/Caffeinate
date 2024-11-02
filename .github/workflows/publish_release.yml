@@ -1,3 +1,4 @@
+#file: noinspection Annotator
 name: Publish Release
 run-name: ${{ github.workflow }} Tag ${{ inputs.releaseTag }}
 on:

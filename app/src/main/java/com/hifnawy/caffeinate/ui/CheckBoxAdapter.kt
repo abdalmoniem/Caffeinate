@@ -8,6 +8,7 @@ import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.TimeoutCheckboxItemBinding
+import com.hifnawy.caffeinate.ui.CheckBoxAdapter.OnItemsChangedListener
 import java.io.Serializable
 import kotlin.time.Duration
 

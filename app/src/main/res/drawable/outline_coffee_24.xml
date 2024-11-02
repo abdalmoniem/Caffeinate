@@ -5,7 +5,7 @@
     android:tint="@color/white"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    
+
     <group
         android:scaleX="-1"
         android:translateX="24">

@@ -23,8 +23,7 @@ import timber.log.Timber as Log
  * @see KeepAwakeService
  * @see KeepAwakeServiceState
  */
-class ScreenLockReceiver(private val caffeinateApplication: CaffeinateApplication) :
-    BroadcastReceiver() {
+class ScreenLockReceiver(private val caffeinateApplication: CaffeinateApplication) : BroadcastReceiver() {
 
     /**
      * Called when the BroadcastReceiver receives an Intent broadcast.

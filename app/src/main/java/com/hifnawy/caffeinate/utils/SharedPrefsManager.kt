@@ -105,9 +105,9 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [Boolean] `true` if all necessary permissions are granted, `false` otherwise.
      */
     var isAllPermissionsGranted: Boolean
-        get() = sharedPreferences.getBoolean(SharedPrefsKeys.ALL_PERMISSIONS_GRANTED.name, false)
+        get() = sharedPreferences.getBoolean(ALL_PERMISSIONS_GRANTED.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(SharedPrefsKeys.ALL_PERMISSIONS_GRANTED.name, value).apply()
+            sharedPreferences.edit().putBoolean(ALL_PERMISSIONS_GRANTED.name, value).apply()
             notifySharedPrefsObservers { observer -> observer.onIsAllPermissionsGrantedChanged(value) }
         }
 
@@ -122,8 +122,8 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @see SharedPrefsManager.Theme
      */
     var theme: Theme
-        get() = Theme.valueOf(sharedPreferences.getString(SharedPrefsKeys.THEME.name, Theme.SYSTEM_DEFAULT.name) ?: Theme.SYSTEM_DEFAULT.name)
-        set(value) = sharedPreferences.edit().putString(SharedPrefsKeys.THEME.name, value.name).apply()
+        get() = Theme.valueOf(sharedPreferences.getString(THEME.name, SYSTEM_DEFAULT.name) ?: SYSTEM_DEFAULT.name)
+        set(value) = sharedPreferences.edit().putString(THEME.name, value.name).apply()
 
     /**
      * Retrieves or sets whether the "Material You" feature is enabled.
@@ -134,8 +134,8 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [Boolean] `true` if the "Material You" feature is enabled, `false` otherwise.
      */
     var isMaterialYouEnabled: Boolean
-        get() = sharedPreferences.getBoolean(SharedPrefsKeys.ENABLE_MATERIAL_YOU.name, false)
-        set(value) = sharedPreferences.edit().putBoolean(SharedPrefsKeys.ENABLE_MATERIAL_YOU.name, value).apply()
+        get() = sharedPreferences.getBoolean(ENABLE_MATERIAL_YOU.name, false)
+        set(value) = sharedPreferences.edit().putBoolean(ENABLE_MATERIAL_YOU.name, value).apply()
 
     /**
      * Retrieves or sets whether the screen should be dimmed while it is being kept awake.
@@ -146,9 +146,9 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [Boolean] `true` if the screen should be dimmed while it is being kept awake, `false` otherwise.
      */
     var isDimmingEnabled: Boolean
-        get() = sharedPreferences.getBoolean(SharedPrefsKeys.ENABLE_DIMMING.name, false)
+        get() = sharedPreferences.getBoolean(ENABLE_DIMMING.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(SharedPrefsKeys.ENABLE_DIMMING.name, value).apply()
+            sharedPreferences.edit().putBoolean(ENABLE_DIMMING.name, value).apply()
             notifySharedPrefsObservers { observer -> observer.onIsDimmingEnabledChanged(value) }
         }
 
@@ -162,9 +162,9 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [Boolean] `true` if the "While Locked" feature is enabled, `false` otherwise.
      */
     var isWhileLockedEnabled: Boolean
-        get() = sharedPreferences.getBoolean(SharedPrefsKeys.ENABLE_WHILE_LOCKED.name, false)
+        get() = sharedPreferences.getBoolean(ENABLE_WHILE_LOCKED.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(SharedPrefsKeys.ENABLE_WHILE_LOCKED.name, value).apply()
+            sharedPreferences.edit().putBoolean(ENABLE_WHILE_LOCKED.name, value).apply()
             notifySharedPrefsObservers { observer -> observer.onIsWhileLockedEnabledChanged(value) }
         }
 
@@ -178,17 +178,17 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      */
     var timeoutCheckBoxes: MutableList<CheckBoxItem>
         get() = when {
-            sharedPreferences.contains(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name) -> sharedPreferences.getSerializableList<MutableList<CheckBoxItem>>(
-                    SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name
+            sharedPreferences.contains(TIMEOUT_CHECK_BOXES.name) -> sharedPreferences.getSerializableList<MutableList<CheckBoxItem>>(
+                    TIMEOUT_CHECK_BOXES.name
             )
 
-            else                                                                 -> timeouts.map { timeout ->
+            else                                                 -> timeouts.map { timeout ->
                 CheckBoxItem(text = timeout.toFormattedTime(), isChecked = true, isEnabled = true, duration = timeout)
             }
         }.map { checkBoxItem ->
             checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext))
         }.toMutableList()
-        set(value) = sharedPreferences.edit().putSerializableList(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name, value.map { checkBoxItem ->
+        set(value) = sharedPreferences.edit().putSerializableList(TIMEOUT_CHECK_BOXES.name, value.map { checkBoxItem ->
             checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext))
         }).apply()
 
