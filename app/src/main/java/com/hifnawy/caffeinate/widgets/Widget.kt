@@ -1,0 +1,205 @@
+package com.hifnawy.caffeinate.widgets
+
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.widget.RemoteViews
+import com.hifnawy.caffeinate.CaffeinateApplication
+import com.hifnawy.caffeinate.R
+import com.hifnawy.caffeinate.ServiceStatus
+import com.hifnawy.caffeinate.databinding.WidgetBinding
+import com.hifnawy.caffeinate.services.KeepAwakeService
+import com.hifnawy.caffeinate.ui.MainActivity
+import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
+import com.hifnawy.caffeinate.utils.SharedPrefsManager
+import timber.log.Timber as Log
+
+/**
+ * A custom implementation of [AppWidgetProvider] that handles widget updates and interactions for the Caffeinate application.
+ *
+ * This class is responsible for responding to broadcast intents that are sent to the widget, such as updates or user interactions.
+ * It updates the widget's UI and manages the interaction between the widget and the [KeepAwakeService].
+ *
+ * The widget allows users to quickly start or stop the service, providing a convenient way to keep the screen awake for a specified duration.
+ *
+ * @constructor Creates a new instance of [Widget].
+ *
+ * @see AppWidgetProvider
+ * @see KeepAwakeService
+ * @see CaffeinateApplication
+ * @see ServiceStatus
+ */
+class Widget : AppWidgetProvider() {
+
+    /**
+     * Receives a broadcast intent and responds accordingly.
+     *
+     * This method is called when a broadcast intent is sent to this widget. It updates the widget's UI and manages the interaction between the widget
+     * and the [KeepAwakeService].
+     *
+     * @param context [Context] the context in which the widget is running
+     * @param intent [Intent] the broadcast intent that was received
+     *
+     * @see AppWidgetProvider.onReceive
+     * @see KeepAwakeService
+     * @see CaffeinateApplication
+     * @see ServiceStatus
+     */
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        val caffeinateApplication = context.applicationContext as CaffeinateApplication
+
+        when (intent.action) {
+            AppWidgetManager.ACTION_APPWIDGET_UPDATE -> updateAllWidgets(caffeinateApplication)
+            "CLICK"                                  -> {
+                if (!checkPermissions(caffeinateApplication)) return
+                KeepAwakeService.startNextTimeout(caffeinateApplication)
+            }
+        }
+    }
+
+    /**
+     * Checks if all necessary permissions are granted for the application to function correctly.
+     *
+     * This method logs the current permission status and, if permissions are not granted,
+     * it starts the MainActivity to prompt the user to grant the necessary permissions.
+     *
+     * @param caffeinateApplication [CaffeinateApplication] the application context
+     * @return [Boolean] `true` if all permissions are granted, `false` otherwise
+     */
+    private fun checkPermissions(caffeinateApplication: CaffeinateApplication): Boolean {
+        val isAllPermissionsGranted by lazy { SharedPrefsManager(caffeinateApplication).isAllPermissionsGranted }
+        Log.d("Permissions Granted: $isAllPermissionsGranted")
+
+        if (!isAllPermissionsGranted) caffeinateApplication.run {
+            startActivity(Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            })
+        }
+
+        return when {
+            !isAllPermissionsGranted -> false
+            else                     -> true
+        }
+    }
+
+    /**
+     * A companion object for the Widget class.
+     *
+     * This object provides static-like functionality for the Widget class, allowing access to
+     * methods and constants without needing an instance of the class.
+     *
+     * The companion object may include utility methods related to widget handling and
+     * predefined constants used throughout the Widget class.
+     *
+     * Example usage:
+     * ```
+     * Widget.updateAllWidgets(caffeinateApplication)
+     * ```
+     *
+     * @see Widget
+     */
+    companion object {
+
+        /**
+         * Sets the click listeners for the widget.
+         *
+         * This method sets the [PendingIntent] for the clicks on the widget text and image views. The [PendingIntent] is used to start the [Widget] when the
+         * user clicks on the widget.
+         *
+         * @receiver [RemoteViews] the remote views of the widget.
+         * @param context [Context] the context of the app.
+         */
+        private fun RemoteViews.setClickListeners(context: Context) {
+            val widgetView = apply(context, null)
+            val widgetBinding = WidgetBinding.bind(widgetView)
+            val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    Intent(context, Widget::class.java).apply { action = "CLICK" },
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            setOnClickPendingIntent(widgetBinding.widgetText.id, pendingIntent)
+            setOnClickPendingIntent(widgetBinding.widgetImageView.id, pendingIntent)
+        }
+
+        /**
+         * Updates the widget with the given id.
+         *
+         * @param caffeinateApplication [CaffeinateApplication] the application context
+         * @param appWidgetManager [AppWidgetManager] the widget manager
+         * @param appWidgetId [Int] the id of the widget to update
+         *
+         * @see AppWidgetManager
+         * @see AppWidgetProvider
+         * @see CaffeinateApplication
+         */
+        private fun updateAppWidget(caffeinateApplication: CaffeinateApplication, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
+            caffeinateApplication.run {
+                val views = RemoteViews(applicationContext.packageName, R.layout.widget)
+                val widgetView = views.apply(applicationContext, null)
+                val widgetBinding = WidgetBinding.bind(widgetView)
+                val widgetText = when (val status = caffeinateApplication.lastStatusUpdate) {
+                    is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(localizedApplicationContext)
+                    is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
+                }
+
+                views.run {
+                    setTextViewText(widgetBinding.widgetLabel.id, getString(R.string.app_name))
+                    setTextViewText(widgetBinding.widgetText.id, widgetText)
+                    setClickListeners(applicationContext)
+
+                    when (caffeinateApplication.lastStatusUpdate) {
+                        is ServiceStatus.Stopped -> setImageViewResource(R.id.widgetImageView, R.drawable.outline_coffee_24)
+                        is ServiceStatus.Running -> setImageViewResource(R.id.widgetImageView, R.drawable.baseline_coffee_24)
+                    }
+                }
+
+                appWidgetManager.updateAppWidget(appWidgetId, views)
+            }
+        }
+
+        /**
+         * Updates all widgets with the new status of the KeepAwakeService.
+         *
+         * This method is called whenever the status of the KeepAwakeService changes, such as when it is started or stopped. It updates the text and
+         * image view of all widgets with the new status.
+         *
+         * The method takes a single parameter, [caffeinateApplication], which is the application context of the app. This parameter is used to access
+         * the [AppWidgetManager] and the [Context] of the app.
+         *
+         * The method first gets the IDs of all widgets from the [AppWidgetManager] using the [AppWidgetManager.getAppWidgetIds] method. It then loops
+         * over the IDs and calls the [updateAppWidget] method to update each widget.
+         *
+         * @param caffeinateApplication [CaffeinateApplication] the application context of the app
+         *
+         * @see AppWidgetManager
+         * @see AppWidgetProvider
+         * @see CaffeinateApplication
+         */
+        fun updateAllWidgets(caffeinateApplication: CaffeinateApplication) {
+            caffeinateApplication.run {
+                val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
+                val widgetComponent = ComponentName(applicationContext, Widget::class.java)
+                val appWidgetIds = appWidgetManager.getAppWidgetIds(widgetComponent)
+                val widgetText = when (val status = caffeinateApplication.lastStatusUpdate) {
+                    is ServiceStatus.Running -> status.remaining.toFormattedTime()
+                    is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
+                }
+
+                appWidgetIds.forEach { appWidgetId -> updateAppWidget(this, appWidgetManager, appWidgetId) }
+
+                if (appWidgetIds.isNotEmpty()) Log.d(
+                        "updateAllWidgets: ${appWidgetIds.size} widgets updated, " +
+                        "widgetIds: ${appWidgetIds.joinToString(", ")}, " +
+                        "widgetText: $widgetText"
+                )
+            }
+        }
+    }
+}

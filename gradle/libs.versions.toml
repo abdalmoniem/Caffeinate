@@ -1,5 +1,5 @@
 [versions]
-androidApplicationVersion = "8.4.2"
+androidApplicationVersion = "8.7.2"
 androidxJunitVersion = "1.2.1"
 appCompatVersion = "1.7.0"
 constraintLayoutVersion = "2.2.0"

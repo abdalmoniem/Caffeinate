@@ -1,0 +1,44 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/widgetText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/widgetImageView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="-10dp"
+        android:text="@string/caffeinate_button_off"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        tools:ignore="HardcodedText" />
+
+    <ImageView
+        android:id="@+id/widgetImageView"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:importantForAccessibility="no"
+        android:padding="0dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/outline_coffee_24"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/widgetLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/widgetImageView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="-10dp"
+        android:text="@string/app_name"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:textAlignment="center"
+        tools:ignore="HardcodedText" />
+
+</RelativeLayout>

@@ -598,7 +598,11 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             toggleState(this, KeepAwakeServiceState.START)
         }
 
-        fun toggleState(caffeinateApplication: CaffeinateApplication, newKeepAwakeServiceState: KeepAwakeServiceState) {
+        fun toggleState(
+                caffeinateApplication: CaffeinateApplication,
+                newKeepAwakeServiceState: KeepAwakeServiceState,
+                startTimeout: Duration? = null
+        ) {
             Log.d("newState: $newKeepAwakeServiceState")
 
             caffeinateApplication.apply {
@@ -608,7 +612,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
                     KeepAwakeServiceState.TOGGLE -> lastStatusUpdate is ServiceStatus.Stopped
                 }
                 val status = when {
-                    start -> ServiceStatus.Running(timeout)
+                    start -> ServiceStatus.Running(startTimeout ?: timeout)
                     else  -> ServiceStatus.Stopped
                 }
 

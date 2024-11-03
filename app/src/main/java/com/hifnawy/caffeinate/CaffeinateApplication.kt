@@ -9,6 +9,7 @@ import com.hifnawy.caffeinate.services.QuickTileService
 import com.hifnawy.caffeinate.ui.CheckBoxItem
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
+import com.hifnawy.caffeinate.widgets.Widget
 import java.util.Locale
 import kotlin.time.Duration
 import timber.log.Timber as Log
@@ -55,7 +56,7 @@ class CaffeinateApplication : Application() {
      * timeout duration, the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] will use this timeout duration as the new timeout
      * duration.
      *
-     * @return the first timeout duration that was selected by the user, or [Duration.INFINITE] if no timeout duration was selected.
+     * @return [Duration] the first timeout duration that was selected by the user, or [Duration.INFINITE] if no timeout duration was selected.
      */
     private val firstTimeout: Duration
         get() = timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
@@ -66,7 +67,7 @@ class CaffeinateApplication : Application() {
      * This is the timeout duration that was selected by the user in the list of available timeout durations. When the user selects a new timeout
      * duration, the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] will use this timeout duration as the new timeout duration.
      *
-     * @return the last timeout duration that was selected by the user.
+     * @return [Duration] the last timeout duration that was selected by the user.
      */
     val lastTimeout: Duration
         get() = timeoutCheckBoxes.last { checkBoxItem -> checkBoxItem.isChecked }.duration
@@ -77,7 +78,7 @@ class CaffeinateApplication : Application() {
      * This is the duration that was previously selected in the list of available timeout durations. When the current timeout duration is finished,
      * the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] will use this timeout duration as the new timeout duration.
      *
-     * @return the previously selected timeout duration.
+     * @return [Duration] the previously selected timeout duration.
      */
     val prevTimeout: Duration
         get() {
@@ -97,7 +98,7 @@ class CaffeinateApplication : Application() {
      *
      * When the current timeout duration is finished, the KeepAwakeService will use this timeout duration as the new timeout duration.
      *
-     * @return the next timeout duration that will be used when the KeepAwakeService is running.
+     * @return [Duration] the next timeout duration that will be used when the KeepAwakeService is running.
      */
     val nextTimeout: Duration
         get() {
@@ -202,7 +203,9 @@ class CaffeinateApplication : Application() {
      * This method is called when the service's status is updated. It iterates over the list of [ServiceStatusObserver]s and calls
      * the [onServiceStatusUpdate][ServiceStatusObserver.onServiceStatusUpdate] method on each observer.
      *
-     * @param status the new status of the service
+     * It also updates the [QuickTileService] and [Widget] if there are any added Quick Tiles or Widgets.
+     *
+     * @param status [ServiceStatus] the new status of the service
      *
      * @see ServiceStatusObserver
      * @see ServiceStatus
@@ -214,6 +217,7 @@ class CaffeinateApplication : Application() {
         keepAwakeServiceObservers.forEach { observer -> observer.onServiceStatusUpdate(status) }
 
         QuickTileService.requestTileStateUpdate(localizedApplicationContext)
+        Widget.updateAllWidgets(this)
     }
 
     /**
@@ -287,7 +291,7 @@ class CaffeinateApplication : Application() {
      * localized application context. The locale is initialized during application startup
      * and can be accessed throughout the application.
      *
-     * @property applicationLocale The current locale used by the application.
+     * @property applicationLocale [Locale] The current locale used by the application.
      */
     companion object {
 
@@ -318,7 +322,7 @@ interface ServiceStatusObserver {
     /**
      * Called when the status of the Caffeinate service is updated.
      *
-     * @param status the new status of the service
+     * @param status [ServiceStatus] the new status of the service
      */
     fun onServiceStatusUpdate(status: ServiceStatus)
 }
