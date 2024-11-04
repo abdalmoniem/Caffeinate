@@ -53,11 +53,34 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      */
     private enum class SharedPrefsKeys {
 
+        /**
+         * A [Boolean] value indicating whether all permissions necessary for the application to function have been granted.
+         */
         ALL_PERMISSIONS_GRANTED,
+
+        /**
+         * A [Theme] value indicating the current theme of the application.
+         */
         THEME,
+
+        /**
+         * A [Boolean] value indicating whether the screen should be dimmed while the service is running.
+         */
         ENABLE_DIMMING,
+
+        /**
+         * A [Boolean] value indicating whether Material You design elements should be enabled.
+         */
         ENABLE_MATERIAL_YOU,
+
+        /**
+         * A [Boolean] value indicating whether the service should be enabled while the screen is locked.
+         */
         ENABLE_WHILE_LOCKED,
+
+        /**
+         * A [List] of [CheckBoxItem] values indicating the timeouts that should be displayed in the RecyclerView.
+         */
         TIMEOUT_CHECK_BOXES,
     }
 
@@ -73,8 +96,31 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      */
     enum class Theme(var value: Int) {
 
+        /**
+         * A theme that follows the device's system theme.
+         *
+         * The application will follow the device's system theme setting, which can be either light or dark.
+         *
+         * @see AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+         */
         SYSTEM_DEFAULT(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM),
+
+        /**
+         * A light theme.
+         *
+         * The application will use a light theme, which is suitable for daytime use.
+         *
+         * @see AppCompatDelegate.MODE_NIGHT_NO
+         */
         LIGHT(AppCompatDelegate.MODE_NIGHT_NO),
+
+        /**
+         * A dark theme.
+         *
+         * The application will use a dark theme, which is suitable for nighttime use.
+         *
+         * @see AppCompatDelegate.MODE_NIGHT_YES
+         */
         DARK(AppCompatDelegate.MODE_NIGHT_YES)
     }
 

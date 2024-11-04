@@ -236,10 +236,10 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
      *
      * @return [Int] The result of the call described above. This must be one of the following
      * constants:
-     * - [START_STICKY_COMPATIBILITY][Service.START_STICKY_COMPATIBILITY],
-     * - [START_STICKY][Service.START_STICKY],
-     * - [START_NOT_STICKY][Service.START_NOT_STICKY],
-     * - [START_REDELIVER_INTENT][Service.START_REDELIVER_INTENT]
+     * - [START_STICKY_COMPATIBILITY][Service.START_STICKY_COMPATIBILITY]: The service is not explicitly restarted if it is killed.
+     * - [START_STICKY][Service.START_STICKY]: The service is restarted with a null intent if it is killed.
+     * - [START_NOT_STICKY][Service.START_NOT_STICKY]: The service is not restarted after being killed.
+     * - [START_REDELIVER_INTENT][Service.START_REDELIVER_INTENT]: The service is restarted with the original intent if it is killed.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIFICATION_ID, buildForegroundNotification(caffeinateApplication.lastStatusUpdate))
@@ -264,6 +264,16 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         return START_NOT_STICKY
     }
 
+    /**
+     * Called by the system to notify a Service that it is no longer used and is being removed.
+     * The service should clean up any resources it has acquired, such as threads, registered
+     * receivers, etc. This is the last call the service receives.
+     *
+     * @see [onStartCommand]
+     * @see [onLowMemory]
+     * @see [onTrimMemory]
+     * @see [onTaskRemoved]
+     */
     override fun onDestroy() {
         super.onDestroy()
 
@@ -271,8 +281,28 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         stopCaffeine()
     }
 
+    /**
+     * Called when the "All Permissions Granted" preference changes.
+     *
+     * This is a part of the [SharedPrefsChangedListener][com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsChangedListener] interface.
+     * This method is called when the "All Permissions Granted" preference changes. The service will try to acquire a wake lock with the new value of
+     * [isDimmingEnabled].
+     *
+     * This method is a no-op as the service does not need to react to this change.
+     *
+     * @param isAllPermissionsGranted [Boolean] `true` if all permissions are granted, `false` otherwise.
+     */
     override fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean) = Unit
 
+    /**
+     * Called when the "Dimming Enabled" preference changes.
+     *
+     * This is a part of the [SharedPrefsChangedListener][com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsChangedListener] interface.
+     * This method is called when the "Dimming Enabled" preference changes. The service will try to acquire a wake lock with the new value of
+     * [isDimmingEnabled].
+     *
+     * @param isDimmingEnabled [Boolean] `true` if dimming is enabled, `false` otherwise.
+     */
     override fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean) {
         Log.d("isDimmingEnabled: $isDimmingEnabled")
 
@@ -287,6 +317,15 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
     }
 
+    /**
+     * Called when the "While Locked Enabled" preference changes.
+     *
+     * This is a part of the [SharedPrefsChangedListener][com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsChangedListener] interface.
+     * This method is called when the "While Locked Enabled" preference changes. The service will try to acquire a wake lock with the new value of
+     * [isWhileLockedEnabled].
+     *
+     * @param isWhileLockedEnabled [Boolean] `true` if the "While Locked" feature is enabled, `false` otherwise.
+     */
     override fun onIsWhileLockedEnabledChanged(isWhileLockedEnabled: Boolean) {
         Log.d("isWhileLockedEnabled: $isWhileLockedEnabled")
 
@@ -296,6 +335,15 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
     }
 
+    /**
+     * Updates the service based on the provided status.
+     *
+     * This method is called whenever the status of the service changes.
+     * Depending on the status, it either updates the foreground notification
+     * with the remaining time or stops the foreground service.
+     *
+     * @param status [ServiceStatus] the new status of the service
+     */
     override fun onServiceStatusUpdate(status: ServiceStatus) {
         when (status) {
             is ServiceStatus.Running -> {
@@ -307,6 +355,16 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
     }
 
+    /**
+     * Starts the foreground service.
+     *
+     * This method is called when the start intent is received.
+     * It acquires a wake lock and starts the foreground service
+     * with the notification that displays the remaining time.
+     *
+     * @see [startForeground]
+     * @see [acquireWakeLock]
+     */
     private fun startService() {
         val status = caffeinateApplication.lastStatusUpdate as ServiceStatus.Running
         Log.d("status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
@@ -329,6 +387,17 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         startCaffeine(status.remaining)
     }
 
+    /**
+     * Registers the [localeChangeReceiver] to receive broadcasts when the system locale is changed.
+     *
+     * This method is used to register the [localeChangeReceiver] to receive broadcasts when the system locale is changed. The
+     * receiver is registered with the [Intent.ACTION_LOCALE_CHANGED] intent filter, which is sent when the system locale is
+     * changed. The receiver is also exported to allow other applications to send broadcasts to it.
+     *
+     * @see [localeChangeReceiver]
+     * @see [Intent.ACTION_LOCALE_CHANGED]
+     * @see [registerReceiver]
+     */
     private fun registerLocaleChangeReceiver() {
         if (!isLocaleChangeReceiverRegistered) {
             Log.d("registering ${this::localeChangeReceiver.name}...")
@@ -345,6 +414,15 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
     }
 
+    /**
+     * Unregisters the [localeChangeReceiver] from receiving broadcasts when the system locale is changed.
+     *
+     * This method is used to unregister the [localeChangeReceiver] so that it no longer receives broadcasts when the
+     * system locale is changed. It ensures that the receiver is unregistered only if it is currently registered.
+     *
+     * @see [localeChangeReceiver]
+     * @see [unregisterReceiver]
+     */
     private fun unregisterLocaleChangeReceiver() {
         if (isLocaleChangeReceiverRegistered) {
             Log.d("unregistering ${this::localeChangeReceiver.name}...")
@@ -354,6 +432,16 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
     }
 
+    /**
+     * Registers the [screenLockReceiver] to receive broadcasts when the screen is turned off.
+     *
+     * This method is used to register the [screenLockReceiver] so that it can receive broadcasts when the screen is turned
+     * off. It ensures that the receiver is registered only if it is currently not registered.
+     *
+     * @see [screenLockReceiver]
+     * @see [registerReceiver]
+     * @see [Intent.ACTION_SCREEN_OFF]
+     */
     private fun registerScreenLockReceiver() {
         if (!isScreenLockReceiverRegistered) {
             Log.d("registering ${this::screenLockReceiver.name}...")
@@ -370,6 +458,15 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
     }
 
+    /**
+     * Unregisters the [screenLockReceiver] from receiving broadcasts when the screen is turned off.
+     *
+     * This method is used to unregister the [screenLockReceiver] so that it can no longer receive broadcasts when
+     * the screen is turned off. It ensures that the receiver is unregistered only if it is currently registered.
+     *
+     * @see [screenLockReceiver]
+     * @see [unregisterReceiver]
+     */
     private fun unregisterScreenLockReceiver() {
         if (isScreenLockReceiverRegistered) {
             Log.d("unregistering ${this::screenLockReceiver.name}...")
@@ -379,6 +476,27 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
     }
 
+    /**
+     * Builds a [Notification] for the foreground service based on the provided [ServiceStatus].
+     *
+     * This method is used to build the foreground notification that is displayed when the service is running.
+     * It takes a [ServiceStatus] object as a parameter, which contains information about the current status
+     * of the service, such as whether it is running or stopped and the remaining time until the screen
+     * turns off.
+     *
+     * The method returns a [Notification] object that is built using a [NotificationCompat.Builder].
+     * The notification has a title and a content text that are set based on the provided
+     * [ServiceStatus] object. It also has an action that is used to stop the service when the user
+     * clicks on the notification.
+     *
+     * @param status [ServiceStatus] the current status of the service
+     *
+     * @return [Notification] the built notification
+     *
+     * @see [ServiceStatus]
+     * @see [NotificationCompat.Builder]
+     * @see [Notification]
+     */
     private fun buildForegroundNotification(status: ServiceStatus): Notification {
         caffeinateApplication.run {
             val notificationStopIntent =
@@ -433,6 +551,24 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
     }
 
+    /**
+     * Acquires a wake lock with the specified duration.
+     *
+     * This method is used to acquire a wake lock with the specified [duration] that prevents the device from going to sleep.
+     * It uses the [PowerManager] to acquire the wake lock, and logs information about the wake lock acquisition.
+     *
+     * The method takes a [Duration] object as a parameter, which specifies the duration of the wake lock. If the duration is
+     * [Duration.INFINITE], the wake lock will be acquired indefinitely, and the method will not automatically release the
+     * wake lock. Otherwise, the wake lock will be acquired for the specified duration, and the method will automatically release
+     * the wake lock after the specified duration has elapsed.
+     *
+     * The method also takes into account the [isDimmingEnabled] preference, and acquires a wake lock with the appropriate level
+     * of screen brightness. If [isDimmingEnabled] is `true`, the method acquires a wake lock with [PowerManager.SCREEN_DIM_WAKE_LOCK],
+     * which dims the screen but keeps it on. Otherwise, the method acquires a wake lock with [PowerManager.SCREEN_BRIGHT_WAKE_LOCK],
+     * which keeps the screen at full brightness.
+     *
+     * @param duration [Duration] the duration of the wake lock.
+     */
     @SuppressLint("WakelockTimeout")
     private fun acquireWakeLock(duration: Duration) {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -466,6 +602,16 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
     }
 
+    /**
+     * Starts the caffeine timeout with the specified [duration].
+     *
+     * This method starts the caffeine timeout with the specified [duration]. If the duration is
+     * indefinite, the method acquires a wake lock with the appropriate level of screen brightness
+     * and keeps the screen on indefinitely. Otherwise, the method acquires a wake lock with the
+     * specified [duration], and the screen will be kept on for the specified duration.
+     *
+     * @param duration [Duration] the duration of the wake lock.
+     */
     private fun startCaffeine(duration: Duration) {
         val isIndefinite = duration == Duration.INFINITE
         Log.d("starting ${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
@@ -487,6 +633,16 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         Log.d("${this::caffeineTimeoutJob.name} started!")
     }
 
+    /**
+     * Stops the caffeine timeout and releases the wake lock.
+     *
+     * This method stops the caffeine timeout and releases the wake lock if it is held. If the wake lock is not held, the method does nothing.
+     *
+     * This method is called by the [onDestroy] method when the service is being stopped
+     *
+     * @see [onDestroy]
+     * @see [startCaffeine]
+     */
     private fun stopCaffeine() {
         caffeinateApplication.run {
             Log.d("stopping ${localizedApplicationContext.getString(R.string.app_name)}...")
@@ -522,32 +678,151 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         }
     }
 
+    /**
+     * A companion object for [KeepAwakeService].
+     *
+     * This object contains public constants and methods that are related to the
+     * [KeepAwakeService] class.
+     *
+     * @author AbdAlMoniem AlHifnawy
+     */
     companion object {
+
+        /**
+         * The state of the [KeepAwakeService].
+         *
+         * This enum defines the possible states of the [KeepAwakeService].
+         *
+         * @property START The service is running and keeping the device awake.
+         * @property STOP The service is stopped and the device is not being kept awake.
+         * @property TOGGLE The service is being toggled. If the service is currently running, it will be stopped. If the service is currently
+         * stopped, it will be started.
+         *
+         * @author AbdAlMoniem AlHifnawy
+         */
         enum class KeepAwakeServiceState {
+
+            /**
+             * The service is running and keeping the device awake.
+             */
             START,
+
+            /**
+             * The service is stopped and the device is not being kept awake.
+             */
             STOP,
+
+            /**
+             * The service is being toggled. If the service is currently running, it will be stopped. If the service is currently stopped, it will be
+             * started.
+             */
             TOGGLE
         }
 
+        /**
+         * The possible actions that can be sent to the [KeepAwakeService].
+         *
+         * This enum defines the possible actions that can be sent to the [KeepAwakeService] through an [Intent].
+         *
+         * @property START The service is being started.
+         * @property STOP The service is being stopped.
+         * @property CHANGE_TIMEOUT The timeout duration is being changed.
+         * @property CHANGE_DIMMING_ENABLED The dimming feature is being toggled.
+         *
+         * @author AbdAlMoniem AlHifnawy
+         */
         private enum class KeepAwakeServiceAction {
+
+            /**
+             * Start the service to keep the device awake.
+             */
             START,
+
+            /**
+             * Stop the service, allowing the device to sleep.
+             */
             STOP,
+
+            /**
+             * Change the timeout duration for keeping the device awake.
+             */
             CHANGE_TIMEOUT,
+
+            /**
+             * Toggle the dimming feature on or off.
+             */
             CHANGE_DIMMING_ENABLED;
 
+            /**
+             * A companion object for [KeepAwakeServiceAction].
+             *
+             * This object contains public constants and methods that are related to the
+             * [KeepAwakeServiceAction] enum.
+             *
+             * @author AbdAlMoniem AlHifnawy
+             */
             companion object {
 
+                /**
+                 * A method that returns the [KeepAwakeServiceAction] corresponding to the given [value].
+                 *
+                 * This method takes a [value] of type [ObjectType] and returns the [KeepAwakeServiceAction] enum constant
+                 * that matches the given [value].
+                 *
+                 * @param value [ObjectType] The value to search for.
+                 * @return [KeepAwakeServiceAction] The [KeepAwakeServiceAction] enum constant that matches the given [value], or null if no match is found.
+                 */
                 inline fun <reified ObjectType> valueOfOrNull(value: ObjectType) = entries.find { entry -> entry.name == value }
             }
         }
 
+        /**
+         * Enum constants representing the possible request codes for the notification actions.
+         *
+         * These enum constants are used to identify the request code of the notification action that was clicked.
+         *
+         * @property NEXT_TIMEOUT The request code for the "Next timeout" notification action.
+         * @property TOGGLE_DIMMING The request code for the "Toggle dimming" notification action.
+         *
+         * @author AbdAlMoniem AlHifnawy
+         */
         private enum class NotificationActionRequestCode {
+
+            /**
+             * The request code for the "Next timeout" notification action.
+             */
             NEXT_TIMEOUT,
+
+            /**
+             * The request code for the "Toggle dimming" notification action.
+             */
             TOGGLE_DIMMING
         }
 
+        /**
+         * The duration of time to wait before debouncing the next timeout.
+         *
+         * When the user requests a new timeout, the service will wait for this duration of time before
+         * starting the new timeout. This allows the user to quickly switch between different timeouts
+         * without the service immediately switching to the new timeout.
+         *
+         * @see KeepAwakeServiceState.START
+         * @see KeepAwakeServiceState.STOP
+         */
         private val DEBOUNCE_DURATION = 1.seconds
 
+        /**
+         * Debounces the next timeout.
+         *
+         * When the user requests a new timeout, the service will wait for [DEBOUNCE_DURATION] before starting the new timeout.
+         * This allows the user to quickly switch between different timeouts without the service immediately switching to the new
+         * timeout.
+         *
+         * @param status [ServiceStatus] The current status of the KeepAwakeService.
+         * @param caffeinateApplication [CaffeinateApplication] The application context.
+         *
+         * @return [KeepAwakeServiceState] The next [KeepAwakeServiceState] to transition to.
+         */
         private fun debounce(status: ServiceStatus.Running, caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
             fun nextTimeout(): KeepAwakeServiceState {
                 timeout = nextTimeout
@@ -566,11 +841,29 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             toggleState(this, keepAwakeServiceState)
         }
 
+        /**
+         * Starts the KeepAwakeService without debouncing.
+         *
+         * If the service is not running, this function will immediately start the service with the provided
+         * timeout. If the service is already running, this function will immediately stop the service and
+         * start it again with the provided timeout.
+         *
+         * @param caffeinateApplication [CaffeinateApplication] The application context.
+         */
         private fun startWithoutDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
             timeout = nextTimeout
             toggleState(this, KeepAwakeServiceState.START)
         }
 
+        /**
+         * Starts the KeepAwakeService with debouncing.
+         *
+         * If the service is not running, this function will start the service with the provided timeout.
+         * If the service is already running, this function will debounce the next timeout by waiting for [DEBOUNCE_DURATION]
+         * before starting the new timeout.
+         *
+         * @param caffeinateApplication [CaffeinateApplication] The application context.
+         */
         private fun startWithDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
             when (val status = lastStatusUpdate) {
                 is ServiceStatus.Stopped -> toggleState(this, KeepAwakeServiceState.START)
@@ -578,6 +871,15 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             }
         }
 
+        /**
+         * Starts the KeepAwakeService with the single timeout duration.
+         *
+         * If the service is not running, this function will start the service with the single timeout duration.
+         * If the service is already running, this function will debounce the next timeout by waiting for [DEBOUNCE_DURATION]
+         * before starting the new timeout.
+         *
+         * @param caffeinateApplication [CaffeinateApplication] The application context.
+         */
         private fun startSingleTimeout(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
             when (lastStatusUpdate) {
                 is ServiceStatus.Stopped -> startWithoutDebounce(this)
@@ -585,6 +887,17 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             }
         }
 
+        /**
+         * Starts the KeepAwakeService with the next timeout duration from the list of timeouts.
+         *
+         * If the service is not running, this function will start the service with the next timeout duration.
+         * If the service is already running, this function will debounce the next timeout by waiting for [DEBOUNCE_DURATION]
+         * before starting the new timeout.
+         *
+         * @param caffeinateApplication [CaffeinateApplication] The application context.
+         * @param debounce [Boolean] If `true`, the service will debounce the next timeout by waiting for [DEBOUNCE_DURATION]
+         * before starting the new timeout. If `false`, the service will start the new timeout immediately.
+         */
         fun startNextTimeout(caffeinateApplication: CaffeinateApplication, debounce: Boolean = true) = caffeinateApplication.run {
             when {
                 timeoutCheckBoxes.size == 1 -> startSingleTimeout(this)
@@ -593,11 +906,32 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             }
         }
 
+        /**
+         * Starts the KeepAwakeService indefinitely.
+         *
+         * If the service is not running, this function will start the service with an infinite timeout.
+         * If the service is already running, this function will debounce the next timeout by waiting for [DEBOUNCE_DURATION]
+         * before starting the new timeout.
+         *
+         * @param caffeinateApplication [CaffeinateApplication] The application context.
+         */
         fun startIndefinitely(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
             timeout = Duration.INFINITE
             toggleState(this, KeepAwakeServiceState.START)
         }
 
+        /**
+         * Toggles the state of the KeepAwakeService.
+         *
+         * This method can be used to start, stop, or toggle the state of the KeepAwakeService.
+         * If the service is not running, this method will start the service with the provided timeout.
+         * If the service is already running, this method will debounce the next timeout by waiting for [DEBOUNCE_DURATION]
+         * before starting the new timeout.
+         *
+         * @param caffeinateApplication [CaffeinateApplication] The application context.
+         * @param newKeepAwakeServiceState [KeepAwakeServiceState] The new state to transition to.
+         * @param startTimeout [Duration] The timeout duration to use when starting the service. If `null`, the service will use the previously set timeout.
+         */
         fun toggleState(
                 caffeinateApplication: CaffeinateApplication,
                 newKeepAwakeServiceState: KeepAwakeServiceState,
@@ -631,6 +965,12 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             }
         }
 
+        /**
+         * The ID for the notification used by the KeepAwakeService.
+         *
+         * This ID is used to uniquely identify the notification that displays
+         * the remaining time when the service is running in the foreground.
+         */
         private const val NOTIFICATION_ID = 23
     }
 }
