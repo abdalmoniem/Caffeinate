@@ -108,8 +108,8 @@ class Widget : AppWidgetProvider() {
         /**
          * Sets the click listeners for the widget.
          *
-         * This method sets the [PendingIntent] for the clicks on the widget text and image views. The [PendingIntent] is used to start the [Widget] when the
-         * user clicks on the widget.
+         * This method sets the [PendingIntent] for the clicks on the widget text and image views. The [PendingIntent] is used to start the [Widget]
+         * when the user clicks on the widget.
          *
          * @receiver [RemoteViews] the remote views of the widget.
          * @param context [Context] the context of the app.
@@ -124,8 +124,7 @@ class Widget : AppWidgetProvider() {
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            setOnClickPendingIntent(widgetBinding.widgetText.id, pendingIntent)
-            setOnClickPendingIntent(widgetBinding.widgetImageView.id, pendingIntent)
+            setOnClickPendingIntent(widgetBinding.widgetRoot.id, pendingIntent)
         }
 
         /**
@@ -139,29 +138,39 @@ class Widget : AppWidgetProvider() {
          * @see AppWidgetProvider
          * @see CaffeinateApplication
          */
-        private fun updateAppWidget(caffeinateApplication: CaffeinateApplication, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
-            caffeinateApplication.run {
-                val views = RemoteViews(applicationContext.packageName, R.layout.widget)
-                val widgetView = views.apply(applicationContext, null)
-                val widgetBinding = WidgetBinding.bind(widgetView)
-                val widgetText = when (val status = caffeinateApplication.lastStatusUpdate) {
-                    is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(localizedApplicationContext)
-                    is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
-                }
+        private fun updateAppWidget(
+                caffeinateApplication: CaffeinateApplication,
+                appWidgetManager: AppWidgetManager,
+                appWidgetId: Int
+        ) = caffeinateApplication.run {
+            val views = RemoteViews(applicationContext.packageName, R.layout.widget)
+            val widgetView = views.apply(applicationContext, null)
+            val widgetBinding = WidgetBinding.bind(widgetView)
+            val widgetText = when (val status = caffeinateApplication.lastStatusUpdate) {
+                is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
+                is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(localizedApplicationContext)
+            }
 
-                views.run {
-                    setTextViewText(widgetBinding.widgetLabel.id, getString(R.string.app_name))
-                    setTextViewText(widgetBinding.widgetText.id, widgetText)
-                    setClickListeners(applicationContext)
+            views.run {
+                setTextViewText(widgetBinding.widgetLabel.id, getString(R.string.app_name))
+                setTextViewText(widgetBinding.widgetText.id, widgetText)
 
-                    when (caffeinateApplication.lastStatusUpdate) {
-                        is ServiceStatus.Stopped -> setImageViewResource(R.id.widgetImageView, R.drawable.outline_coffee_24)
-                        is ServiceStatus.Running -> setImageViewResource(R.id.widgetImageView, R.drawable.baseline_coffee_24)
+                when (lastStatusUpdate) {
+                    is ServiceStatus.Stopped -> {
+                        setImageViewResource(widgetBinding.widgetBackground.id, R.drawable.widget_background_off)
+                        setImageViewResource(widgetBinding.widgetImageView.id, R.drawable.outline_coffee_24)
+                    }
+
+                    is ServiceStatus.Running -> {
+                        setImageViewResource(widgetBinding.widgetBackground.id, R.drawable.widget_background_on)
+                        setImageViewResource(widgetBinding.widgetImageView.id, R.drawable.baseline_coffee_24)
                     }
                 }
 
-                appWidgetManager.updateAppWidget(appWidgetId, views)
+                setClickListeners(applicationContext)
             }
+
+            appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
         /**
@@ -182,24 +191,22 @@ class Widget : AppWidgetProvider() {
          * @see AppWidgetProvider
          * @see CaffeinateApplication
          */
-        fun updateAllWidgets(caffeinateApplication: CaffeinateApplication) {
-            caffeinateApplication.run {
-                val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
-                val widgetComponent = ComponentName(applicationContext, Widget::class.java)
-                val appWidgetIds = appWidgetManager.getAppWidgetIds(widgetComponent)
-                val widgetText = when (val status = caffeinateApplication.lastStatusUpdate) {
-                    is ServiceStatus.Running -> status.remaining.toFormattedTime()
-                    is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
-                }
-
-                appWidgetIds.forEach { appWidgetId -> updateAppWidget(this, appWidgetManager, appWidgetId) }
-
-                if (appWidgetIds.isNotEmpty()) Log.d(
-                        "updateAllWidgets: ${appWidgetIds.size} widgets updated, " +
-                        "widgetIds: ${appWidgetIds.joinToString(", ")}, " +
-                        "widgetText: $widgetText"
-                )
+        fun updateAllWidgets(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
+            val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
+            val widgetComponent = ComponentName(applicationContext, Widget::class.java)
+            val appWidgetIds = appWidgetManager.getAppWidgetIds(widgetComponent)
+            val widgetText = when (val status = caffeinateApplication.lastStatusUpdate) {
+                is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
+                is ServiceStatus.Running -> status.remaining.toFormattedTime()
             }
+
+            appWidgetIds.forEach { appWidgetId -> updateAppWidget(this, appWidgetManager, appWidgetId) }
+
+            if (appWidgetIds.isNotEmpty()) Log.d(
+                    "${appWidgetIds.size} widgets updated, " +
+                    "widgetIds: ${appWidgetIds.joinToString(", ")}, " +
+                    "widgetText: $widgetText"
+            )
         }
     }
 }
