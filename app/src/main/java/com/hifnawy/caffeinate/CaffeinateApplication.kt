@@ -8,6 +8,7 @@ import com.hifnawy.caffeinate.ServiceStatus.Stopped
 import com.hifnawy.caffeinate.services.QuickTileService
 import com.hifnawy.caffeinate.ui.CheckBoxItem
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.LogDebugTree
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.widgets.Widget
 import java.util.Locale
@@ -276,7 +277,7 @@ class CaffeinateApplication : Application() {
         super.onCreate()
 
         if (BuildConfig.DEBUG) {
-            Log.plant(Log.DebugTree())
+            Log.plant(LogDebugTree())
         }
 
         applyLocaleConfiguration()

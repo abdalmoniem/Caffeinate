@@ -79,7 +79,7 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      *
      * @see [TimeoutJob.start]
      */
-    fun cancel(): Unit = job.cancel(CancellationException("${::cancel.name} -> ${this::class.simpleName} cancelled!"))
+    fun cancel(): Unit = job.cancel(CancellationException("${this::class.simpleName} cancelled!"))
 
     /**
      * Starts the timeout job.
@@ -91,25 +91,25 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      * If the timeout job was already running, it will be stopped and restarted with the new duration.
      *
      * @param duration [Duration] the duration to use for the timeout job.
+     *
+     * @return [Job] the [Job] that is running the timeout loop.
      */
-    fun start(duration: Duration) {
-        launch {
-            val isIndefinite = duration == Duration.INFINITE
+    fun start(duration: Duration) = launch {
+        val isIndefinite = duration == Duration.INFINITE
 
-            Log.d("timeout initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
-            val durationSequence = when {
-                isIndefinite -> generateSequence(0L) { it + 1L }
-                else         -> (duration.inWholeSeconds downTo 0).asSequence()
+        Log.d("timeout initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
+        val durationSequence = when {
+            isIndefinite -> generateSequence(0L) { it + 1L }
+            else         -> (duration.inWholeSeconds downTo 0).asSequence()
+        }
+
+        durationSequence.forEach {
+            when {
+                isIndefinite -> update(Duration.INFINITE)
+                else         -> update(it.toDuration(DurationUnit.SECONDS))
             }
 
-            durationSequence.forEach {
-                when {
-                    isIndefinite -> update(Duration.INFINITE)
-                    else         -> update(it.toDuration(DurationUnit.SECONDS))
-                }
-
-                delay(1.seconds.inWholeMilliseconds)
-            }
+            delay(1.seconds.inWholeMilliseconds)
         }
     }
 
@@ -127,7 +127,7 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
     private suspend fun update(remaining: Duration) = withContext(Dispatchers.Main) {
         val isIndefinite = remaining == Duration.INFINITE
 
-        caffeinateApplication.apply {
+        caffeinateApplication.run {
             when (lastStatusUpdate) {
                 is ServiceStatus.Running -> {
                     Log.d("${currentTime}: duration: ${remaining.toFormattedTime()}, status: $lastStatusUpdate, isIndefinite: $isIndefinite")

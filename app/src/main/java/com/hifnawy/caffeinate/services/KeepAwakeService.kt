@@ -136,14 +136,11 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     private val notificationChannel by lazy {
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> notificationManager.getNotificationChannel(notificationChannelID)
-                                                              ?: let {
-                                                                  NotificationChannel(
-                                                                          notificationChannelID,
-                                                                          notificationChannelID,
-                                                                          NotificationManager.IMPORTANCE_HIGH
-                                                                  )
-                                                                      .also { channel -> notificationManager.createNotificationChannel(channel) }
-                                                              }
+                                                              ?: NotificationChannel(
+                                                                      notificationChannelID,
+                                                                      notificationChannelID,
+                                                                      NotificationManager.IMPORTANCE_HIGH
+                                                              ).also { channel -> notificationManager.createNotificationChannel(channel) }
 
             else                                           -> null
         }
@@ -662,11 +659,11 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             unregisterLocaleChangeReceiver()
             unregisterScreenLockReceiver()
 
-            Log.d("${::stopCaffeine.name}: removing from ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
+            Log.d("removing from ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
             keepAwakeServiceObservers.remove(this@KeepAwakeService)
             Log.d("removed from ${CaffeinateApplication::keepAwakeServiceObservers.name}!")
 
-            Log.d("${::stopCaffeine.name}: removing from ${CaffeinateApplication::sharedPrefsObservers.name}...")
+            Log.d("removing from ${CaffeinateApplication::sharedPrefsObservers.name}...")
             sharedPrefsObservers.remove(this@KeepAwakeService)
             Log.d("removed from ${CaffeinateApplication::sharedPrefsObservers.name}!")
 
