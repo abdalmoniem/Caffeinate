@@ -2,6 +2,7 @@
 
 gitTopLevel="$(git rev-parse --show-toplevel)"
 versionCodeFilter="\(versionCode\s\+=\s\+\)\([[:digit:]]\+\)"
+changeLogs=0
 
 for tag in $(git tag)
 do
@@ -35,8 +36,33 @@ do
     echo "-----------------------------------------------------------------"
   fi
 
-  echo "$commitMessage" > "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$versionCode.txt"
-  echo "saving to '$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$versionCode.txt'"
+  echo "$commitMessage" > "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt"
+  echo "saving to '$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt'"
   echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   echo
+
+  ((changeLogs+=1))
 done
+
+if [ $changeLogs -gt 0 ]; then
+  currentCommitHash=$(git rev-parse HEAD)
+  isCurrentCommitOnRemote=$(git branch -r --contains "$currentCommitHash")
+
+  echo
+
+  if [ -n "$isCurrentCommitOnRemote" ]; then
+    newVersionName="${newTag#v}"
+
+    echo "commit '$currentCommitHash' is on the remote branch, creating a new change log commit..."
+    echo
+
+    git add "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/"
+    git commit -sm "updated $changeLogs change logs(s)"
+  else
+    echo "commit '$currentCommitHash' is not on the remote branch, amending..."
+    echo
+
+    git add "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/"
+    git commit --amend --no-edit
+  fi
+fi

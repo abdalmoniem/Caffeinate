@@ -1,0 +1,3 @@
+widget background monet theme
+
+the widget's background color is now themed with the primary color of monet theme of the system
