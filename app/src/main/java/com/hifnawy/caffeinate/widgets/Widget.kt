@@ -6,7 +6,12 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.GradientDrawable
 import android.widget.RemoteViews
+import androidx.annotation.DrawableRes
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.graphics.drawable.toBitmap
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.ServiceStatus
@@ -51,12 +56,13 @@ class Widget : AppWidgetProvider() {
      */
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        val caffeinateApplication = context.applicationContext as CaffeinateApplication
+
+        caffeinateApplication = context.applicationContext as CaffeinateApplication
 
         when (intent.action) {
             AppWidgetManager.ACTION_APPWIDGET_UPDATE -> updateAllWidgets(caffeinateApplication)
             "CLICK"                                  -> {
-                if (!checkPermissions(caffeinateApplication)) return
+                if (!checkPermissions()) return
                 KeepAwakeService.startNextTimeout(caffeinateApplication)
             }
         }
@@ -68,10 +74,9 @@ class Widget : AppWidgetProvider() {
      * This method logs the current permission status and, if permissions are not granted,
      * it starts the MainActivity to prompt the user to grant the necessary permissions.
      *
-     * @param caffeinateApplication [CaffeinateApplication] the application context
      * @return [Boolean] `true` if all permissions are granted, `false` otherwise
      */
-    private fun checkPermissions(caffeinateApplication: CaffeinateApplication): Boolean {
+    private fun checkPermissions(): Boolean {
         val isAllPermissionsGranted by lazy { SharedPrefsManager(caffeinateApplication).isAllPermissionsGranted }
         Log.d("Permissions Granted: $isAllPermissionsGranted")
 
@@ -106,6 +111,39 @@ class Widget : AppWidgetProvider() {
     companion object {
 
         /**
+         * A reference to the application instance, which is used to access the application context and other application-wide resources.
+         *
+         * This field is only initialized once the [onReceive] method is called, and it is used by the [updateAllWidgets] method to access the
+         * application context and other resources.
+         *
+         * @see onReceive
+         * @see updateAllWidgets
+         */
+        private lateinit var caffeinateApplication: CaffeinateApplication
+
+        /**
+         * Retrieves a Bitmap from the drawable resource and applies a tint with the theme's primary color.
+         *
+         * @receiver [DrawableRes] The drawable resource ID to convert into a Bitmap.
+         *
+         * @return [Bitmap] The tinted Bitmap representation of the drawable resource.
+         *
+         * @exception [UninitializedPropertyAccessException] if the application context is not initialized.
+         * @exception [android.content.res.Resources.NotFoundException] if the drawable resource ID is not valid.
+         *
+         * @see AppCompatResources
+         * @see AppCompatResources.getDrawable
+         * @see GradientDrawable
+         * @see UninitializedPropertyAccessException
+         * @see android.content.res.Resources.NotFoundException
+         */
+        private val @receiver:DrawableRes Int.themeColored: Bitmap
+            get() = caffeinateApplication.run {
+                (AppCompatResources.getDrawable(applicationContext, this@themeColored) as GradientDrawable)
+                    .apply { if (themeColor != 0) setColor(themeColor) }.toBitmap()
+            }
+
+        /**
          * Sets the click listeners for the widget.
          *
          * This method sets the [PendingIntent] for the clicks on the widget text and image views. The [PendingIntent] is used to start the [Widget]
@@ -130,7 +168,6 @@ class Widget : AppWidgetProvider() {
         /**
          * Updates the widget with the given id.
          *
-         * @param caffeinateApplication [CaffeinateApplication] the application context
          * @param appWidgetManager [AppWidgetManager] the widget manager
          * @param appWidgetId [Int] the id of the widget to update
          *
@@ -138,11 +175,7 @@ class Widget : AppWidgetProvider() {
          * @see AppWidgetProvider
          * @see CaffeinateApplication
          */
-        private fun updateAppWidget(
-                caffeinateApplication: CaffeinateApplication,
-                appWidgetManager: AppWidgetManager,
-                appWidgetId: Int
-        ) = caffeinateApplication.run {
+        private fun updateAppWidget(appWidgetManager: AppWidgetManager, appWidgetId: Int) = caffeinateApplication.run {
             val views = RemoteViews(applicationContext.packageName, R.layout.widget)
             val widgetView = views.apply(applicationContext, null)
             val widgetBinding = WidgetBinding.bind(widgetView)
@@ -162,7 +195,7 @@ class Widget : AppWidgetProvider() {
                     }
 
                     is ServiceStatus.Running -> {
-                        setImageViewResource(widgetBinding.widgetBackground.id, R.drawable.widget_background_on)
+                        setImageViewBitmap(widgetBinding.widgetBackground.id, R.drawable.widget_background_on.themeColored)
                         setImageViewResource(widgetBinding.widgetImageView.id, R.drawable.baseline_coffee_24)
                     }
                 }
@@ -200,7 +233,7 @@ class Widget : AppWidgetProvider() {
                 is ServiceStatus.Running -> status.remaining.toFormattedTime()
             }
 
-            appWidgetIds.forEach { appWidgetId -> updateAppWidget(this, appWidgetManager, appWidgetId) }
+            appWidgetIds.forEach { appWidgetId -> updateAppWidget(appWidgetManager, appWidgetId) }
 
             if (appWidgetIds.isNotEmpty()) Log.d(
                     "${appWidgetIds.size} widgets updated, " +

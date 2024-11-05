@@ -2,7 +2,9 @@ package com.hifnawy.caffeinate
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Color
 import android.os.Build
+import androidx.annotation.ColorInt
 import com.hifnawy.caffeinate.ServiceStatus.Running
 import com.hifnawy.caffeinate.ServiceStatus.Stopped
 import com.hifnawy.caffeinate.services.QuickTileService
@@ -10,6 +12,7 @@ import com.hifnawy.caffeinate.ui.CheckBoxItem
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.LogDebugTree
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
+import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
 import com.hifnawy.caffeinate.widgets.Widget
 import java.util.Locale
 import kotlin.time.Duration
@@ -61,6 +64,21 @@ class CaffeinateApplication : Application() {
      */
     private val firstTimeout: Duration
         get() = timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+
+    /**
+     * The color of the application's theme.
+     *
+     * This is the color that is used for the application's theme. This color is used for the application's primary color, and is used to color the
+     * application's UI components such as the action bar, buttons, and text.
+     *
+     * @return [Int] The [ColorInt] color of the application's theme.
+     *
+     * @see android.content.res.Resources.Theme
+     * @see android.content.res.Resources.Theme.themeColor
+     * @see android.util.TypedValue
+     */
+    @ColorInt
+    var themeColor: Int = Color.TRANSPARENT
 
     /**
      * The last timeout duration that was selected by the user.

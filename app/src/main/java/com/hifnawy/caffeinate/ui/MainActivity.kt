@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 showChooseThemeDialog()
             }
 
-            appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, root.context.theme.themeColor)
+            appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, theme.themeColor)
 
             appThemeCard.setOnClickListener(themeClickListener)
             appThemeButton.setOnClickListener(themeClickListener)
@@ -147,6 +147,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
         super.onResume()
 
         caffeinateApplication.run {
+            themeColor = this@MainActivity.theme.themeColor
+
             applyLocaleConfiguration()
 
             if (isAllPermissionsGranted()) onIsAllPermissionsGrantedChanged(true)
@@ -218,12 +220,12 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             when (status) {
                 is ServiceStatus.Stopped -> {
                     caffeineButton.text = getString(R.string.caffeinate_button_off)
-                    appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, root.context.theme.themeColor)
+                    appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, theme.themeColor)
                 }
 
                 is ServiceStatus.Running -> {
                     caffeineButton.text = status.remaining.toLocalizedFormattedTime(root.context)
-                    appIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, root.context.theme.themeColor)
+                    appIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, theme.themeColor)
                 }
             }
         }
@@ -715,16 +717,16 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 val onNumberPickerAnimationStart = { _: Animator -> dialogButtonRandomTimeout.isEnabled = false }
                 val onNumberPickerAnimationEnd = { _: Animator -> dialogButtonRandomTimeout.isEnabled = true }
 
-                hoursNumberPicker.textColor = root.context.theme.themeColor
-                minutesNumberPicker.textColor = root.context.theme.themeColor
-                secondsNumberPicker.textColor = root.context.theme.themeColor
+                hoursNumberPicker.textColor = theme.themeColor
+                minutesNumberPicker.textColor = theme.themeColor
+                secondsNumberPicker.textColor = theme.themeColor
 
-                hoursLabel.setTextColor(root.context.theme.themeColor)
-                minutesLabel.setTextColor(root.context.theme.themeColor)
-                secondsLabel.setTextColor(root.context.theme.themeColor)
+                hoursLabel.setTextColor(theme.themeColor)
+                minutesLabel.setTextColor(theme.themeColor)
+                secondsLabel.setTextColor(theme.themeColor)
 
-                hoursSeparator.setTextColor(root.context.theme.themeColor)
-                minutesSeparator.setTextColor(root.context.theme.themeColor)
+                hoursSeparator.setTextColor(theme.themeColor)
+                minutesSeparator.setTextColor(theme.themeColor)
 
                 hoursNumberPicker.setFormatter { value -> "%02d".format(value) }
                 minutesNumberPicker.setFormatter { value -> "%02d".format(value) }
