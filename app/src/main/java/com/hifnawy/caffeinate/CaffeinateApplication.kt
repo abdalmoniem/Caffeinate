@@ -6,16 +6,17 @@ import android.graphics.Color
 import android.os.Build
 import androidx.annotation.ColorInt
 import com.hifnawy.caffeinate.ServiceStatus.Running
+import com.hifnawy.caffeinate.ServiceStatus.Running.RemainingValueObserver
 import com.hifnawy.caffeinate.ServiceStatus.Stopped
 import com.hifnawy.caffeinate.services.QuickTileService
 import com.hifnawy.caffeinate.ui.CheckBoxItem
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.LogDebugTree
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
-import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
 import com.hifnawy.caffeinate.widgets.Widget
 import java.util.Locale
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import timber.log.Timber as Log
 
 /**
@@ -31,8 +32,8 @@ import timber.log.Timber as Log
  * @property nextTimeout [Duration] The next timeout duration to use when the KeepAwakeService is running.
  * @property timeout [Duration] The currently selected timeout duration.
  * @property keepAwakeServiceObservers [List] A list of [ServiceStatusObserver] objects that are notified when the KeepAwakeService's status changes.
- * @property sharedPrefsObservers [List] A list of [SharedPrefsChangedListener][SharedPrefsManager.SharedPrefsChangedListener] objects that are notified when
- * shared preferences change.
+ * @property sharedPrefsObservers [List] A list of [SharedPrefsChangedListener][SharedPrefsManager.SharedPrefsChangedListener] objects that are
+ * notified when shared preferences change.
  * @property lastStatusUpdate [ServiceStatus] The last status update received from the KeepAwakeService.
  * @property timeoutCheckBoxes [List] A list of [CheckBoxItem] objects representing the available timeout durations.
  * @property localizedApplicationContext [Context] The context of the application with the current locale set.
@@ -64,21 +65,6 @@ class CaffeinateApplication : Application() {
      */
     private val firstTimeout: Duration
         get() = timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
-
-    /**
-     * The color of the application's theme.
-     *
-     * This is the color that is used for the application's theme. This color is used for the application's primary color, and is used to color the
-     * application's UI components such as the action bar, buttons, and text.
-     *
-     * @return [Int] The [ColorInt] color of the application's theme.
-     *
-     * @see android.content.res.Resources.Theme
-     * @see android.content.res.Resources.Theme.themeColor
-     * @see android.util.TypedValue
-     */
-    @ColorInt
-    var themeColor: Int = Color.TRANSPARENT
 
     /**
      * The last timeout duration that was selected by the user.
@@ -144,6 +130,21 @@ class CaffeinateApplication : Application() {
     var timeout: Duration = sharedPreferences.timeouts.first()
 
     /**
+     * The color of the application's theme.
+     *
+     * This is the color that is used for the application's theme. This color is used for the application's primary color, and is used to color the
+     * application's UI components such as the action bar, buttons, and text.
+     *
+     * @return [Int] The [ColorInt] color of the application's theme.
+     *
+     * @see android.content.res.Resources.Theme
+     * @see com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
+     * @see android.util.TypedValue
+     */
+    @ColorInt
+    var themeColor: Int = Color.TRANSPARENT
+
+    /**
      * A list of observers that are notified whenever the status of the KeepAwakeService changes.
      *
      * This list is used to store all observers that are registered to receive notifications whenever the status of the KeepAwakeService changes.
@@ -167,25 +168,26 @@ class CaffeinateApplication : Application() {
     var sharedPrefsObservers = mutableListOf<SharedPrefsManager.SharedPrefsChangedListener>()
 
     /**
-     * The last status update that was received from the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService].
+     * The last status update received from the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService].
      *
-     * This field is used to store the last status update that was received from the
-     * [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService].
+     * This value is updated whenever the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] sends a status update to the
+     * [CaffeinateApplication].
      *
-     * When the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] is started, stopped, or its status is updated, it sends a
-     * broadcast intent to the app to notify it of the status update. The app receives this intent and updates this field with the new status.
+     * The [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] sends a status update whenever its status changes, such as when it is
+     * started or stopped, or when its timeout duration changes.
      *
-     * The field is then used in the app's UI to update the UI to reflect the current status of the
-     * [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService].
-     *
-     * @see com.hifnawy.caffeinate.services.KeepAwakeService
      * @see ServiceStatus
+     * @see com.hifnawy.caffeinate.services.KeepAwakeService
+     * @see notifyKeepAwakeServiceObservers
      */
     var lastStatusUpdate: ServiceStatus = Stopped
         set(status) {
             field = status
 
-            notifyKeepAwakeServiceObservers(status)
+            when (status) {
+                is Running -> status.onRemainingUpdated = RemainingValueObserver { notifyKeepAwakeServiceObservers(status) }
+                else       -> notifyKeepAwakeServiceObservers(status)
+            }
         }
 
     /**
@@ -193,8 +195,8 @@ class CaffeinateApplication : Application() {
      *
      * This list is stored in the app's SharedPreferences and is loaded when the app is launched.
      *
-     * The list of timeout durations is used to populate the [RecyclerView][androidx.recyclerview.widget.RecyclerView] in the "Choose timeout" dialog, which is shown when the user clicks the
-     * "Choose timeout" button in the app's UI.
+     * The list of timeout durations is used to populate the [RecyclerView][androidx.recyclerview.widget.RecyclerView] in the "Choose timeout" dialog,
+     * which is shown when the user clicks the "Choose timeout" button in the app's UI.
      *
      * The list is also used to determine the next timeout duration to use when the current timeout duration is finished.
      *
@@ -220,7 +222,7 @@ class CaffeinateApplication : Application() {
      * Notifies all [ServiceStatusObserver]s in the [keepAwakeServiceObservers] list about a change in the service's status.
      *
      * This method is called when the service's status is updated. It iterates over the list of [ServiceStatusObserver]s and calls
-     * the [onServiceStatusUpdate][ServiceStatusObserver.onServiceStatusUpdate] method on each observer.
+     * the [onServiceStatusUpdate][ServiceStatusObserver.onServiceStatusUpdated] method on each observer.
      *
      * It also updates the [QuickTileService] and [Widget] if there are any added Quick Tiles or Widgets.
      *
@@ -233,7 +235,7 @@ class CaffeinateApplication : Application() {
     private fun notifyKeepAwakeServiceObservers(status: ServiceStatus) {
         if (status is Stopped) timeout = firstTimeout
 
-        keepAwakeServiceObservers.forEach { observer -> observer.onServiceStatusUpdate(status) }
+        keepAwakeServiceObservers.forEach { observer -> observer.onServiceStatusUpdated(status) }
 
         QuickTileService.requestTileStateUpdate(localizedApplicationContext)
         Widget.updateAllWidgets(this)
@@ -336,14 +338,14 @@ class CaffeinateApplication : Application() {
  *
  * @see ServiceStatus
  */
-interface ServiceStatusObserver {
+fun interface ServiceStatusObserver {
 
     /**
      * Called when the status of the Caffeinate service is updated.
      *
      * @param status [ServiceStatus] the new status of the service
      */
-    fun onServiceStatusUpdate(status: ServiceStatus)
+    fun onServiceStatusUpdated(status: ServiceStatus)
 }
 
 /**
@@ -359,13 +361,101 @@ interface ServiceStatusObserver {
 sealed class ServiceStatus {
 
     /**
-     * The service is currently running.
+     * Represents the status of the Caffeinate service when it is running.
      *
-     * @property remaining [Duration] the remaining duration for which the service is running.
+     * This class contains a timeout that is used to determine when the service should stop.
+     * The timeout is specified in seconds and is used by the service to run for the specified
+     * amount of time.
+     *
+     * @param startTimeout [Duration] the timeout duration in seconds.
+     *
+     * @property isCountingDown [Boolean] whether the service is currently counting down or not.
+     * @property isRestarted [Boolean] whether the service has been restarted or not.
+     * @property remaining [Duration] the remaining timeout duration in seconds.
+     * @property onRemainingUpdated [RemainingValueObserver] a callback that is called when the remaining timeout duration is updated.
      *
      * @author AbdAlMoniem AlHifnawy
      */
-    class Running(val remaining: Duration) : ServiceStatus() {
+    class Running(private val startTimeout: Duration) : ServiceStatus() {
+
+        /**
+         * Interface for observing changes to the remaining timeout duration while the service is running.
+         *
+         * Implement this interface to receive updates about the remaining timeout duration while the service is running.
+         * The callback provided will be called whenever the remaining timeout duration is updated.
+         *
+         * @author AbdAlMoniem AlHifnawy
+         *
+         * @see Running
+         * @see remaining
+         */
+        fun interface RemainingValueObserver {
+
+            /**
+             * Called when the remaining timeout duration is updated.
+             *
+             * This method is called whenever the remaining timeout duration is updated.
+             * It is called with no arguments and is intended to be overridden by classes
+             * that implement this interface.
+             *
+             * @see remaining
+             */
+            fun onRemainingUpdated()
+        }
+
+        /**
+         * Indicates whether the service is currently counting down or not.
+         *
+         * If the service is currently running and the remaining duration is less than the
+         * starting timeout, then the service is considered to be counting down.
+         *
+         * @return [Boolean] `true` if the service is currently counting down, `false` otherwise.
+         *
+         * @see ServiceStatus.Running.remaining
+         * @see ServiceStatus.Running.startTimeout
+         */
+        val isCountingDown: Boolean
+            get() = 0.seconds <= remaining && remaining <= startTimeout && startTimeout != Duration.INFINITE
+
+        /**
+         * Indicates whether the service is currently restarted or not.
+         *
+         * If the service is currently running and the remaining duration is equal to the
+         * starting timeout, then the service is considered to be restarted.
+         *
+         * @return [Boolean] `true` if the service is currently restarted, `false` otherwise.
+         *
+         * @see ServiceStatus.Running.remaining
+         * @see ServiceStatus.Running.startTimeout
+         */
+        val isRestarted: Boolean
+            get() = remaining == startTimeout && startTimeout != Duration.INFINITE
+
+        /**
+         * A callback that is called when the remaining timeout duration is updated.
+         *
+         * This callback is called whenever the remaining timeout duration is updated.
+         * It is called with the current [Running] instance as an argument.
+         *
+         * @see remaining
+         */
+        var onRemainingUpdated: RemainingValueObserver? = null
+
+        /**
+         * The remaining timeout duration.
+         *
+         * This property is updated whenever the service is running and the remaining timeout duration
+         * changes. The property is also settable, and setting it will trigger the
+         * [onRemainingUpdated] callback.
+         *
+         * @see onRemainingUpdated
+         */
+        var remaining: Duration = startTimeout
+            set(value) {
+                field = value
+
+                onRemainingUpdated?.onRemainingUpdated()
+            }
 
         /**
          * Returns a string in the format

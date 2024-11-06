@@ -39,11 +39,13 @@ import com.hifnawy.caffeinate.databinding.DialogChooseThemeBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding
 import com.hifnawy.caffeinate.databinding.DialogSetCustomTimeoutBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
+import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageDrawable
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
+import timber.log.Timber
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.time.Duration
@@ -116,17 +118,20 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
             if (DynamicColors.isDynamicColorAvailable()) enableMaterialYouPreferences()
 
-            caffeineButton.setOnClickListener {
+            caffeineButton.setOnClickListener { buttonView ->
                 if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
 
-                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 KeepAwakeService.startNextTimeout(caffeinateApplication)
             }
 
             caffeineButton.setOnLongClickListener {
                 if (!sharedPreferences.isAllPermissionsGranted) return@setOnLongClickListener false
 
-                KeepAwakeService.startIndefinitely(caffeinateApplication)
+                when (caffeinateApplication.lastStatusUpdate) {
+                    is ServiceStatus.Stopped -> KeepAwakeService.startIndefinitely(caffeinateApplication)
+                    is ServiceStatus.Running -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
+                }
 
                 return@setOnLongClickListener true
             }
@@ -156,7 +161,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             keepAwakeServiceObservers.addObserver(::keepAwakeServiceObservers.name, this@MainActivity)
             sharedPrefsObservers.addObserver(::sharedPrefsObservers.name, this@MainActivity)
 
-            onServiceStatusUpdate(lastStatusUpdate)
+            onServiceStatusUpdated(lastStatusUpdate)
         }
     }
 
@@ -215,15 +220,25 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
      *
      * @param status [ServiceStatus] the service status to update the UI for
      */
-    override fun onServiceStatusUpdate(status: ServiceStatus) {
+    override fun onServiceStatusUpdated(status: ServiceStatus) {
         with(binding) {
+            Timber.d("Status Changed: $status")
+
             when (status) {
                 is ServiceStatus.Stopped -> {
+                    toggleRestartButton(false)
+
                     caffeineButton.text = getString(R.string.caffeinate_button_off)
                     appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, theme.themeColor)
                 }
 
                 is ServiceStatus.Running -> {
+                    when {
+                        status.isRestarted -> Unit
+                        status.isCountingDown -> toggleRestartButton(true)
+                        else -> toggleRestartButton(false)
+                    }
+
                     caffeineButton.text = status.remaining.toLocalizedFormattedTime(root.context)
                     appIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, theme.themeColor)
                 }
@@ -361,6 +376,60 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
             timeoutChoiceCard.setOnClickListener(timeoutChoiceClickListener)
             timeoutChoiceButton.setOnClickListener(timeoutChoiceClickListener)
+        }
+    }
+
+    /**
+     * Enables or disables the restart button and animates it in or out of the layout.
+     *
+     * @param isShown [Boolean] `true` if the restart button should be shown, `false` otherwise.
+     * @param animationDuration [Long] The duration of the animation in milliseconds. Defaults to `100L`.
+     */
+    private fun toggleRestartButton(isShown: Boolean, animationDuration: Long = 100) {
+        with(binding.restartButton) {
+            when (isShown) {
+                true -> {
+                    isEnabled = true
+                    visibility = View.VISIBLE
+
+                    if (!hasOnClickListeners()) {
+                        scaleX = 0f
+                        scaleY = 0f
+                        animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(animationDuration)
+                            .start()
+
+                        setOnClickListener { buttonView ->
+                            buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+
+                            KeepAwakeService.restart(caffeinateApplication)
+                        }
+                    }
+                }
+
+                else -> {
+                    if (hasOnClickListeners()) {
+                        scaleX = 1f
+                        scaleY = 1f
+                        animate()
+                            .scaleX(0f)
+                            .scaleY(0f)
+                            .setDuration(animationDuration)
+                            .withEndAction {
+                                isEnabled = false
+                                visibility = View.GONE
+
+                                setOnClickListener(null)
+                            }
+                            .start()
+                    } else {
+                        isEnabled = false
+                        visibility = View.GONE
+                    }
+                }
+            }
         }
     }
 

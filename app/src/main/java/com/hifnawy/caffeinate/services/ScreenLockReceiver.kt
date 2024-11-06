@@ -35,6 +35,6 @@ class ScreenLockReceiver(private val caffeinateApplication: CaffeinateApplicatio
      */
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("Screen Locked, Stopping...")
-        KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STOP)
+        KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
     }
 }

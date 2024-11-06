@@ -29,6 +29,7 @@
     <string name="caffeinate_button_off">OFF</string>
     <string name="quick_tile_off">Off</string>
     <string name="foreground_notification_action_next_timeout">Next Timeout</string>
+    <string name="foreground_notification_action_restart_timeout">Restart Timeout</string>
     <string name="foreground_notification_action_disable_dimming">Disable Dimming</string>
     <string name="foreground_notification_action_enable_dimming">Enable Dimming</string>
     <string name="foreground_notification_tap_to_turn_off">Tap to turn off</string>

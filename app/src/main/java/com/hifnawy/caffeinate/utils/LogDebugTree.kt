@@ -1,6 +1,7 @@
 package com.hifnawy.caffeinate.utils
 
 import android.util.Log
+import com.hifnawy.caffeinate.utils.LogDebugTree.StackTraceObject
 import timber.log.Timber
 
 /**
@@ -32,7 +33,7 @@ class LogDebugTree : Timber.DebugTree() {
      *
      * @author AbdAlMoniem AlHifnawy
      */
-    private data class StackTraceObject(val className: String = "Unknown Class", val methodName: String = "Unknown Method") {
+    private data class StackTraceObject(val className: String = "UnknownClass", val methodName: String = "UnknownMethod") {
 
         /**
          * Converts the [StackTraceObject] to a string representation in the format "className.methodName".
@@ -72,11 +73,9 @@ class LogDebugTree : Timber.DebugTree() {
             else        -> return
         }
         val stackTraceObjects = Thread.currentThread().stackTrace.map { StackTraceObject(it.className, it.methodName) }
-        val logMethodLastIndex = stackTraceObjects.indexOfLast { it.methodName == logMethodName || it.methodName == "log" }
-        val callerObject = when {
-            logMethodLastIndex != -1 && logMethodLastIndex + 1 < stackTraceObjects.size -> stackTraceObjects[logMethodLastIndex + 1]
-            else                                                                        -> StackTraceObject()
-        }
+        val callerObject = stackTraceObjects.lastOrNull { it.methodName == logMethodName || it.methodName == "log" }?.let {
+            stackTraceObjects[stackTraceObjects.indexOf(it) + 1]
+        } ?: StackTraceObject()
 
         super.log(priority, tag, "$callerObject: $message", t)
     }

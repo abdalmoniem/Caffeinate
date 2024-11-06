@@ -225,6 +225,7 @@ class Widget : AppWidgetProvider() {
          * @see CaffeinateApplication
          */
         fun updateAllWidgets(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
+            this@Companion.caffeinateApplication = this
             val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
             val widgetComponent = ComponentName(applicationContext, Widget::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widgetComponent)

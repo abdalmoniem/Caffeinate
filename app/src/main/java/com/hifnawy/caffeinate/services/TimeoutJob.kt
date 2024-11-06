@@ -124,24 +124,21 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      *
      * @param remaining [Duration] the remaining duration for which the service is running.
      */
-    private suspend fun update(remaining: Duration) = withContext(Dispatchers.Main) {
+    private suspend fun update(remaining: Duration) = caffeinateApplication.run {
         val isIndefinite = remaining == Duration.INFINITE
 
-        caffeinateApplication.run {
+        withContext(Dispatchers.Main) {
             when (lastStatusUpdate) {
                 is ServiceStatus.Running -> {
                     Log.d("${currentTime}: duration: ${remaining.toFormattedTime()}, status: $lastStatusUpdate, isIndefinite: $isIndefinite")
 
                     when (remaining) {
-                        0.seconds -> KeepAwakeService.toggleState(this, KeepAwakeServiceState.STOP)
-                        else      -> lastStatusUpdate = ServiceStatus.Running(remaining)
+                        0.seconds -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
+                        else      -> (lastStatusUpdate as? ServiceStatus.Running)?.remaining = remaining
                     }
                 }
 
-                is ServiceStatus.Stopped -> KeepAwakeService.toggleState(
-                        this,
-                        KeepAwakeServiceState.START
-                )
+                is ServiceStatus.Stopped -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_START)
             }
         }
     }

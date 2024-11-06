@@ -481,17 +481,37 @@
                 android:id="@+id/caffeineButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="50dp"
-                android:layout_marginEnd="50dp"
                 android:enabled="false"
                 android:minWidth="200dp"
                 android:text="@string/caffeinate_button_off"
                 android:textSize="@dimen/caffeinate_button_text_size"
                 app:cornerRadius="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/restartButton"
+                app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/timeoutChoiceCard" />
+                app:layout_constraintTop_toBottomOf="@+id/timeoutChoiceCard"
+                app:layout_constraintVertical_bias="0.494" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/restartButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="20dp"
+                android:enabled="false"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:cornerRadius="50dp"
+                app:icon="@drawable/baseline_restart_alt_24"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="32dp"
+                app:layout_constraintBottom_toBottomOf="@+id/caffeineButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/caffeineButton"
+                app:layout_constraintTop_toTopOf="@+id/caffeineButton" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
