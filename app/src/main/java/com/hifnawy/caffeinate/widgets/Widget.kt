@@ -128,8 +128,8 @@ class Widget : AppWidgetProvider() {
          *
          * @return [Bitmap] The tinted Bitmap representation of the drawable resource.
          *
-         * @exception [UninitializedPropertyAccessException] if the application context is not initialized.
-         * @exception [android.content.res.Resources.NotFoundException] if the drawable resource ID is not valid.
+         * @throws [UninitializedPropertyAccessException] if the application context is not initialized.
+         * @throws [android.content.res.Resources.NotFoundException] if the drawable resource ID is not valid.
          *
          * @see AppCompatResources
          * @see AppCompatResources.getDrawable
@@ -175,7 +175,7 @@ class Widget : AppWidgetProvider() {
          * @see AppWidgetProvider
          * @see CaffeinateApplication
          */
-        private fun updateAppWidget(appWidgetManager: AppWidgetManager, appWidgetId: Int) = caffeinateApplication.run {
+        private fun updateAppWidget(appWidgetManager: AppWidgetManager, appWidgetId: IntArray) = caffeinateApplication.run {
             val views = RemoteViews(applicationContext.packageName, R.layout.widget)
             val widgetView = views.apply(applicationContext, null)
             val widgetBinding = WidgetBinding.bind(widgetView)
@@ -212,20 +212,20 @@ class Widget : AppWidgetProvider() {
          * This method is called whenever the status of the KeepAwakeService changes, such as when it is started or stopped. It updates the text and
          * image view of all widgets with the new status.
          *
-         * The method takes a single parameter, [caffeinateApplication], which is the application context of the app. This parameter is used to access
+         * The method takes a single parameter, [context], which is the context of the app. This parameter is used to access
          * the [AppWidgetManager] and the [Context] of the app.
          *
          * The method first gets the IDs of all widgets from the [AppWidgetManager] using the [AppWidgetManager.getAppWidgetIds] method. It then loops
          * over the IDs and calls the [updateAppWidget] method to update each widget.
          *
-         * @param caffeinateApplication [CaffeinateApplication] the application context of the app
+         * @param context [Context] the context of the app
          *
          * @see AppWidgetManager
          * @see AppWidgetProvider
          * @see CaffeinateApplication
          */
-        fun updateAllWidgets(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
-            this@Companion.caffeinateApplication = this
+        fun updateAllWidgets(context: Context) = context.run {
+            caffeinateApplication = applicationContext as CaffeinateApplication
             val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
             val widgetComponent = ComponentName(applicationContext, Widget::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(widgetComponent)
@@ -234,7 +234,9 @@ class Widget : AppWidgetProvider() {
                 is ServiceStatus.Running -> status.remaining.toFormattedTime()
             }
 
-            appWidgetIds.forEach { appWidgetId -> updateAppWidget(appWidgetManager, appWidgetId) }
+            // appWidgetIds.forEach { appWidgetId ->  }
+
+            updateAppWidget(appWidgetManager, appWidgetIds)
 
             if (appWidgetIds.isNotEmpty()) Log.d(
                     "${appWidgetIds.size} widgets updated, " +

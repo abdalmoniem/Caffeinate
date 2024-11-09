@@ -30,6 +30,7 @@ import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.NotificationAc
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
+import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.NotificationUtils
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.WakeLockExtensionFunctions.releaseSafely
@@ -56,7 +57,7 @@ import timber.log.Timber as Log
  * @see ServiceStatusObserver
  * @see LocaleChangeReceiver
  */
-class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListener, ServiceStatusObserver {
+class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, ServiceStatusObserver {
 
     /**
      * A lazy delegate that provides a reference to the [CaffeinateApplication] instance that owns this service.
@@ -291,34 +292,21 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     }
 
     /**
-     * Called when the "All Permissions Granted" preference changes.
-     *
-     * This is a part of the [SharedPrefsChangedListener][com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsChangedListener] interface.
-     * This method is called when the "All Permissions Granted" preference changes. The service will try to acquire a wake lock with the new value of
-     * [isDimmingEnabled].
-     *
-     * This method is a no-op as the service does not need to react to this change.
-     *
-     * @param isAllPermissionsGranted [Boolean] `true` if all permissions are granted, `false` otherwise.
-     */
-    override fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean) = Unit
-
-    /**
      * Called when the "Dimming Enabled" preference changes.
      *
-     * This is a part of the [SharedPrefsChangedListener][com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsChangedListener] interface.
+     * This is a part of the [SharedPrefsChangedListener][com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsObserver] interface.
      * This method is called when the "Dimming Enabled" preference changes. The service will try to acquire a wake lock with the new value of
      * [isDimmingEnabled].
      *
      * @param isDimmingEnabled [Boolean] `true` if dimming is enabled, `false` otherwise.
      */
-    override fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean) {
+    override fun onIsDimmingEnabledUpdated(isDimmingEnabled: Boolean) {
         Log.d("isDimmingEnabled: $isDimmingEnabled")
 
         when (val status = caffeinateApplication.lastStatusUpdate) {
             is ServiceStatus.Running -> {
                 this.isDimmingEnabled = isDimmingEnabled
-                acquireWakeLock(status.remaining)
+                acquireWakeLock()
                 onServiceStatusUpdated(status)
             }
 
@@ -329,13 +317,13 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     /**
      * Called when the "While Locked Enabled" preference changes.
      *
-     * This is a part of the [SharedPrefsChangedListener][com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsChangedListener] interface.
+     * This is a part of the [SharedPrefsChangedListener][com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsObserver] interface.
      * This method is called when the "While Locked Enabled" preference changes. The service will try to acquire a wake lock with the new value of
      * [isWhileLockedEnabled].
      *
      * @param isWhileLockedEnabled [Boolean] `true` if the "While Locked" feature is enabled, `false` otherwise.
      */
-    override fun onIsWhileLockedEnabledChanged(isWhileLockedEnabled: Boolean) {
+    override fun onIsWhileLockedEnabledUpdated(isWhileLockedEnabled: Boolean) {
         Log.d("isWhileLockedEnabled: $isWhileLockedEnabled")
 
         when (caffeinateApplication.lastStatusUpdate) {
@@ -375,28 +363,27 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
      * @see [acquireWakeLock]
      */
     private fun startService() = caffeinateApplication.run {
+        Log.d("starting ${this@KeepAwakeService::class.simpleName} service...")
+
         Log.d("notifying observers...")
         lastStatusUpdate = ServiceStatus.Running(timeout).also { status ->
+            Log.d("observers notified!")
             Log.d("status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
 
             Log.d("sending foreground notification...")
             startForeground(NOTIFICATION_ID, buildForegroundNotification(status))
             Log.d("foreground notification sent!")
 
-            Log.d("adding ${this@KeepAwakeService::class.simpleName} to ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
-            keepAwakeServiceObservers.addObserver(::keepAwakeServiceObservers.name, this@KeepAwakeService)
-            Log.d("${this@KeepAwakeService::class.simpleName} added to ${CaffeinateApplication::keepAwakeServiceObservers.name}!")
-
-            Log.d("adding ${this@KeepAwakeService::class.simpleName} to ${CaffeinateApplication::sharedPrefsObservers.name}...")
-            sharedPrefsObservers.addObserver(::sharedPrefsObservers.name, this@KeepAwakeService)
-            Log.d("${this@KeepAwakeService::class.simpleName} added to ${CaffeinateApplication::sharedPrefsObservers.name}!")
+            keepAwakeServiceObservers.addObserver(this@KeepAwakeService)
+            sharedPrefsObservers.addObserver(this@KeepAwakeService)
 
             registerLocaleChangeReceiver()
             if (!sharedPreferences.isWhileLockedEnabled) registerScreenLockReceiver()
 
             startCaffeine(status.remaining)
         }
-        Log.d("observers notified!")
+
+        Log.d("${this@KeepAwakeService::class.simpleName} service started!")
     }
 
     /**
@@ -584,8 +571,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
     /**
      * Acquires a wake lock with the specified duration.
      *
-     * This method is used to acquire a wake lock with the specified [duration] that prevents the device from going to sleep.
-     * It uses the [PowerManager] to acquire the wake lock, and logs information about the wake lock acquisition.
+     * This method is used to acquire a wake lock that prevents the device from going to sleep. It uses the [PowerManager] to
+     * acquire the wake lock, and logs information about the wake lock acquisition.
      *
      * The method takes a [Duration] object as a parameter, which specifies the duration of the wake lock. If the duration is
      * [Duration.INFINITE], the wake lock will be acquired indefinitely, and the method will not automatically release the
@@ -596,11 +583,9 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
      * of screen brightness. If [isDimmingEnabled] is `true`, the method acquires a wake lock with [PowerManager.SCREEN_DIM_WAKE_LOCK],
      * which dims the screen but keeps it on. Otherwise, the method acquires a wake lock with [PowerManager.SCREEN_BRIGHT_WAKE_LOCK],
      * which keeps the screen at full brightness.
-     *
-     * @param duration [Duration] the duration of the wake lock.
      */
     @SuppressLint("WakelockTimeout")
-    private fun acquireWakeLock(duration: Duration) {
+    private fun acquireWakeLock() {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
         wakeLock?.apply {
@@ -627,7 +612,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         ).apply {
             Log.d("acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingAllowed: $isDimmingEnabled...")
             setReferenceCounted(false)
-            if (duration == Duration.INFINITE) acquire() else acquire(duration.inWholeMilliseconds)
+            acquire()
             Log.d("${this@KeepAwakeService::wakeLock.name} acquired, isDimmingAllowed: $isDimmingEnabled!")
         }
     }
@@ -646,7 +631,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         val isIndefinite = duration == Duration.INFINITE
         Log.d("starting ${localizedApplicationContext.getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
 
-        acquireWakeLock(duration)
+        acquireWakeLock()
 
         caffeineTimeoutJob?.apply {
             Log.d("cancelling ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
@@ -693,13 +678,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
         unregisterLocaleChangeReceiver()
         unregisterScreenLockReceiver()
 
-        Log.d("removing ${this@KeepAwakeService::class.simpleName} from ${CaffeinateApplication::keepAwakeServiceObservers.name}...")
-        keepAwakeServiceObservers.remove(this@KeepAwakeService)
-        Log.d("removed ${this@KeepAwakeService::class.simpleName} from ${CaffeinateApplication::keepAwakeServiceObservers.name}!")
-
-        Log.d("removing ${this@KeepAwakeService::class.simpleName} from ${CaffeinateApplication::sharedPrefsObservers.name}...")
-        sharedPrefsObservers.remove(this@KeepAwakeService)
-        Log.d("removed ${this@KeepAwakeService::class.simpleName} from ${CaffeinateApplication::sharedPrefsObservers.name}!")
+        keepAwakeServiceObservers.removeObserver(this@KeepAwakeService)
+        sharedPrefsObservers.removeObserver(this@KeepAwakeService)
 
         Log.d("notifying observers...")
         lastStatusUpdate = ServiceStatus.Stopped
@@ -1016,6 +996,10 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsChangedListene
             }
 
             startTimeout?.run { timeout = this }
+
+            // Log.d("notifying observers...")
+            // lastStatusUpdate = lastStatusUpdate
+            // Log.d("observers notified!")
 
             when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> localizedApplicationContext.startForegroundService(intent)

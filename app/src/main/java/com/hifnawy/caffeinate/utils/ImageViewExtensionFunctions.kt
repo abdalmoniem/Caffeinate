@@ -1,5 +1,6 @@
 package com.hifnawy.caffeinate.utils
 
+import android.content.res.Resources
 import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
@@ -18,18 +19,20 @@ object ImageViewExtensionFunctions {
      * Sets the image drawable of the given [ImageView] to the specified
      * [drawableResId] and colors it with the specified [color].
      *
-     * @param drawableResId [DrawableRes] the id of the drawable to be set.
-     * @param color [ColorInt] the color used to tint the drawable.
+     * @param drawableResId [Int] the [DrawableRes] id of the drawable to be set.
+     * @param color [Int] the [ColorInt] color used to tint the drawable.
+     *
+     * @throws [UninitializedPropertyAccessException] if the view's context is not initialized.
+     * @throws [android.content.res.Resources.NotFoundException] if the drawable resource ID is not valid.
+     * @throws Resources.NotFoundException If the [color] param or [colorPrimary][R.color.colorPrimary] attribute is not defined in the current theme.
      */
     fun ImageView.setColoredImageDrawable(
             @DrawableRes
             drawableResId: Int,
             @ColorInt
             color: Int = ContextCompat.getColor(context, R.color.colorPrimary)
-    ) {
-        val appIconDrawable = AppCompatResources.getDrawable(context, drawableResId)
-
-        setImageDrawable(appIconDrawable)
+    ) = AppCompatResources.getDrawable(context, drawableResId).run {
+        setImageDrawable(this)
         setColorFilter(color)
     }
 }

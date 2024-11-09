@@ -3,6 +3,7 @@ package com.hifnawy.caffeinate.utils
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.hifnawy.caffeinate.CaffeinateApplication
+import com.hifnawy.caffeinate.Observer
 import com.hifnawy.caffeinate.ui.CheckBoxItem
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
@@ -154,7 +155,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         get() = sharedPreferences.getBoolean(ALL_PERMISSIONS_GRANTED.name, false)
         set(value) {
             sharedPreferences.edit().putBoolean(ALL_PERMISSIONS_GRANTED.name, value).apply()
-            notifySharedPrefsObservers { observer -> observer.onIsAllPermissionsGrantedChanged(value) }
+            notifySharedPrefsObservers { observer -> observer.onIsAllPermissionsGrantedUpdated(value) }
         }
 
     /**
@@ -195,7 +196,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         get() = sharedPreferences.getBoolean(ENABLE_DIMMING.name, false)
         set(value) {
             sharedPreferences.edit().putBoolean(ENABLE_DIMMING.name, value).apply()
-            notifySharedPrefsObservers { observer -> observer.onIsDimmingEnabledChanged(value) }
+            notifySharedPrefsObservers { observer -> observer.onIsDimmingEnabledUpdated(value) }
         }
 
     /**
@@ -211,7 +212,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         get() = sharedPreferences.getBoolean(ENABLE_WHILE_LOCKED.name, false)
         set(value) {
             sharedPreferences.edit().putBoolean(ENABLE_WHILE_LOCKED.name, value).apply()
-            notifySharedPrefsObservers { observer -> observer.onIsWhileLockedEnabledChanged(value) }
+            notifySharedPrefsObservers { observer -> observer.onIsWhileLockedEnabledUpdated(value) }
         }
 
     /**
@@ -247,7 +248,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      *
      * @param notifyCallback [(observer: SharedPrefsChangedListener) -> Unit][notifyCallback] the callback to be called on each registered observer.
      */
-    private fun notifySharedPrefsObservers(notifyCallback: (observer: SharedPrefsChangedListener) -> Unit) =
+    private fun notifySharedPrefsObservers(notifyCallback: (observer: SharedPrefsObserver) -> Unit) =
             caffeinateApplication.sharedPrefsObservers.forEach(notifyCallback)
 
     /**
@@ -258,29 +259,31 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * methods provided in this interface. Each method corresponds to a specific preference and is called whenever the
      * associated preference changes.
      *
+     * @see Observer
+     * @see com.hifnawy.caffeinate.ServiceStatusObserver
      * @see SharedPrefsManager.notifySharedPrefsObservers
      */
-    interface SharedPrefsChangedListener {
+    interface SharedPrefsObserver : Observer {
 
         /**
          * Called when the "All Permissions Granted" preference changes.
          *
          * @param isAllPermissionsGranted [Boolean] `true` if all permissions are granted, `false` otherwise.
          */
-        fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean)
+        fun onIsAllPermissionsGrantedUpdated(isAllPermissionsGranted: Boolean) = Unit
 
         /**
          * Called when the "Dimming Enabled" preference changes.
          *
          * @param isDimmingEnabled [Boolean] `true` if dimming is enabled, `false` otherwise.
          */
-        fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean)
+        fun onIsDimmingEnabledUpdated(isDimmingEnabled: Boolean) = Unit
 
         /**
          * Called when the "While Locked Enabled" preference changes.
          *
          * @param isWhileLockedEnabled [Boolean] `true` if the "While Locked" feature is enabled, `false` otherwise.
          */
-        fun onIsWhileLockedEnabledChanged(isWhileLockedEnabled: Boolean)
+        fun onIsWhileLockedEnabledUpdated(isWhileLockedEnabled: Boolean) = Unit
     }
 }

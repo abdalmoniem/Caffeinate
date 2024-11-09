@@ -1,0 +1,3 @@
+fix quick tile update issue
+
+fixed quick tile not updating on some device models and on Android 15
