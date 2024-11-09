@@ -1,6 +1,7 @@
 package com.hifnawy.caffeinate.utils
 
 import com.hifnawy.caffeinate.Observer
+import kotlin.reflect.KClass
 import timber.log.Timber as Log
 
 /**
@@ -9,6 +10,17 @@ import timber.log.Timber as Log
  * @author AbdAlMoniem AlHifnawy
  */
 object MutableListExtensionFunctions {
+
+    /**
+     * Retrieves the list of classes for the observers in this list.
+     *
+     * This property returns the Kotlin class type for each observer currently present in the list.
+     * It provides an easy way to inspect the types of observers being managed.
+     *
+     * @return [List] A list of [KClass] objects representing the class types of the observers.
+     */
+    val <ObserverType : Observer> MutableList<ObserverType>.itemClasses: List<KClass<out ObserverType>>
+        get() = this.map { it::class }
 
     /**
      * Adds an observer to the list if it is not already present.
