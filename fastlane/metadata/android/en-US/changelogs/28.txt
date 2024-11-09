@@ -1,0 +1,1 @@
+refix quick tile not updating on some devices

@@ -16,6 +16,7 @@ import com.hifnawy.caffeinate.services.QuickTileService.Companion.requestTileSta
 import com.hifnawy.caffeinate.ui.MainActivity
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
+import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.itemClasses
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import timber.log.Timber as Log
@@ -59,9 +60,9 @@ class QuickTileService : TileService(), ServiceStatusObserver {
      * @see TileService.onStartListening
      */
     override fun onStartListening() = caffeinateApplication.run {
-        keepAwakeServiceObservers.addObserver(this@QuickTileService)
-
-        updateQuickTile(lastStatusUpdate)
+        // If the current class isn't in the list of observers, add it. Since only one QuickTile is added to the QuickSettings
+        // Panel, this ensures that only one observer is added over the lifetime of the application when a timeout is started.
+        if (this@QuickTileService::class !in keepAwakeServiceObservers.itemClasses) keepAwakeServiceObservers.addObserver(this@QuickTileService)
     }
 
     /**
@@ -73,9 +74,8 @@ class QuickTileService : TileService(), ServiceStatusObserver {
      * @see TileService.onStopListening
      */
     override fun onStopListening() = caffeinateApplication.run {
-        keepAwakeServiceObservers.removeObserver(this@QuickTileService)
-
-        updateQuickTile(lastStatusUpdate)
+        // only remove the observer if the service is stopped.
+        if (lastStatusUpdate is ServiceStatus.Stopped) keepAwakeServiceObservers.removeObserver(this@QuickTileService)
     }
 
     /**
