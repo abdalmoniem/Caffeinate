@@ -4,6 +4,7 @@
     android:description="@string/app_name"
     android:initialKeyguardLayout="@layout/widget"
     android:initialLayout="@layout/widget"
+    android:previewImage="@drawable/widget_preview"
     android:previewLayout="@layout/widget"
     android:resizeMode="none"
     android:targetCellWidth="1"

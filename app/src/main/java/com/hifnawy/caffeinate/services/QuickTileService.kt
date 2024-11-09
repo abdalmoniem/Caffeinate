@@ -133,7 +133,10 @@ class QuickTileService : TileService(), ServiceStatusObserver {
 
         quickTile.run {
             state = tileState
-            label = localizedApplicationContext.getString(R.string.app_name)
+            label = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> localizedApplicationContext.getString(R.string.app_name)
+                else                                           -> tileSubtitle
+            }
             contentDescription = localizedApplicationContext.getString(R.string.app_name)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) subtitle = tileSubtitle
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) stateDescription = tileSubtitle
