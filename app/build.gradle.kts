@@ -15,8 +15,8 @@ android {
         applicationId = "com.hifnawy.caffeinate"
         minSdk = 24
         targetSdk = 35
-        versionCode = 25
-        versionName = "1.6.7"
+        versionCode = 26
+        versionName = "1.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -32,20 +32,23 @@ android {
                 signingProperties.all { property -> property in keystoreProperties.keys } &&
                 rootProject.file(keystoreProperties["storeFile"] as String).exists()
 
-        if (!isSigningConfigEnabled) {
-            signingProperties
-                .filter { property -> property !in keystoreProperties.keys }
-                .forEach { missingKey -> project.logger.warn("WARNING: missing key in '${localPropertiesFile.absolutePath}': $missingKey") }
-            project.logger.warn("WARNING: signing config not found, add signing config in local.properties")
-        } else {
-            signingConfigs {
-                project.logger.lifecycle("keystore: ${rootProject.file(keystoreProperties["storeFile"] as String).absolutePath}")
+        when (isSigningConfigEnabled) {
+            false -> {
+                signingProperties
+                    .filter { property -> property !in keystoreProperties.keys }
+                    .forEach { missingKey -> project.logger.warn("WARNING: missing key in '${localPropertiesFile.absolutePath}': $missingKey") }
+            }
 
-                create("release") {
-                    keyAlias = keystoreProperties["keyAlias"] as String
-                    keyPassword = keystoreProperties["keyPassword"] as String
-                    storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
-                    storePassword = keystoreProperties["storePassword"] as String
+            else  -> {
+                signingConfigs {
+                    project.logger.lifecycle("INFO: keystore: ${rootProject.file(keystoreProperties["storeFile"] as String).absolutePath}")
+
+                    create("release") {
+                        keyAlias = keystoreProperties["keyAlias"] as String
+                        keyPassword = keystoreProperties["keyPassword"] as String
+                        storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
+                        storePassword = keystoreProperties["storePassword"] as String
+                    }
                 }
             }
         }
@@ -62,19 +65,27 @@ android {
             isShrinkResources = false
             isDebuggable = isDebuggingEnabled
 
-            project.logger.lifecycle("release isDebuggable: $isDebuggingEnabled")
+            project.logger.lifecycle("INFO: $name isDebuggable: $isDebuggingEnabled")
 
             proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
                     "proguard-rules.pro"
             )
 
-            if (isSigningConfigEnabled) {
-                signingConfig = signingConfigs.findByName("release")
-                                ?: error("release signing config not found, add signing config in local.properties")
-            } else {
-                project.logger.warn("WARNING: release buildType is not signed, add signing config in local.properties to enable signing.")
-            }
+            signingConfigs.findByName("release")?.also { signingConfiguration ->
+                when (isSigningConfigEnabled) {
+                    true -> {
+                        signingConfig = signingConfiguration
+                        project.logger.lifecycle("INFO: $name buildType is signed with release signing config.")
+                        project.logger.lifecycle("INFO: $name signing config is located in ${signingConfiguration.storeFile?.absolutePath}")
+                    }
+
+                    else                   -> project.logger.warn(
+                            "WARNING: $name buildType is not signed, " +
+                            "add signing config in local.properties to enable signing."
+                    )
+                }
+            } ?: project.logger.error("ERROR: $name signing config not found, add signing config in local.properties")
         }
 
         debug {
@@ -84,6 +95,24 @@ android {
             proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
                     "proguard-rules.pro"
+            )
+
+            signingConfigs.findByName("release")?.also { signingConfiguration ->
+                when (isSigningConfigEnabled) {
+                    true -> {
+                        signingConfig = signingConfiguration
+                        project.logger.lifecycle("INFO: $name buildType is signed with release signing config.")
+                        project.logger.lifecycle("INFO: $name signing config is located in ${signingConfiguration.storeFile?.absolutePath}")
+                    }
+
+                    else -> project.logger.lifecycle(
+                            "INFO: $name buildType is signed with default signing config, " +
+                            "add signing config in local.properties to enable signing."
+                    )
+                }
+            } ?: project.logger.lifecycle(
+                    "INFO: $name buildType is signed with default signing config, " +
+                    "add signing config in local.properties to enable signing."
             )
 
             applicationIdSuffix = ".debug"

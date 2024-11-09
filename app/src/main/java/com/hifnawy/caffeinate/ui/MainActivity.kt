@@ -27,6 +27,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.animation.addListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.stephenvinouze.materialnumberpickercore.MaterialNumberPicker
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -43,6 +44,7 @@ import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServi
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageDrawable
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
+import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
 import timber.log.Timber
@@ -62,7 +64,7 @@ import kotlin.time.Duration.Companion.seconds
  * @see KeepAwakeService
  * @see SharedPrefsManager
  */
-class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedListener, ServiceStatusObserver {
+class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver, ServiceStatusObserver {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
@@ -156,10 +158,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
 
             applyLocaleConfiguration()
 
-            if (isAllPermissionsGranted()) onIsAllPermissionsGrantedChanged(true)
+            if (isAllPermissionsGranted()) onIsAllPermissionsGrantedUpdated(true)
 
-            keepAwakeServiceObservers.addObserver(::keepAwakeServiceObservers.name, this@MainActivity)
-            sharedPrefsObservers.addObserver(::sharedPrefsObservers.name, this@MainActivity)
+            keepAwakeServiceObservers.addObserver(this@MainActivity)
+            sharedPrefsObservers.addObserver(this@MainActivity)
 
             onServiceStatusUpdated(lastStatusUpdate)
         }
@@ -177,72 +179,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
      */
     override fun onPause() {
         super.onPause()
-        caffeinateApplication.keepAwakeServiceObservers.remove(this)
-    }
 
-    /**
-     * Called when there is a change in the permission state indicating whether all necessary permissions have been granted.
-     *
-     * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
-     */
-    override fun onIsAllPermissionsGrantedChanged(isAllPermissionsGranted: Boolean) {
-        binding.caffeineButton.isEnabled = isAllPermissionsGranted
-
-        changeAllowDimmingPreferences(isAllPermissionsGranted)
-        changeAllowWhileLockedPreferences(isAllPermissionsGranted)
-        binding.caffeineButton.isEnabled = isAllPermissionsGranted
-
-        changeAllowDimmingPreferences(isAllPermissionsGranted)
-        changeAllowWhileLockedPreferences(isAllPermissionsGranted)
-        changeTimeoutsPreferences(isAllPermissionsGranted)
-    }
-
-    /**
-     * Called when the user has changed the preference of whether the screen should be dimmed while it is being kept awake.
-     *
-     * @param isDimmingEnabled [Boolean] `true` if the screen should be dimmed while it is being kept awake, `false` otherwise.
-     */
-    override fun onIsDimmingEnabledChanged(isDimmingEnabled: Boolean) {
-        binding.allowDimmingSwitch.isChecked = isDimmingEnabled
-    }
-
-    /**
-     * Called when the user has changed the preference of whether the keep awake screen should be enabled while the screen is locked.
-     *
-     * @param isWhileLockedEnabled [Boolean] `true` if the keep awake screen should be enabled while the screen is locked, `false` otherwise.
-     */
-    override fun onIsWhileLockedEnabledChanged(isWhileLockedEnabled: Boolean) {
-        binding.allowWhileLockedSwitch.isChecked = isWhileLockedEnabled
-    }
-
-    /**
-     * Updates the UI to match the given service status.
-     *
-     * @param status [ServiceStatus] the service status to update the UI for
-     */
-    override fun onServiceStatusUpdated(status: ServiceStatus) {
-        with(binding) {
-            Timber.d("Status Changed: $status")
-
-            when (status) {
-                is ServiceStatus.Stopped -> {
-                    toggleRestartButton(false)
-
-                    caffeineButton.text = getString(R.string.caffeinate_button_off)
-                    appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, theme.themeColor)
-                }
-
-                is ServiceStatus.Running -> {
-                    when {
-                        status.isRestarted -> Unit
-                        status.isCountingDown -> toggleRestartButton(true)
-                        else -> toggleRestartButton(false)
-                    }
-
-                    caffeineButton.text = status.remaining.toLocalizedFormattedTime(root.context)
-                    appIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, theme.themeColor)
-                }
-            }
+        caffeinateApplication.run {
+            keepAwakeServiceObservers.removeObserver(this@MainActivity)
+            sharedPrefsObservers.removeObserver(this@MainActivity)
         }
     }
 
@@ -276,6 +216,72 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
             snackbar.show()
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    /**
+     * Called when there is a change in the permission state indicating whether all necessary permissions have been granted.
+     *
+     * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
+     */
+    override fun onIsAllPermissionsGrantedUpdated(isAllPermissionsGranted: Boolean) {
+        binding.caffeineButton.isEnabled = isAllPermissionsGranted
+
+        changeAllowDimmingPreferences(isAllPermissionsGranted)
+        changeAllowWhileLockedPreferences(isAllPermissionsGranted)
+        binding.caffeineButton.isEnabled = isAllPermissionsGranted
+
+        changeAllowDimmingPreferences(isAllPermissionsGranted)
+        changeAllowWhileLockedPreferences(isAllPermissionsGranted)
+        changeTimeoutsPreferences(isAllPermissionsGranted)
+    }
+
+    /**
+     * Called when the user has changed the preference of whether the screen should be dimmed while it is being kept awake.
+     *
+     * @param isDimmingEnabled [Boolean] `true` if the screen should be dimmed while it is being kept awake, `false` otherwise.
+     */
+    override fun onIsDimmingEnabledUpdated(isDimmingEnabled: Boolean) {
+        binding.allowDimmingSwitch.isChecked = isDimmingEnabled
+    }
+
+    /**
+     * Called when the user has changed the preference of whether the keep awake screen should be enabled while the screen is locked.
+     *
+     * @param isWhileLockedEnabled [Boolean] `true` if the keep awake screen should be enabled while the screen is locked, `false` otherwise.
+     */
+    override fun onIsWhileLockedEnabledUpdated(isWhileLockedEnabled: Boolean) {
+        binding.allowWhileLockedSwitch.isChecked = isWhileLockedEnabled
+    }
+
+    /**
+     * Updates the UI to match the given service status.
+     *
+     * @param status [ServiceStatus] the service status to update the UI for
+     */
+    override fun onServiceStatusUpdated(status: ServiceStatus) {
+        with(binding) {
+            Timber.d("Status Changed: $status")
+
+            when (status) {
+                is ServiceStatus.Stopped -> {
+                    restartButton.animateVisibility = false
+
+                    caffeineButton.text = getString(R.string.caffeinate_button_off)
+                    appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, theme.themeColor)
+                }
+
+                is ServiceStatus.Running -> {
+                    when {
+                        status.isRestarted -> Unit
+                        status.isCountingDown -> restartButton.animateVisibility = true
+                        else -> restartButton.animateVisibility = false
+                    }
+
+                    caffeineButton.text = status.remaining.toLocalizedFormattedTime(root.context)
+                    appIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, theme.themeColor)
+                }
+            }
+        }
     }
 
     /**
@@ -380,14 +386,33 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
     }
 
     /**
-     * Enables or disables the restart button and animates it in or out of the layout.
+     * An extension property for [MaterialButton] that is used to set the visibility of the button.
      *
-     * @param isShown [Boolean] `true` if the restart button should be shown, `false` otherwise.
-     * @param animationDuration [Long] The duration of the animation in milliseconds. Defaults to `100L`.
+     * Sets the visibility of the receiver [MaterialButton] and animates it in/out by scaling it.
+     *
+     * - When the visibility is set to `true`, the button will be enabled and its visibility will be set to [View.VISIBLE].
+     * - When the visibility is set to `false`, the button will be disabled and its visibility will be set to [View.GONE].
+     *
+     * The animation duration is set to 100 milliseconds.
+     *
+     * @receiver [MaterialButton] The button to set the visibility of.
+     *
+     * @see MaterialButton
+     * @see MaterialButton.isEnabled
+     * @see MaterialButton.getVisibility
+     * @see MaterialButton.setVisibility
+     * @see MaterialButton.animate
+     * @see MaterialButton.setScaleX
+     * @see MaterialButton.setScaleY
+     * @see MaterialButton.getScaleX
+     * @see MaterialButton.getScaleY
      */
-    private fun toggleRestartButton(isShown: Boolean, animationDuration: Long = 100) {
-        with(binding.restartButton) {
-            when (isShown) {
+    private var MaterialButton.animateVisibility: Boolean
+        get() = visibility == View.VISIBLE
+        set(value) {
+            val animationDuration = 100L
+
+            when (value) {
                 true -> {
                     isEnabled = true
                     visibility = View.VISIBLE
@@ -431,7 +456,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsChangedL
                 }
             }
         }
-    }
 
     /**
      * Returns true if all necessary permissions are granted.

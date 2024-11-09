@@ -16,8 +16,6 @@ import java.util.Locale
 import java.util.concurrent.CancellationException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
 import timber.log.Timber as Log
 
 /**
@@ -99,17 +97,14 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
 
         Log.d("timeout initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
         val durationSequence = when {
-            isIndefinite -> generateSequence(0L) { it + 1L }
-            else         -> (duration.inWholeSeconds downTo 0).asSequence()
+            isIndefinite -> generateSequence(Duration.INFINITE) { it - 1.seconds }
+            else         -> generateSequence(duration) { it - 1.seconds }
         }
 
-        durationSequence.forEach {
-            when {
-                isIndefinite -> update(Duration.INFINITE)
-                else         -> update(it.toDuration(DurationUnit.SECONDS))
-            }
+        durationSequence.forEach { duration ->
+            update(duration)
 
-            delay(1.seconds.inWholeMilliseconds)
+            delay(1.seconds)
         }
     }
 
@@ -130,8 +125,6 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
         withContext(Dispatchers.Main) {
             when (lastStatusUpdate) {
                 is ServiceStatus.Running -> {
-                    Log.d("${currentTime}: duration: ${remaining.toFormattedTime()}, status: $lastStatusUpdate, isIndefinite: $isIndefinite")
-
                     when (remaining) {
                         0.seconds -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
                         else      -> (lastStatusUpdate as? ServiceStatus.Running)?.remaining = remaining
@@ -141,5 +134,7 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
                 is ServiceStatus.Stopped -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_START)
             }
         }
+
+        Log.d("${currentTime}: duration: ${remaining.toFormattedTime()}, status: $lastStatusUpdate, isIndefinite: $isIndefinite")
     }
 }

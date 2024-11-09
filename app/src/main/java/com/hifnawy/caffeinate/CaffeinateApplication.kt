@@ -14,6 +14,7 @@ import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.LogDebugTree
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.widgets.Widget
+import timber.log.Timber
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -32,7 +33,7 @@ import timber.log.Timber as Log
  * @property nextTimeout [Duration] The next timeout duration to use when the KeepAwakeService is running.
  * @property timeout [Duration] The currently selected timeout duration.
  * @property keepAwakeServiceObservers [List] A list of [ServiceStatusObserver] objects that are notified when the KeepAwakeService's status changes.
- * @property sharedPrefsObservers [List] A list of [SharedPrefsChangedListener][SharedPrefsManager.SharedPrefsChangedListener] objects that are
+ * @property sharedPrefsObservers [List] A list of [SharedPrefsChangedListener][SharedPrefsManager.SharedPrefsObserver] objects that are
  * notified when shared preferences change.
  * @property lastStatusUpdate [ServiceStatus] The last status update received from the KeepAwakeService.
  * @property timeoutCheckBoxes [List] A list of [CheckBoxItem] objects representing the available timeout durations.
@@ -165,7 +166,7 @@ class CaffeinateApplication : Application() {
      *
      * @see SharedPrefsManager.notifySharedPrefsObservers
      */
-    var sharedPrefsObservers = mutableListOf<SharedPrefsManager.SharedPrefsChangedListener>()
+    var sharedPrefsObservers = mutableListOf<SharedPrefsManager.SharedPrefsObserver>()
 
     /**
      * The last status update received from the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService].
@@ -183,6 +184,8 @@ class CaffeinateApplication : Application() {
     var lastStatusUpdate: ServiceStatus = Stopped
         set(status) {
             field = status
+
+            Timber.d("lastStatusUpdate: $status")
 
             when (status) {
                 is Running -> status.onRemainingUpdated = RemainingValueObserver { notifyKeepAwakeServiceObservers(status) }
@@ -237,7 +240,7 @@ class CaffeinateApplication : Application() {
 
         keepAwakeServiceObservers.forEach { observer -> observer.onServiceStatusUpdated(status) }
 
-        QuickTileService.requestTileStateUpdate(localizedApplicationContext)
+        QuickTileService.requestTileStateUpdate(this)
         Widget.updateAllWidgets(this)
     }
 
@@ -331,14 +334,28 @@ class CaffeinateApplication : Application() {
 }
 
 /**
+ * A general-purpose interface for objects that can be registered to observe specific
+ * events and receive updates about them.
+ *
+ * Implement this interface to receive updates about the events you are interested in.
+ *
+ * @author AbdAlMoniem AlHifnawy
+ *
+ * @see ServiceStatusObserver
+ * @see SharedPrefsManager.SharedPrefsObserver
+ */
+interface Observer
+
+/**
  * An interface for observing changes in the status of the Caffeinate service.
  *
  * Implement this interface to receive updates about the service's status,
  * which can be either running or stopped.
  *
+ * @see Observer
  * @see ServiceStatus
  */
-fun interface ServiceStatusObserver {
+fun interface ServiceStatusObserver : Observer {
 
     /**
      * Called when the status of the Caffeinate service is updated.
@@ -389,7 +406,7 @@ sealed class ServiceStatus {
          * @see Running
          * @see remaining
          */
-        fun interface RemainingValueObserver {
+        fun interface RemainingValueObserver : Observer {
 
             /**
              * Called when the remaining timeout duration is updated.
@@ -463,7 +480,9 @@ sealed class ServiceStatus {
          *
          * @return [String] a string representation of the object.
          */
-        override fun toString() = "${Running::class.java.simpleName}(${remaining.toFormattedTime()})"
+        override fun toString() =
+                "${Running::class.java.simpleName}(${::remaining.name}: ${remaining.toFormattedTime()}, " +
+                "isIndefinite: ${remaining == Duration.INFINITE})"
     }
 
     /**
