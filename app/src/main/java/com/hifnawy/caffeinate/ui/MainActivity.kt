@@ -608,10 +608,17 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
         with(binding) {
             var theme = sharedPreferences.theme
             val dialogBinding = DialogChooseThemeBinding.inflate(LayoutInflater.from(root.context))
-            val dialog = MaterialAlertDialogBuilder(root.context).setView(dialogBinding.root).create().apply {
-                setCancelable(false)
-                window?.setLayout((displayWidth * 0.6f).toInt(), (displayHeight * 0.45f).toInt())
-            }
+
+            val dialog = MaterialAlertDialogBuilder(root.context)
+                .setView(dialogBinding.root)
+                .create()
+                .apply {
+                    setCancelable(false)
+                    window?.setLayout(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                }
 
             when (theme.value) {
                 AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> {

@@ -8,7 +8,7 @@
 
     <RadioGroup
         android:id="@+id/themeRadioGroup"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:checkedButton="@id/themeSystemDefault"
         app:layout_constraintStart_toStartOf="parent"
@@ -16,7 +16,7 @@
 
         <RadioButton
             android:id="@+id/themeSystemDefault"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="@string/app_theme_system_default"
@@ -25,7 +25,7 @@
 
         <RadioButton
             android:id="@+id/themeSystemLight"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="@string/app_theme_system_light"
@@ -34,7 +34,7 @@
 
         <RadioButton
             android:id="@+id/themeSystemDark"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="@string/app_theme_system_dark"
