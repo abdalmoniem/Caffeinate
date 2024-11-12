@@ -76,7 +76,7 @@ update_publish_release_yaml_file_and_add_tag() {
     fi
 
   scriptDir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd -P)
-  sh $scriptDir/update_fastlane_changelogs.sh
+  sh $scriptDir/get_changelog.sh
 
   else
     echo "ERROR: file $publishReleaseYaml not found"

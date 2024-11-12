@@ -1,0 +1,12 @@
+
+* added themed icons support
+* fixed theme choice dialog on small devices
+* New translations strings.xml (Arabic)
+* New translations strings.xml (Arabic, Egypt)
+* Update issue templates
+- preparing new release v1.7.5
+- app icons is now themed with adaptive icons, which will be enabled if the user enables adaptive icon coloring from the launcher/OS settings
+- removed duplicate and unnecessary screenshots in fastlane
+- fixed theme choice dialog clipping dialog buttons on small dpi scaled devices
+- New Crowdin updates (#50)
+- refix quick tile not updating on some devices
