@@ -13,9 +13,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/coffee_icon"
+        android:icon="@mipmap/app_icon_themed"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/coffee_icon"
+        android:roundIcon="@mipmap/app_icon_themed"
         android:supportsRtl="true"
         android:theme="@style/Theme.Caffeinate"
         tools:targetApi="31">
