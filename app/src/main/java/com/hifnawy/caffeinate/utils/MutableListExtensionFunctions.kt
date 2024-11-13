@@ -1,6 +1,7 @@
 package com.hifnawy.caffeinate.utils
 
 import com.hifnawy.caffeinate.Observer
+import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import kotlin.reflect.KClass
 import timber.log.Timber as Log
 
@@ -42,10 +43,12 @@ object MutableListExtensionFunctions {
             else              -> Log.d("${observer::class.simpleName} is already added to ${this::class.simpleName}<${ObserverType::class.simpleName}>!")
         }
 
-        Log.d(
-                "Items in ${this::class.simpleName}<${ObserverType::class.simpleName}>:\n" +
-                "[${joinToString(", ") { "${it::class.simpleName.toString()}@${it.hashCode().toString(16).uppercase()}" }}]"
-        )
+        if(isNotEmpty()) {
+            Log.d(
+                    "Items in ${this::class.simpleName}<${ObserverType::class.simpleName}>:\n" +
+                    "[${joinToString(", ") { "${it::class.simpleName.toString()}@${it.hashCode().toString(16).uppercase()}" }}]"
+            )
+        }
     }
 
     /**
@@ -71,9 +74,11 @@ object MutableListExtensionFunctions {
             else             -> Log.d("${observer::class.simpleName} is not present in ${this::class.simpleName}<${ObserverType::class.simpleName}>!")
         }
 
-        Log.d(
-                "Items in ${this::class.simpleName}<${ObserverType::class.simpleName}>:\n" +
-                "[${joinToString(", ") { "${it::class.simpleName.toString()}@${it.hashCode().toString(16).uppercase()}" }}]"
-        )
+        if(isNotEmpty()) {
+            Log.d(
+                    "Items in ${this::class.simpleName}<${ObserverType::class.simpleName}>:\n" +
+                    "[${joinToString(", ") { "${it::class.simpleName.toString()}@${it.hashCode().toString(16).uppercase()}" }}]"
+            )
+        }
     }
 }

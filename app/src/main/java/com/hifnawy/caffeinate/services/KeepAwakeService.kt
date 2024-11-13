@@ -11,6 +11,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
@@ -27,6 +28,7 @@ import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServi
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.NotificationActionRequestCode.REQUEST_CODE_NEXT_TIMEOUT
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.NotificationActionRequestCode.REQUEST_CODE_RESTART_TIMEOUT
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.NotificationActionRequestCode.REQUEST_CODE_TOGGLE_DIMMING
+import com.hifnawy.caffeinate.ui.OverlayHandler
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
@@ -70,6 +72,20 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
      * @see CaffeinateApplication
      */
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
+
+    /**
+     * A lazy delegate that provides a reference to the [OverlayHandler] instance that is used
+     * by this service to handle overlay-related operations.
+     *
+     * The [OverlayHandler] is responsible for managing the overlay that is displayed when the
+     * service is running in the foreground. It provides methods to show, hide and update the
+     * overlay, and is used by this service to update the overlay when the service's state changes.
+     *
+     * @return [OverlayHandler] the overlay handler instance.
+     *
+     * @see OverlayHandler
+     */
+    private val overlayHandler by lazy { OverlayHandler(caffeinateApplication) }
 
     /**
      * A lazy delegate that provides a reference to the [NotificationManager] instance that handles notifications
@@ -181,6 +197,21 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
     private var isScreenLockReceiverRegistered = false
 
     /**
+     * A flag indicating whether the screen overlay is enabled.
+     *
+     * This flag is used to track whether the screen overlay is currently enabled.
+     * The screen overlay is a floating window that is used to keep the screen awake.
+     * The overlay is enabled when the user requests to keep the screen awake, and
+     * disabled when the user requests to stop keeping the screen awake.
+     *
+     * This flag is initially set to the value that is stored in the shared preferences.
+     * The value of this flag is updated whenever the preference is changed by the user.
+     *
+     */
+    private var isOverlayEnabled = false
+        get() = field && Settings.canDrawOverlays(this)
+
+    /**
      * A flag indicating whether the screen should be dimmed while it is being kept awake.
      *
      * This flag is used to determine whether the screen should be dimmed while it is being kept awake.
@@ -198,7 +229,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
      * This wake lock is used to prevent the device from going to sleep while the service is running.
      * It is acquired when the service is started and released when the service is stopped.
      *
-     * @see startService
+     * @see prepareService
      * @see stopService
      */
     private var wakeLock: PowerManager.WakeLock? = null
@@ -237,7 +268,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
      *
      * All implementations must be thread-safe.
      *
-     * @param intent [Intent] The [Intent] supplied to [startService], as given.
+     * @param intent [Intent] The [Intent] supplied to [prepareService], as given.
      * This may be `null` if the service is being restarted after its process has gone away, and
      * it had previously returned anything except [START_STICKY_COMPATIBILITY][Service.START_STICKY_COMPATIBILITY].
      * @param flags [Int] Additional data about this start request.
@@ -253,6 +284,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIFICATION_ID, buildForegroundNotification(caffeinateApplication.lastStatusUpdate))
 
+        Log.d("onStartCommand, lastStatusUpdate: ${caffeinateApplication.lastStatusUpdate}")
+
         intent ?: return START_NOT_STICKY
         val keepAwakeServiceAction = intent.action?.let { action -> KeepAwakeServiceAction.valueOfOrNull(action) } ?: let {
             Log.wtf("intent.action: ${intent.action} cannot be parsed to ${KeepAwakeServiceAction::class.qualifiedName}!")
@@ -261,12 +294,13 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
 
         Log.d("serviceAction: $keepAwakeServiceAction")
 
+        isOverlayEnabled = sharedPreferences.isOverlayEnabled
         isDimmingEnabled = sharedPreferences.isDimmingEnabled
 
         when (keepAwakeServiceAction) {
-            ACTION_START                  -> startService()
+            ACTION_START                  -> prepareService()
             ACTION_RESTART                -> restart(caffeinateApplication)
-            ACTION_STOP                   -> stopSelf()
+            ACTION_STOP                   -> stopCaffeine()
             ACTION_CHANGE_TIMEOUT         -> startNextTimeout(caffeinateApplication, debounce = false)
             ACTION_CHANGE_DIMMING_ENABLED -> sharedPreferences.isDimmingEnabled = !sharedPreferences.isDimmingEnabled
         }
@@ -275,20 +309,37 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
     }
 
     /**
-     * Called by the system to notify a Service that it is no longer used and is being removed.
-     * The service should clean up any resources it has acquired, such as threads, registered
-     * receivers, etc. This is the last call the service receives.
+     * Called when the service is removed from the task manager.
      *
-     * @see [onStartCommand]
-     * @see [onLowMemory]
-     * @see [onTrimMemory]
-     * @see [onTaskRemoved]
+     * This method is triggered when the user swipes away the app from the recent apps list.
+     * It is responsible for cleaning up resources and stopping the caffeine session.
+     *
+     * @param rootIntent [Intent?] The root Intent that was used to launch the task.
+     * This may be `null` if the task was removed via the task manager.
+     *
+     * @see Service.onTaskRemoved
      */
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
 
-        Log.d("stopping ${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)}...")
-        stopCaffeine()
+        Log.d("${this::class.simpleName} service removed from task manager!")
+        if (sharedPreferences.isOverlayEnabled) stopCaffeine()
+    }
+
+    /**
+     * Called when the "Overlay Enabled" preference changes.
+     *
+     * @param isOverlayEnabled [Boolean] `true` if the overlay is enabled, `false` otherwise.
+     */
+    override fun onIsOverlayEnabledUpdated(isOverlayEnabled: Boolean) {
+        Log.d("isOverlayEnabled: $isOverlayEnabled")
+
+        this.isOverlayEnabled = isOverlayEnabled
+
+        when (caffeinateApplication.lastStatusUpdate) {
+            is ServiceStatus.Running -> if (isOverlayEnabled) overlayHandler.showOverlay() else overlayHandler.hideOverlay()
+            is ServiceStatus.Stopped -> Unit
+        }
     }
 
     /**
@@ -306,7 +357,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
         when (val status = caffeinateApplication.lastStatusUpdate) {
             is ServiceStatus.Running -> {
                 this.isDimmingEnabled = isDimmingEnabled
-                acquireWakeLock()
+                acquireWakeLock(status.remaining)
                 onServiceStatusUpdated(status)
             }
 
@@ -346,14 +397,16 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
             is ServiceStatus.Running -> {
                 Log.d("duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}")
                 notificationManager.notify(NOTIFICATION_ID, buildForegroundNotification(status))
+                if (isOverlayEnabled) overlayHandler.overlayText =
+                        status.remaining.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext)
             }
 
-            else                     -> stopForeground(STOP_FOREGROUND_REMOVE)
+            is ServiceStatus.Stopped -> stopForeground(STOP_FOREGROUND_REMOVE)
         }
     }
 
     /**
-     * Starts the foreground service.
+     * Prepares the foreground service.
      *
      * This method is called when the start intent is received.
      * It acquires a wake lock and starts the foreground service
@@ -362,12 +415,11 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
      * @see [startForeground]
      * @see [acquireWakeLock]
      */
-    private fun startService() = caffeinateApplication.run {
+    private fun prepareService() = caffeinateApplication.run {
         Log.d("starting ${this@KeepAwakeService::class.simpleName} service...")
 
-        Log.d("notifying observers...")
+
         lastStatusUpdate = ServiceStatus.Running(timeout).also { status ->
-            Log.d("observers notified!")
             Log.d("status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
 
             Log.d("sending foreground notification...")
@@ -378,7 +430,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
             sharedPrefsObservers.addObserver(this@KeepAwakeService)
 
             registerLocaleChangeReceiver()
-            if (!sharedPreferences.isWhileLockedEnabled) registerScreenLockReceiver()
+            if (sharedPreferences.isWhileLockedEnabled) registerScreenLockReceiver()
 
             startCaffeine(status.remaining)
         }
@@ -496,76 +548,75 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
      * @see [NotificationCompat.Builder]
      * @see [Notification]
      */
-    private fun buildForegroundNotification(status: ServiceStatus): Notification {
-        caffeinateApplication.run {
-            val notificationActionStopIntent =
-                    NotificationUtils.getPendingIntent(localizedApplicationContext, KeepAwakeService::class.java, ACTION_STOP.name, 0)
-            val notificationActionNextTimeoutStr = localizedApplicationContext.getString(R.string.foreground_notification_action_next_timeout)
-            val notificationActionDimmingEnabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_disable_dimming)
-            val notificationActionDimmingDisabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_enable_dimming)
-            val notificationActionNextTimeout = NotificationUtils.getNotificationAction(
-                    localizedApplicationContext,
-                    KeepAwakeService::class.java,
-                    ACTION_CHANGE_TIMEOUT.name,
-                    R.drawable.baseline_coffee_24,
-                    notificationActionNextTimeoutStr,
-                    REQUEST_CODE_NEXT_TIMEOUT.ordinal
-            )
-            val notificationActionRestartTimeout = when (status) {
-                is ServiceStatus.Running -> when {
-                    status.isCountingDown -> NotificationUtils.getNotificationAction(
-                            this,
-                            KeepAwakeService::class.java,
-                            ACTION_RESTART.name,
-                            R.drawable.baseline_coffee_24,
-                            getString(R.string.foreground_notification_action_restart_timeout),
-                            REQUEST_CODE_RESTART_TIMEOUT.ordinal
-                    )
+    private fun buildForegroundNotification(status: ServiceStatus): Notification = caffeinateApplication.run {
+        val notificationActionStopIntent =
+                NotificationUtils.getPendingIntent(localizedApplicationContext, KeepAwakeService::class.java, ACTION_STOP.name, 0)
+        val notificationActionNextTimeoutStr = localizedApplicationContext.getString(R.string.foreground_notification_action_next_timeout)
+        val notificationActionDimmingEnabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_disable_dimming)
+        val notificationActionDimmingDisabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_enable_dimming)
+        val notificationActionNextTimeout = NotificationUtils.getNotificationAction(
+                localizedApplicationContext,
+                KeepAwakeService::class.java,
+                ACTION_CHANGE_TIMEOUT.name,
+                R.drawable.baseline_coffee_24,
+                notificationActionNextTimeoutStr,
+                REQUEST_CODE_NEXT_TIMEOUT.ordinal
+        )
+        val notificationActionRestartTimeout = when (status) {
+            is ServiceStatus.Running -> when {
+                status.isCountingDown -> NotificationUtils.getNotificationAction(
+                        this,
+                        KeepAwakeService::class.java,
+                        ACTION_RESTART.name,
+                        R.drawable.baseline_coffee_24,
+                        getString(R.string.foreground_notification_action_restart_timeout),
+                        REQUEST_CODE_RESTART_TIMEOUT.ordinal
+                )
 
-                    else                  -> null
-                }
-
-                else                     -> null
-            }
-            val notificationActionToggleDimming = NotificationUtils.getNotificationAction(
-                    this,
-                    KeepAwakeService::class.java,
-                    ACTION_CHANGE_DIMMING_ENABLED.name,
-                    R.drawable.baseline_coffee_24,
-                    if (isDimmingEnabled) notificationActionDimmingEnabledStr else notificationActionDimmingDisabledStr,
-                    REQUEST_CODE_TOGGLE_DIMMING.ordinal
-            )
-            val notificationBuilder = NotificationCompat.Builder(localizedApplicationContext, notificationChannelID)
-            var durationStr: String? = null
-            var contentTitle: String? = null
-
-            if (status is ServiceStatus.Running) {
-                durationStr = status.remaining.toLocalizedFormattedTime(localizedApplicationContext)
-                contentTitle = when (status.remaining) {
-                    Duration.INFINITE -> localizedApplicationContext.getString(R.string.foreground_notification_title_duration_indefinite)
-                    else              -> localizedApplicationContext.getString(R.string.foreground_notification_title_duration_definite, durationStr)
-                }
+                else                  -> null
             }
 
-            notificationBuilder
-                .setSilent(true)
-                .setOngoing(true)
-                .setSubText(durationStr)
-                .setContentTitle(contentTitle)
-                .setContentIntent(notificationActionStopIntent)
-                .setSmallIcon(R.drawable.baseline_coffee_24)
-                .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
-                .addAction(notificationActionNextTimeout)
-                .addAction(notificationActionRestartTimeout)
-                .addAction(notificationActionToggleDimming)
-                .setContentInfo(localizedApplicationContext.getString(R.string.app_name))
-                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-                .setContentText(localizedApplicationContext.getString(R.string.foreground_notification_tap_to_turn_off))
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) notificationChannel?.let { channel -> notificationBuilder.setChannelId(channel.id) }
-
-            return notificationBuilder.build()
+            else                     -> null
         }
+        val notificationActionToggleDimming = NotificationUtils.getNotificationAction(
+                this,
+                KeepAwakeService::class.java,
+                ACTION_CHANGE_DIMMING_ENABLED.name,
+                R.drawable.baseline_coffee_24,
+                if (isDimmingEnabled) notificationActionDimmingEnabledStr else notificationActionDimmingDisabledStr,
+                REQUEST_CODE_TOGGLE_DIMMING.ordinal
+        )
+        val notificationBuilder = NotificationCompat.Builder(localizedApplicationContext, notificationChannelID)
+        var durationStr: String? = null
+        var contentTitle: String? = null
+
+        if (status is ServiceStatus.Running) {
+            durationStr = status.remaining.toLocalizedFormattedTime(localizedApplicationContext)
+            contentTitle = when (status.remaining) {
+                Duration.INFINITE -> localizedApplicationContext.getString(R.string.foreground_notification_title_duration_indefinite)
+                else              -> localizedApplicationContext.getString(R.string.foreground_notification_title_duration_definite, durationStr)
+            }
+        }
+
+        notificationBuilder
+            .setSilent(true)
+            .setOngoing(true)
+            .setAutoCancel(true)
+            .setSubText(durationStr)
+            .setContentTitle(contentTitle)
+            .setContentIntent(notificationActionStopIntent)
+            .setSmallIcon(R.drawable.baseline_coffee_24)
+            .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
+            .addAction(notificationActionNextTimeout)
+            .addAction(notificationActionRestartTimeout)
+            .addAction(notificationActionToggleDimming)
+            .setContentInfo(localizedApplicationContext.getString(R.string.app_name))
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .setContentText(localizedApplicationContext.getString(R.string.foreground_notification_tap_to_turn_off))
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) notificationChannel?.let { channel -> notificationBuilder.setChannelId(channel.id) }
+
+        return notificationBuilder.build()
     }
 
     /**
@@ -585,7 +636,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
      * which keeps the screen at full brightness.
      */
     @SuppressLint("WakelockTimeout")
-    private fun acquireWakeLock() {
+    private fun acquireWakeLock(duration: Duration) {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
         wakeLock?.apply {
@@ -604,16 +655,18 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
                 Log.d("using ${PowerManager::SCREEN_BRIGHT_WAKE_LOCK.name}")
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK
             }
-        } or PowerManager.ACQUIRE_CAUSES_WAKEUP
+        } or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE
 
         wakeLock = powerManager.newWakeLock(
                 wakeLockLevel,
-                "${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)}:wakelockTag"
+                "${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)}:wakeLockTag"
         ).apply {
-            Log.d("acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingAllowed: $isDimmingEnabled...")
-            setReferenceCounted(false)
-            acquire()
-            Log.d("${this@KeepAwakeService::wakeLock.name} acquired, isDimmingAllowed: $isDimmingEnabled!")
+            Log.d("acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingEnabled: $isDimmingEnabled...")
+            when {
+                duration == Duration.INFINITE -> acquire()
+                else                          -> acquire(duration.inWholeMilliseconds)
+            }
+            Log.d("${this@KeepAwakeService::wakeLock.name} acquired, isDimmingEnabled: $isDimmingEnabled!")
         }
     }
 
@@ -631,7 +684,9 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
         val isIndefinite = duration == Duration.INFINITE
         Log.d("starting ${localizedApplicationContext.getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
 
-        acquireWakeLock()
+        acquireWakeLock(duration)
+
+        if (isOverlayEnabled) overlayHandler.showOverlay()
 
         caffeineTimeoutJob?.apply {
             Log.d("cancelling ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
@@ -681,11 +736,15 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
         keepAwakeServiceObservers.removeObserver(this@KeepAwakeService)
         sharedPrefsObservers.removeObserver(this@KeepAwakeService)
 
-        Log.d("notifying observers...")
         lastStatusUpdate = ServiceStatus.Stopped
-        Log.d("observers notified!")
+
+        notificationManager.cancel(NOTIFICATION_ID)
 
         Log.d("${localizedApplicationContext.getString(R.string.app_name)} stopped!")
+
+        if (isOverlayEnabled) overlayHandler.hideOverlay()
+
+        stopSelf()
     }
 
     /**
@@ -996,10 +1055,6 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
             }
 
             startTimeout?.run { timeout = this }
-
-            // Log.d("notifying observers...")
-            // lastStatusUpdate = lastStatusUpdate
-            // Log.d("observers notified!")
 
             when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> localizedApplicationContext.startForegroundService(intent)

@@ -1,8 +1,6 @@
 package com.hifnawy.caffeinate.utils
 
 import android.content.Context
-import android.util.LayoutDirection
-import androidx.core.text.layoutDirection
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import kotlin.time.Duration
@@ -29,8 +27,8 @@ object DurationExtensionFunctions {
             Duration.INFINITE -> "∞"
             else              -> {
                 val format = when {
-                    hideLegend || isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
-                    else                -> if (hours == 0L) "%02dm %02ds" else "%02dh %02dm %02ds"
+                    hideLegend || CaffeinateApplication.isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
+                    else                                      -> if (hours == 0L) "%02dm %02ds" else "%02dh %02dm %02ds"
                 }
 
                 when (hours) {
@@ -61,8 +59,8 @@ object DurationExtensionFunctions {
             Duration.INFINITE -> "∞"
             else              -> {
                 val format = when {
-                    hideLegend || isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
-                    else                -> if (hours == 0L) "%02d${minuteLetter} %02d${secondLetter}" else "%02d${hourLetter} %02d${minuteLetter} %02d${secondLetter}"
+                    hideLegend || CaffeinateApplication.isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
+                    else                                      -> if (hours == 0L) "%02d${minuteLetter} %02d${secondLetter}" else "%02d${hourLetter} %02d${minuteLetter} %02d${secondLetter}"
                 }
 
                 when (hours) {
@@ -72,12 +70,4 @@ object DurationExtensionFunctions {
             }
         }
     }
-
-    /**
-     * Checks if the current locale is right-to-left.
-     *
-     * @return [Boolean] `true` if the current locale is right-to-left, `false` otherwise.
-     */
-    private val isRTL: Boolean
-        get() = CaffeinateApplication.applicationLocale.layoutDirection == LayoutDirection.RTL
 }

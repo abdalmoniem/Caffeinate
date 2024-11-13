@@ -12,6 +12,7 @@ import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSeria
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ALL_PERMISSIONS_GRANTED
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_DIMMING
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_MATERIAL_YOU
+import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_OVERLAY
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_WHILE_LOCKED
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.THEME
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.TIMEOUT_CHECK_BOXES
@@ -47,6 +48,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @property THEME A [Theme] value indicating the current theme of the application.
      * @property ENABLE_DIMMING A [Boolean] value indicating whether the screen should be dimmed while the service is running.
      * @property ENABLE_MATERIAL_YOU A [Boolean] value indicating whether Material You design elements should be enabled.
+     * @property ENABLE_OVERLAY A [Boolean] value indicating whether the overlay should be enabled.
      * @property ENABLE_WHILE_LOCKED A [Boolean] value indicating whether the service should be enabled while the screen is locked.
      * @property TIMEOUT_CHECK_BOXES A [List] of [CheckBoxItem] values indicating the timeouts that should be displayed in the RecyclerView.
      *
@@ -73,6 +75,11 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
          * A [Boolean] value indicating whether Material You design elements should be enabled.
          */
         ENABLE_MATERIAL_YOU,
+
+        /**
+         * A [Boolean] value indicating whether the overlay should be enabled.
+         */
+        ENABLE_OVERLAY,
 
         /**
          * A [Boolean] value indicating whether the service should be enabled while the screen is locked.
@@ -185,6 +192,21 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         set(value) = sharedPreferences.edit().putBoolean(ENABLE_MATERIAL_YOU.name, value).apply()
 
     /**
+     * Retrieves or sets whether the screen overlay should be shown while it is being kept awake.
+     *
+     * This property is used to get or update the preference of whether the screen overlay should be shown while it is being kept awake.
+     * It allows the application to persist the user's preference across sessions.
+     *
+     * @return [Boolean] `true` if the screen overlay should be shown, `false` otherwise.
+     */
+    var isOverlayEnabled: Boolean
+        get() = sharedPreferences.getBoolean(ENABLE_OVERLAY.name, false)
+        set(value) {
+            sharedPreferences.edit().putBoolean(ENABLE_OVERLAY.name, value).apply()
+            notifySharedPrefsObservers { observer -> observer.onIsOverlayEnabledUpdated(value) }
+        }
+
+    /**
      * Retrieves or sets whether the screen should be dimmed while it is being kept awake.
      *
      * This property is used to get or update the preference of whether the screen should be dimmed while it is being kept awake.
@@ -271,6 +293,13 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
          * @param isAllPermissionsGranted [Boolean] `true` if all permissions are granted, `false` otherwise.
          */
         fun onIsAllPermissionsGrantedUpdated(isAllPermissionsGranted: Boolean) = Unit
+
+        /**
+         * Called when the "Overlay Enabled" preference changes.
+         *
+         * @param isOverlayEnabled [Boolean] `true` if the overlay is enabled, `false` otherwise.
+         */
+        fun onIsOverlayEnabledUpdated(isOverlayEnabled: Boolean) = Unit
 
         /**
          * Called when the "Dimming Enabled" preference changes.

@@ -20,6 +20,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.NumberPicker
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -71,10 +73,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
     private val grantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.baseline_check_circle_24) }
     private val notGrantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.baseline_cancel_24) }
-    private val displayWidth: Int
-        get() = resources.displayMetrics.widthPixels
-    private val displayHeight: Int
-        get() = resources.displayMetrics.heightPixels
+    private lateinit var overlayPermissionLauncher: ActivityResultLauncher<Intent>
     private val Iterable<CheckBoxItem>.enabledDurations: CharSequence
         get() =
             filter { checkBoxItem -> checkBoxItem.isChecked }.joinToString(
@@ -118,6 +117,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
                 SharedPrefsManager.Theme.DARK           -> appThemeButton.text = getString(R.string.app_theme_system_dark)
             }
 
+            registerForOverlayPermission()
             if (DynamicColors.isDynamicColorAvailable()) enableMaterialYouPreferences()
 
             caffeineButton.setOnClickListener { buttonView ->
@@ -158,6 +158,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
 
             applyLocaleConfiguration()
 
+            checkOverlayPermission()
             if (isAllPermissionsGranted()) onIsAllPermissionsGrantedUpdated(true)
 
             keepAwakeServiceObservers.addObserver(this@MainActivity)
@@ -196,9 +197,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
      * @param grantResults [IntArray] The grant results for the corresponding permissions which is either
      * [PERMISSION_GRANTED][PackageManager.PERMISSION_GRANTED] or [PERMISSION_DENIED][PackageManager.PERMISSION_DENIED]. Never null.
      */
-    override fun onRequestPermissionsResult(
-            requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (requestCode == 93 && grantResults.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
             val snackbar = Snackbar.make(binding.root, getString(R.string.notifications_permission_required), Snackbar.LENGTH_INDEFINITE)
 
@@ -215,6 +214,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
 
             snackbar.show()
         }
+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
@@ -233,6 +233,15 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
         changeAllowDimmingPreferences(isAllPermissionsGranted)
         changeAllowWhileLockedPreferences(isAllPermissionsGranted)
         changeTimeoutsPreferences(isAllPermissionsGranted)
+    }
+
+    /**
+     * Called when the "Overlay Enabled" preference changes.
+     *
+     * @param isOverlayEnabled [Boolean] `true` if the overlay is enabled, `false` otherwise.
+     */
+    override fun onIsOverlayEnabledUpdated(isOverlayEnabled: Boolean) {
+        binding.overlaySwitch.isChecked = isOverlayEnabled
     }
 
     /**
@@ -308,6 +317,23 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
                 switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 sharedPreferences.isMaterialYouEnabled = isChecked
                 recreate()
+            }
+        }
+    }
+
+    private fun changeShowOverlayPreferences(isEnabled: Boolean) {
+        with(binding) {
+            overlayCard.isEnabled = isEnabled
+            overlayTextView.isEnabled = isEnabled
+            overlaySubTextTextView.isEnabled = isEnabled
+            overlaySubTextTextView.visibility = if (isEnabled) View.VISIBLE else View.GONE
+            overlaySwitch.isEnabled = isEnabled
+            overlaySwitch.isChecked = sharedPreferences.isOverlayEnabled
+
+            overlayCard.setOnClickListener { overlaySwitch.isChecked = !sharedPreferences.isOverlayEnabled }
+            overlaySwitch.setOnCheckedChangeListener { switch, isChecked ->
+                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                sharedPreferences.isOverlayEnabled = isChecked
             }
         }
     }
@@ -567,6 +593,30 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
         }
     }
 
+    private fun checkOverlayPermission() {
+        with(binding) {
+            val canDrawOverlays = Settings.canDrawOverlays(this@MainActivity)
+
+            changeShowOverlayPreferences(canDrawOverlays)
+
+            if (!canDrawOverlays) {
+                overlayPermissionCard.setOnClickListener {
+                    overlayPermissionLauncher.launch(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+                        data = Uri.parse("package:${packageName}")
+                    })
+                }
+                overlayPermissionTextView.text = getString(R.string.overlay_permission_not_granted)
+                overlayPermissionImageView.setImageDrawable(notGrantedDrawable)
+                overlayPermissionImageView.setColorFilter(Color.argb(255, 255, 0, 0))
+            } else {
+                overlayPermissionCard.setOnClickListener(null)
+                overlayPermissionTextView.text = getString(R.string.overlay_permission_granted)
+                overlayPermissionImageView.setImageDrawable(grantedDrawable)
+                overlayPermissionImageView.setColorFilter(Color.argb(255, 0, 255, 0))
+            }
+        }
+    }
+
     /**
      * Requests the user to grant the battery optimization permission.
      *
@@ -595,6 +645,35 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
             .show()
     }
 
+    private fun registerForOverlayPermission() {
+        with(binding) {
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply { data = Uri.parse("package:${packageName}") }
+
+            overlayPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                val canDrawOverlays = Settings.canDrawOverlays(this@MainActivity)
+
+                changeShowOverlayPreferences(canDrawOverlays)
+
+                if (!canDrawOverlays) {
+                    overlayPermissionCard.setOnClickListener { overlayPermissionLauncher.launch(intent) }
+                    overlayPermissionTextView.text = getString(R.string.overlay_permission_not_granted)
+                    overlayPermissionImageView.setImageDrawable(notGrantedDrawable)
+                    overlayPermissionImageView.setColorFilter(Color.argb(255, 255, 0, 0))
+                    val snackbar = Snackbar.make(binding.root, getString(R.string.overlay_permission_required), Snackbar.LENGTH_INDEFINITE)
+                    snackbar.setAction(getString(R.string.go_to_settings)) {
+                        overlayPermissionLauncher.launch(intent)
+                    }
+                    snackbar.show()
+                } else {
+                    overlayPermissionCard.setOnClickListener(null)
+                    overlayPermissionTextView.text = getString(R.string.overlay_permission_granted)
+                    overlayPermissionImageView.setImageDrawable(grantedDrawable)
+                    overlayPermissionImageView.setColorFilter(Color.argb(255, 0, 255, 0))
+                }
+            }
+        }
+    }
+
     /**
      * Shows a dialog to the user to let them choose a theme.
      *
@@ -608,7 +687,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
         with(binding) {
             var theme = sharedPreferences.theme
             val dialogBinding = DialogChooseThemeBinding.inflate(LayoutInflater.from(root.context))
-
             val dialog = MaterialAlertDialogBuilder(root.context)
                 .setView(dialogBinding.root)
                 .create()

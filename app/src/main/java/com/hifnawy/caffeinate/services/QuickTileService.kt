@@ -62,7 +62,10 @@ class QuickTileService : TileService(), ServiceStatusObserver {
     override fun onStartListening() = caffeinateApplication.run {
         // If the current class isn't in the list of observers, add it. Since only one QuickTile is added to the QuickSettings
         // Panel, this ensures that only one observer is added over the lifetime of the application when a timeout is started.
-        if (this@QuickTileService::class !in keepAwakeServiceObservers.itemClasses) keepAwakeServiceObservers.addObserver(this@QuickTileService)
+        if (this@QuickTileService::class !in keepAwakeServiceObservers.itemClasses) {
+            keepAwakeServiceObservers.addObserver(this@QuickTileService)
+            updateQuickTile(lastStatusUpdate)
+        }
     }
 
     /**
@@ -75,7 +78,10 @@ class QuickTileService : TileService(), ServiceStatusObserver {
      */
     override fun onStopListening() = caffeinateApplication.run {
         // only remove the observer if the service is stopped.
-        if (lastStatusUpdate is ServiceStatus.Stopped) keepAwakeServiceObservers.removeObserver(this@QuickTileService)
+        if (lastStatusUpdate is ServiceStatus.Stopped) {
+            keepAwakeServiceObservers.removeObserver(this@QuickTileService)
+            updateQuickTile(lastStatusUpdate)
+        }
     }
 
     /**

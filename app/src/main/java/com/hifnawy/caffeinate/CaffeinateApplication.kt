@@ -4,7 +4,9 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
+import android.util.LayoutDirection
 import androidx.annotation.ColorInt
+import androidx.core.text.layoutDirection
 import com.hifnawy.caffeinate.ServiceStatus.Running
 import com.hifnawy.caffeinate.ServiceStatus.Running.RemainingValueObserver
 import com.hifnawy.caffeinate.ServiceStatus.Stopped
@@ -14,7 +16,6 @@ import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.LogDebugTree
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.widgets.Widget
-import timber.log.Timber
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -185,11 +186,9 @@ class CaffeinateApplication : Application() {
         set(status) {
             field = status
 
-            Timber.d("lastStatusUpdate: $status")
-
             when (status) {
                 is Running -> status.onRemainingUpdated = RemainingValueObserver { notifyKeepAwakeServiceObservers(status) }
-                else       -> notifyKeepAwakeServiceObservers(status)
+                is Stopped -> notifyKeepAwakeServiceObservers(status)
             }
         }
 
@@ -236,12 +235,16 @@ class CaffeinateApplication : Application() {
      * @see keepAwakeServiceObservers
      */
     private fun notifyKeepAwakeServiceObservers(status: ServiceStatus) {
+        Log.d("notifying observers...")
+
         if (status is Stopped) timeout = firstTimeout
 
         keepAwakeServiceObservers.forEach { observer -> observer.onServiceStatusUpdated(status) }
 
         QuickTileService.requestTileStateUpdate(this)
         Widget.updateAllWidgets(this)
+
+        Log.d("observers notified!")
     }
 
     /**
@@ -316,6 +319,7 @@ class CaffeinateApplication : Application() {
      * and can be accessed throughout the application.
      *
      * @property applicationLocale [Locale] The current locale used by the application.
+     * @property isRTL [Boolean] `true` if the current locale is right-to-left, `false` otherwise.
      */
     companion object {
 
@@ -330,6 +334,14 @@ class CaffeinateApplication : Application() {
          */
         lateinit var applicationLocale: Locale
             private set
+
+        /**
+         * Checks if the current locale is right-to-left.
+         *
+         * @return [Boolean] `true` if the current locale is right-to-left, `false` otherwise.
+         */
+        val isRTL: Boolean
+            get() = applicationLocale.layoutDirection == LayoutDirection.RTL
     }
 }
 

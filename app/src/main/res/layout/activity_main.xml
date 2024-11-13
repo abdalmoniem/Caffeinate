@@ -207,6 +207,51 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/overlayPermissionCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="48dp"
+                app:cardCornerRadius="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/notificationPermissionCard">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/overlayPermissionTextView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/overlay_permission_not_granted"
+                        android:textSize="@dimen/permissions_text_size"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/overlayPermissionImageView"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/overlayPermissionImageView"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:contentDescription="@string/notifications_permission_not_granted"
+                        android:src="@drawable/baseline_cancel_24"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/overlayPermissionTextView"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="#ffff0000" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/appThemeCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -218,7 +263,7 @@
                 app:cardCornerRadius="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/notificationPermissionCard">
+                app:layout_constraintTop_toBottomOf="@+id/overlayPermissionCard">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -302,7 +347,68 @@
                         android:textOn="@string/material_you_on"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:thumbIcon="@drawable/switch_thumb_selector"
+                        tools:ignore="DuplicateSpeakableTextCheck" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/overlayCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="10dp"
+                android:clickable="true"
+                android:enabled="false"
+                android:focusable="true"
+                app:cardCornerRadius="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/materialYouCard">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/overlayTextView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:text="@string/show_overlay_pref"
+                        android:textSize="@dimen/pref_text_size"
+                        app:layout_constraintBottom_toTopOf="@+id/overlaySubTextTextView"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/overlaySubTextTextView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:text="@string/show_overlay_pref_description"
+                        android:textSize="@dimen/prefs_description_text_size"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/overlaySwitch"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/overlayTextView"
+                        tools:ignore="VisualLintLongText" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/overlaySwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:enabled="false"
+                        android:textOff="@string/material_you_off"
+                        android:textOn="@string/material_you_on"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:thumbIcon="@drawable/switch_thumb_selector" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -319,7 +425,7 @@
                 app:cardCornerRadius="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/materialYouCard">
+                app:layout_constraintTop_toBottomOf="@+id/overlayCard">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -359,7 +465,8 @@
                         android:textOn="@string/allow_dimming_on"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:thumbIcon="@drawable/switch_thumb_selector" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -416,7 +523,8 @@
                         android:textOn="@string/allow_while_locked_on"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:thumbIcon="@drawable/switch_thumb_selector" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -511,7 +619,8 @@
                 app:layout_constraintBottom_toBottomOf="@+id/caffeineButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/caffeineButton"
-                app:layout_constraintTop_toTopOf="@+id/caffeineButton" />
+                app:layout_constraintTop_toTopOf="@+id/caffeineButton"
+                tools:ignore="SpeakableTextPresentCheck" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
