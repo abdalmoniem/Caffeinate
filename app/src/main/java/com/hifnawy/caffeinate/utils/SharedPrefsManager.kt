@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.services.Observer
+import com.hifnawy.caffeinate.services.ServiceStatus
 import com.hifnawy.caffeinate.ui.CheckBoxItem
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
@@ -14,6 +15,8 @@ import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_DI
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_MATERIAL_YOU
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_OVERLAY
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_WHILE_LOCKED
+import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.IS_SERVICE_RUNNING
+import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.LAST_REMAINING_TIMEOUT
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.THEME
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.TIMEOUT_CHECK_BOXES
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.Theme.DARK
@@ -90,6 +93,26 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
          * A [List] of [CheckBoxItem] values indicating the timeouts that should be displayed in the RecyclerView.
          */
         TIMEOUT_CHECK_BOXES,
+
+        /**
+         * A [Boolean] value indicating whether the service is running.
+         *
+         * > TODO: Remove or find a way to infer the service status without using shared preferences
+         *         because this will put a strain on the device's storage since it will store
+         *         the last remaining timeout in the shared preferences every time the service
+         *         status is updated. which is every one second.
+         */
+        IS_SERVICE_RUNNING,
+
+        /**
+         * A [Long] value indicating the last remaining timeout value stored in shared preferences.
+         *
+         * > TODO: Remove or find a way to infer the service status without using shared preferences
+         *         because this will put a strain on the device's storage since it will store
+         *         the last remaining timeout in the shared preferences every time the service
+         *         status is updated. which is every one second.
+         */
+        LAST_REMAINING_TIMEOUT
     }
 
     /**
@@ -260,6 +283,51 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         set(value) = sharedPreferences.edit().putSerializableList(TIMEOUT_CHECK_BOXES.name, value.map { checkBoxItem ->
             checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext))
         }).apply()
+
+    /**
+     * Retrieves or sets whether the service is running.
+     *
+     * This property allows the application to determine if the service is currently running. The value is stored in
+     * shared preferences and persists across sessions.
+     *
+     * > TODO: Remove or find a way to infer the service status without using shared preferences
+     *         because this will put a strain on the device's storage since it will store
+     *         the last remaining timeout in the shared preferences every time the service
+     *         status is updated. which is every one second.
+     *
+     * @return [Boolean] `true` if the service is running, `false` otherwise.
+     */
+    var isServiceRunning: Boolean
+        get() = sharedPreferences.getBoolean(IS_SERVICE_RUNNING.name, false)
+        set(value) {
+            sharedPreferences.edit().putBoolean(IS_SERVICE_RUNNING.name, value).apply()
+            val timeout = when (value) {
+                true  -> (caffeinateApplication.lastStatusUpdate as ServiceStatus.Running).remaining.inWholeSeconds
+                false -> -1L
+            }
+
+            sharedPreferences.edit().putLong(LAST_REMAINING_TIMEOUT.name, timeout).apply()
+        }
+
+    /**
+     * Retrieves the last remaining timeout value stored in shared preferences.
+     *
+     * This property returns the last remaining timeout value stored in shared preferences, which is the value of the
+     * remaining timeout at the time the service was last stopped. The value is stored in shared preferences and persists
+     * across sessions.
+     *
+     * If the service is not running or the last remaining timeout has not been stored, this property returns `-1`.
+     *
+     * > TODO: Remove or find a way to infer the service status without using shared preferences
+     *         because this will put a strain on the device's storage since it will store
+     *         the last remaining timeout in the shared preferences every time the service
+     *         status is updated. which is every one second.
+     *
+     * @return [Long] The last remaining timeout value stored in shared preferences, or `-1` if the service is not running
+     *         or the last remaining timeout has not been stored.
+     */
+    val lastRemainingTimeout: Long
+        get() = sharedPreferences.getLong(LAST_REMAINING_TIMEOUT.name, -1)
 
     /**
      * Notifies all registered observers of a change in the shared preferences.

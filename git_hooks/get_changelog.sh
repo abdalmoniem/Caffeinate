@@ -17,17 +17,21 @@ if [ -z "$latestTag" ] || [ -z "$previousTag" ]; then
   exit 1
 fi
 
-echo "Generating Changelog..."
-while IFS= read -r body && IFS= read -r subject; do
-  subject_trimmed=$(echo "$subject" | sed -e 's/Change-Id:\s*.*//' | sed -e 's/Signed-off-by:\s*.*//' | sed 's/__END__//' | sed -e 's/^[^a-zA-Z0-9]*//')
-  body_trimmed=$(echo "$body" | sed -e 's/Change-Id:\s*.*//' | sed -e 's/Signed-off-by:\s*.*//' | sed 's/__END__//' | sed -e 's/^[^a-zA-Z0-9]*//')
+echo "Generating Changelog between $previousTag and $latestTag..."
+while read commit_hash
+do
+  subject=$(git log --format=%s -n 1 $commit_hash | sed -e 's/Change-Id:\s*.*//' | sed -e 's/Signed-off-by:\s*.*//' | sed -e 's/^[^a-zA-Z0-9]*//')
+  body=$(git log --format=%b -n 1 $commit_hash | sed -e 's/Change-Id:\s*.*//' | sed -e 's/Signed-off-by:\s*.*//' | sed -e 's/^[^a-zA-Z0-9]*//')
 
-  [[ -n "$subject_trimmed" ]] && echo "* $subject_trimmed"
-  [[ -n "$body_trimmed" ]] && echo "- $body_trimmed"
-
-  subjects+=("$subject_trimmed")
-  bodies+=("$body_trimmed")
-done < <(git log "$previousTag".."$latestTag" --pretty=format:"%s%n%b%n__END__")
+  echo "Commit: $commit_hash"
+  echo "* $subject"
+  subjects+=("$subject")
+  if [[ -n "$body" ]]; then
+    echo "- $body"
+    bodies+=("$body")
+  fi
+  echo "------------------------------"
+done < <(git log "$previousTag".."$latestTag" --pretty=format:"%H")
 
 changeLogs=${#subjects[@]}
 
@@ -36,12 +40,21 @@ if [ $changeLogs -gt 0 ]; then
 
   echo "" > "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt"
 
-  for subject in "${subjects[@]}"; do
-    [[ -n "$subject" ]] && echo "* $subject" >> "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt"
+  for index in $(seq ${#subjects[@]} -1 1); do
+    subject=${subjects[$index-1]}
+    if [[ -n "$subject" ]]; then
+      echo "* $subject" | sed '2,$s/^/  /' >> "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt"
+    fi
   done
 
-  for body in "${bodies[@]}"; do
-    [[ -n "$body" ]] && echo "- $body" >> "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt"
+  echo >> "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt"
+
+  for index in $(seq ${#bodies[@]} -1 1); do
+    body=${bodies[$index-1]}
+    if [[ -n "$body" ]]; then
+      echo "- $body" | sed '2,$s/^/  /' >> "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt"
+      echo >> "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt"
+    fi
   done
 
   currentCommitHash=$(git rev-parse HEAD)
@@ -53,7 +66,7 @@ if [ $changeLogs -gt 0 ]; then
     echo
 
     git add "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/"
-    git commit -sm "updated $changeLogs change logs(s)"
+    git commit -sm "updated $changeLogs change log(s)"
   else
     echo "commit '$currentCommitHash' is not on the remote branch, amending..."
     echo
@@ -61,4 +74,7 @@ if [ $changeLogs -gt 0 ]; then
     git add "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/"
     git commit --amend --no-edit
   fi
+else
+  echo "No / $changeLogs change log(s) found between $previousTag and $latestTag"
 fi
+
