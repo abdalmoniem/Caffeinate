@@ -6,8 +6,9 @@
     <p>Caffeinate Keeps the phone's screen awake for a configurable amount of time.</p>
 
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)
-[![Build App](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_app.yml)
-[![Publish Release](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release_on_tag.yml)
+[![Debug Build](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_debug_variant.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_debug_variant.yml)
+[![Release Build](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_release_variant.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/build_release_variant.yml)
+[![New Release](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release_on_tag.yml/badge.svg)](https://github.com/abdalmoniem/Caffeinate/actions/workflows/publish_release_on_tag.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate/badge)](https://www.codefactor.io/repository/github/abdalmoniem/caffeinate)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/0beba9b2841c40aa982513161d5febe5)](https://app.codacy.com/gh/abdalmoniem/Caffeinate)
 [![Crowdin](https://badges.crowdin.net/caffeinate/localized.svg)](https://crowdin.com/project/caffeinate)
