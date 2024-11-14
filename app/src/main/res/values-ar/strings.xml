@@ -15,7 +15,7 @@
     <string name="app_theme_pref">السمة</string>
     <string name="material_you_pref">ألوان ديناميكية</string>
     <string name="show_overlay_pref">عرض النافذة العائمة</string>
-    <string name="show_overlay_pref_description">عرض الوقت المتبقى فى نافذة عائمة أعلى الشاشة، ستظل هذه النافذة فى معروضة حتى عندما يكون التطبيق فى الخلفية.
+    <string name="show_overlay_pref_description">عرض الوقت المتبقى فى نافذة عائمة أعلى الشاشة، ستظل هذه النافذة معروضة حتى عندما يكون التطبيق فى الخلفية.
 قد تتطلب بعض الأجهزة تفعيل هذا الخِيار لكى يعمل التطبيق بشكل صحيح.    </string>
     <string name="material_you_pref_description">الألوان الديناميكية متوفرة فقط على أندرويد ١٢ وما فوق</string>
     <string name="material_you_off">الألوان الديناميكية مُعطَّلة</string>
