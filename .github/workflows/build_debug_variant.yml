@@ -1,5 +1,5 @@
 #file: noinspection Annotator
-name: Build App
+name: Build Debug Variant
 run-name: ${{ github.workflow }} ${{ github.event.repository.updated_at}}
 
 on:
