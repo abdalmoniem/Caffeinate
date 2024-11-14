@@ -166,6 +166,7 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.gson)
     implementation(libs.materialNumberPicker)
+    implementation(libs.activity)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidxJunit)
     androidTestImplementation(libs.androidxEspressoCore)

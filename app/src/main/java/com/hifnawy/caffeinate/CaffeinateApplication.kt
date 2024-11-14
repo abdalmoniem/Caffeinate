@@ -147,6 +147,20 @@ class CaffeinateApplication : Application() {
     var themeColor: Int = Color.TRANSPARENT
 
     /**
+     * The background color of the application's theme.
+     *
+     * This is the color that is used for the background of the application's UI components such as the action bar, buttons, and text.
+     *
+     * @return [Int] The [ColorInt] background color of the application's theme.
+     *
+     * @see android.content.res.Resources.Theme
+     * @see com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.backgroundColor
+     * @see android.util.TypedValue
+     */
+    @ColorInt
+    var backgroundColor: Int = Color.TRANSPARENT
+
+    /**
      * A list of observers that are notified whenever the status of the KeepAwakeService changes.
      *
      * This list is used to store all observers that are registered to receive notifications whenever the status of the KeepAwakeService changes.

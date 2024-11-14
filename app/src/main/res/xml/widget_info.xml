@@ -2,6 +2,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:description="@string/app_name"
+    android:configure="com.hifnawy.caffeinate.ui.WidgetConfigurationActivity"
     android:initialKeyguardLayout="@layout/widget"
     android:initialLayout="@layout/widget"
     android:previewImage="@drawable/widget_preview"

@@ -7,7 +7,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
@@ -60,8 +62,8 @@ class Widget : AppWidgetProvider() {
         caffeinateApplication = context.applicationContext as CaffeinateApplication
 
         when (intent.action) {
-            AppWidgetManager.ACTION_APPWIDGET_UPDATE -> updateAllWidgets(caffeinateApplication)
-            "CLICK"                                  -> {
+            AppWidgetManager.ACTION_APPWIDGET_UPDATE, AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED -> updateAllWidgets(caffeinateApplication)
+            "CLICK"                                                                                     -> {
                 if (!checkPermissions()) return
                 KeepAwakeService.startNextTimeout(caffeinateApplication)
             }
@@ -144,6 +146,28 @@ class Widget : AppWidgetProvider() {
             }
 
         /**
+         * Retrieves a Bitmap from the drawable resource and applies a tint with the specified background color.
+         *
+         * @receiver [DrawableRes] The drawable resource ID to convert into a Bitmap.
+         *
+         * @return [Bitmap] The tinted Bitmap representation of the drawable resource.
+         *
+         * @throws [UninitializedPropertyAccessException] if the application context is not initialized.
+         * @throws [android.content.res.Resources.NotFoundException] if the drawable resource ID is not valid.
+         *
+         * @see AppCompatResources
+         * @see AppCompatResources.getDrawable
+         * @see Drawable
+         * @see UninitializedPropertyAccessException
+         * @see android.content.res.Resources.NotFoundException
+         */
+        private val @receiver:DrawableRes Int.backgroundColored: Bitmap
+            get() = caffeinateApplication.run {
+                (AppCompatResources.getDrawable(applicationContext, this@backgroundColored) as Drawable)
+                    .apply { if (backgroundColor != 0) setTint(backgroundColor) }.toBitmap()
+            }
+
+        /**
          * Sets the click listeners for the widget.
          *
          * This method sets the [PendingIntent] for the clicks on the widget text and image views. The [PendingIntent] is used to start the [Widget]
@@ -175,7 +199,9 @@ class Widget : AppWidgetProvider() {
          * @see AppWidgetProvider
          * @see CaffeinateApplication
          */
-        private fun updateAppWidget(appWidgetManager: AppWidgetManager, appWidgetId: IntArray) = caffeinateApplication.run {
+        private fun updateAppWidget(appWidgetManager: AppWidgetManager, appWidgetId: Int) = caffeinateApplication.run {
+            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+            val showBackground = options.getBoolean("showBackground")
             val views = RemoteViews(applicationContext.packageName, R.layout.widget)
             val widgetView = views.apply(applicationContext, null)
             val widgetBinding = WidgetBinding.bind(widgetView)
@@ -185,17 +211,20 @@ class Widget : AppWidgetProvider() {
             }
 
             views.run {
+                setViewVisibility(widgetBinding.widgetBackground.id, if (showBackground) View.VISIBLE else View.GONE)
+                setImageViewBitmap(widgetBinding.widgetBackground.id, R.drawable.widget_background.backgroundColored)
+
                 setTextViewText(widgetBinding.widgetLabel.id, getString(R.string.app_name))
                 setTextViewText(widgetBinding.widgetText.id, widgetText)
 
                 when (lastStatusUpdate) {
                     is ServiceStatus.Stopped -> {
-                        setImageViewResource(widgetBinding.widgetBackground.id, R.drawable.widget_background_off)
+                        setImageViewResource(widgetBinding.widgetBorder.id, R.drawable.widget_background_off)
                         setImageViewResource(widgetBinding.widgetImageView.id, R.drawable.outline_coffee_24)
                     }
 
                     is ServiceStatus.Running -> {
-                        setImageViewBitmap(widgetBinding.widgetBackground.id, R.drawable.widget_background_on.themeColored)
+                        setImageViewBitmap(widgetBinding.widgetBorder.id, R.drawable.widget_background_on.themeColored)
                         setImageViewResource(widgetBinding.widgetImageView.id, R.drawable.baseline_coffee_24)
                     }
                 }
@@ -234,10 +263,8 @@ class Widget : AppWidgetProvider() {
                 is ServiceStatus.Running -> status.remaining.toFormattedTime()
             }
 
-            // appWidgetIds.forEach { appWidgetId ->  }
-
-            updateAppWidget(appWidgetManager, appWidgetIds)
-
+            appWidgetIds.forEach { appWidgetId -> updateAppWidget(appWidgetManager, appWidgetId) }
+            // updateAppWidget(appWidgetManager, appWidgetIds)
             if (appWidgetIds.isNotEmpty()) Log.d(
                     "${appWidgetIds.size} widgets updated, " +
                     "widgetIds: ${appWidgetIds.joinToString(", ")}, " +

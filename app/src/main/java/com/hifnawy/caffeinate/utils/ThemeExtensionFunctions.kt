@@ -37,12 +37,29 @@ object ThemeExtensionFunctions {
      * Retrieves the primary color of the current theme.
      *
      * @return [ColorInt] the primary color of the current theme.
+     *
+     * @throws Resources.NotFoundException If the `colorPrimary` attribute is not defined in the current theme.
      */
     val Resources.Theme.themeColor: Int
         @ColorInt
         get() {
             val typedValue = TypedValue()
-            this@themeColor.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true)
+            resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true)
+            return typedValue.data
+        }
+
+    /**
+     * Retrieves the background color of the current theme.
+     *
+     * @return [Int] the background color of the current theme.
+     *
+     * @throws Resources.NotFoundException If the `colorBackgroundFloating` attribute is not defined in the current theme.
+     */
+    val Resources.Theme.backgroundColor: Int
+        @ColorInt
+        get() {
+            val typedValue = TypedValue()
+            resolveAttribute(androidx.appcompat.R.attr.colorBackgroundFloating, typedValue, true)
             return typedValue.data
         }
 }

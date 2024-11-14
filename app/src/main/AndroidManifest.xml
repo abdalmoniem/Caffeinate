@@ -21,20 +21,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Caffeinate"
         tools:targetApi="31">
-        <receiver
-            android:name=".widgets.Widget"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="android.appwidget.action.APPWIDGET_ENABLED" />
-                <action android:name="android.appwidget.action.APPWIDGET_DISABLED" />
-                <action android:name="CLICK" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_info" />
-        </receiver>
 
         <activity
             android:name=".ui.MainActivity"
@@ -49,6 +35,10 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.WidgetConfigurationActivity"
+            android:exported="false" />
+
         <service
             android:name=".services.KeepAwakeService"
             android:enabled="true"
@@ -58,6 +48,7 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="To Enable KeepScreenOn" />
         </service>
+
         <service
             android:name=".services.QuickTileService"
             android:enabled="true"
@@ -76,6 +67,20 @@
                 android:name="android.service.quicksettings.ACTIVE_TILE"
                 android:value="true" />
         </service>
-    </application>
 
+        <receiver
+            android:name=".widgets.Widget"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_ENABLED" />
+                <action android:name="android.appwidget.action.APPWIDGET_DISABLED" />
+                <action android:name="CLICK" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+    </application>
 </manifest>

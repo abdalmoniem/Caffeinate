@@ -48,6 +48,7 @@ import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageD
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
+import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.backgroundColor
 import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
 import timber.log.Timber
 import kotlin.math.abs
@@ -155,6 +156,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
 
         caffeinateApplication.run {
             themeColor = this@MainActivity.theme.themeColor
+            backgroundColor = this@MainActivity.theme.backgroundColor
 
             applyLocaleConfiguration()
 
