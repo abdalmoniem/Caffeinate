@@ -1,0 +1,59 @@
+#file: noinspection Annotator
+name: Build Release Variant
+run-name: ${{ github.workflow }} ${{ github.event.repository.updated_at}}
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '00 00 * * 5'
+
+permissions: { }
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check base64
+        run: base64 --version
+
+      - name: Create local.properties
+        run: |
+          echo ${{ secrets.SIGNING_KEY }} | base64 -d > release_keystore.jks
+
+          keystoreFile=$(realpath release_keystore.jks)
+
+          echo "keystoreFile: $keystoreFile"
+
+          echo "storePassword=${{ secrets.KEY_STORE_PASSWORD }}" >> local.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> local.properties
+          echo "keyAlias=release_key" >> local.properties
+          echo "storeFile=$keystoreFile" >> local.properties
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: 21
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2.1.3
+
+      - name: Build Release APK
+        run: bash gradlew app:assembleRelease
+
+      - name: Get Release APK Name
+        run: |
+          releaseApk=$(find app/build/outputs/apk/release/*.apk)
+          echo $releaseApk
+          echo ARTIFACT_NAME=$(basename $releaseApk) >> $GITHUB_ENV
+          echo ARTIFACT_PATH=$releaseApk >> $GITHUB_ENV
+          
+      - name: Create Artifact ${{ env.ARTIFACT_NAME }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+          if-no-files-found: error
