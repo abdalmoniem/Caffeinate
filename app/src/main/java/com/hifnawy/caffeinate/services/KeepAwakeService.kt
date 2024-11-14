@@ -7,7 +7,6 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
@@ -173,28 +172,6 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
             else                                           -> null
         }
     }
-
-    /**
-     * A flag indicating whether the [LocaleChangeReceiver] is registered.
-     *
-     * This flag is used to track whether the [LocaleChangeReceiver] is currently registered to receive
-     * [Intent.ACTION_LOCALE_CHANGED] broadcasts, which are sent when the system locale changes.
-     *
-     * @see LocaleChangeReceiver
-     * @see Intent.ACTION_LOCALE_CHANGED
-     */
-    private var isLocaleChangeReceiverRegistered = false
-
-    /**
-     * A flag indicating whether the [ScreenLockReceiver] is registered.
-     *
-     * This flag is used to track whether the [ScreenLockReceiver] is currently registered to receive
-     * [Intent.ACTION_SCREEN_OFF] broadcasts, which are sent when the screen is turned off.
-     *
-     * @see ScreenLockReceiver
-     * @see Intent.ACTION_SCREEN_OFF
-     */
-    private var isScreenLockReceiverRegistered = false
 
     /**
      * A flag indicating whether the screen overlay is enabled.
@@ -378,7 +355,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
         Log.d("isWhileLockedEnabled: $isWhileLockedEnabled")
 
         when (caffeinateApplication.lastStatusUpdate) {
-            is ServiceStatus.Running -> if (isWhileLockedEnabled) unregisterScreenLockReceiver() else registerScreenLockReceiver()
+            is ServiceStatus.Running -> if (isWhileLockedEnabled) screenLockReceiver.unregister() else screenLockReceiver.register()
             is ServiceStatus.Stopped -> Unit
         }
     }
@@ -429,102 +406,13 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
             keepAwakeServiceObservers.addObserver(this@KeepAwakeService)
             sharedPrefsObservers.addObserver(this@KeepAwakeService)
 
-            registerLocaleChangeReceiver()
-            if (sharedPreferences.isWhileLockedEnabled) registerScreenLockReceiver()
+            localeChangeReceiver.register()
+            if (!sharedPreferences.isWhileLockedEnabled) screenLockReceiver.register()
 
             startCaffeine(status.remaining)
         }
 
         Log.d("${this@KeepAwakeService::class.simpleName} service started!")
-    }
-
-    /**
-     * Registers the [localeChangeReceiver] to receive broadcasts when the system locale is changed.
-     *
-     * This method is used to register the [localeChangeReceiver] to receive broadcasts when the system locale is changed. The
-     * receiver is registered with the [Intent.ACTION_LOCALE_CHANGED] intent filter, which is sent when the system locale is
-     * changed. The receiver is also exported to allow other applications to send broadcasts to it.
-     *
-     * @see [localeChangeReceiver]
-     * @see [Intent.ACTION_LOCALE_CHANGED]
-     * @see [registerReceiver]
-     */
-    private fun registerLocaleChangeReceiver() {
-        if (!isLocaleChangeReceiverRegistered) {
-            Log.d("registering ${this::localeChangeReceiver.name}...")
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(localeChangeReceiver, IntentFilter(Intent.ACTION_LOCALE_CHANGED), RECEIVER_EXPORTED)
-            } else {
-                registerReceiver(localeChangeReceiver, IntentFilter(Intent.ACTION_LOCALE_CHANGED))
-            }
-
-            isLocaleChangeReceiverRegistered = true
-
-            Log.d("${this::localeChangeReceiver.name} registered!")
-        }
-    }
-
-    /**
-     * Unregisters the [localeChangeReceiver] from receiving broadcasts when the system locale is changed.
-     *
-     * This method is used to unregister the [localeChangeReceiver] so that it no longer receives broadcasts when the
-     * system locale is changed. It ensures that the receiver is unregistered only if it is currently registered.
-     *
-     * @see [localeChangeReceiver]
-     * @see [unregisterReceiver]
-     */
-    private fun unregisterLocaleChangeReceiver() {
-        if (isLocaleChangeReceiverRegistered) {
-            Log.d("unregistering ${this::localeChangeReceiver.name}...")
-            unregisterReceiver(localeChangeReceiver)
-            isLocaleChangeReceiverRegistered = false
-            Log.d("${this::localeChangeReceiver.name} unregistered!")
-        }
-    }
-
-    /**
-     * Registers the [screenLockReceiver] to receive broadcasts when the screen is turned off.
-     *
-     * This method is used to register the [screenLockReceiver] so that it can receive broadcasts when the screen is turned
-     * off. It ensures that the receiver is registered only if it is currently not registered.
-     *
-     * @see [screenLockReceiver]
-     * @see [registerReceiver]
-     * @see [Intent.ACTION_SCREEN_OFF]
-     */
-    private fun registerScreenLockReceiver() {
-        if (!isScreenLockReceiverRegistered) {
-            Log.d("registering ${this::screenLockReceiver.name}...")
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(screenLockReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF), RECEIVER_EXPORTED)
-            } else {
-                registerReceiver(screenLockReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
-            }
-
-            isScreenLockReceiverRegistered = true
-
-            Log.d("${this::screenLockReceiver.name} registered!")
-        }
-    }
-
-    /**
-     * Unregisters the [screenLockReceiver] from receiving broadcasts when the screen is turned off.
-     *
-     * This method is used to unregister the [screenLockReceiver] so that it can no longer receive broadcasts when
-     * the screen is turned off. It ensures that the receiver is unregistered only if it is currently registered.
-     *
-     * @see [screenLockReceiver]
-     * @see [unregisterReceiver]
-     */
-    private fun unregisterScreenLockReceiver() {
-        if (isScreenLockReceiverRegistered) {
-            Log.d("unregistering ${this::screenLockReceiver.name}...")
-            unregisterReceiver(screenLockReceiver)
-            isScreenLockReceiverRegistered = false
-            Log.d("${this::screenLockReceiver.name} unregistered!")
-        }
     }
 
     /**
@@ -730,8 +618,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
             Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} cancelled!")
         }
 
-        unregisterLocaleChangeReceiver()
-        unregisterScreenLockReceiver()
+        localeChangeReceiver.unregister()
+        screenLockReceiver.register()
 
         keepAwakeServiceObservers.removeObserver(this@KeepAwakeService)
         sharedPrefsObservers.removeObserver(this@KeepAwakeService)

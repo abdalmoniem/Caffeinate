@@ -3,6 +3,7 @@ package com.hifnawy.caffeinate.services
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
 import timber.log.Timber as Log
@@ -20,10 +21,12 @@ import timber.log.Timber as Log
  *
  * @author AbdAlMoniem AlHifnawy
  *
+ * @see BroadcastReceiver
+ * @see BroadcastReceiverHandler
  * @see KeepAwakeService
- * @see KeepAwakeServiceState
  */
-class ScreenLockReceiver(private val caffeinateApplication: CaffeinateApplication) : BroadcastReceiver() {
+class ScreenLockReceiver(private val caffeinateApplication: CaffeinateApplication) :
+        BroadcastReceiverHandler(caffeinateApplication, IntentFilter(Intent.ACTION_SCREEN_OFF)) {
 
     /**
      * Called when the BroadcastReceiver receives an Intent broadcast.
@@ -33,8 +36,12 @@ class ScreenLockReceiver(private val caffeinateApplication: CaffeinateApplicatio
      *
      * @see BroadcastReceiver
      */
-    override fun onReceive(context: Context, intent: Intent) {
-        Log.d("Screen Locked, Stopping...")
-        KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
+    override fun onReceive(context: Context, intent: Intent) = when (intent.action) {
+        Intent.ACTION_SCREEN_OFF -> {
+            Log.d("Screen Locked, Stopping...")
+            KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
+        }
+
+        else                     -> Unit
     }
 }

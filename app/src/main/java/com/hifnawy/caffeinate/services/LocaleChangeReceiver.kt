@@ -3,6 +3,7 @@ package com.hifnawy.caffeinate.services
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import com.hifnawy.caffeinate.CaffeinateApplication
 import timber.log.Timber as Log
 
@@ -17,7 +18,8 @@ import timber.log.Timber as Log
  *
  * @see CaffeinateApplication
  */
-class LocaleChangeReceiver(private val caffeinateApplication: CaffeinateApplication) : BroadcastReceiver() {
+class LocaleChangeReceiver(private val caffeinateApplication: CaffeinateApplication) :
+        BroadcastReceiverHandler(caffeinateApplication, IntentFilter(Intent.ACTION_LOCALE_CHANGED)) {
 
     /**
      * Called when the BroadcastReceiver receives an Intent broadcast.
@@ -26,12 +28,16 @@ class LocaleChangeReceiver(private val caffeinateApplication: CaffeinateApplicat
      * @param intent [Intent] The Intent being received.
      *
      * @see BroadcastReceiver
+     * @see BroadcastReceiverHandler
+     * @see KeepAwakeService
      */
-    override fun onReceive(context: Context, intent: Intent) {
-        if (Intent.ACTION_LOCALE_CHANGED == intent.action) {
+    override fun onReceive(context: Context, intent: Intent) = when (intent.action) {
+        Intent.ACTION_LOCALE_CHANGED -> {
             Log.d("App locale changed from system settings! Apply new Locale...")
             caffeinateApplication.applyLocaleConfiguration()
             Log.d("Locale changed to ${CaffeinateApplication.applicationLocale.displayName} (${CaffeinateApplication.applicationLocale.language})")
         }
+
+        else                         -> Unit
     }
 }
