@@ -3,7 +3,7 @@ package com.hifnawy.caffeinate.utils
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.hifnawy.caffeinate.CaffeinateApplication
-import com.hifnawy.caffeinate.Observer
+import com.hifnawy.caffeinate.services.Observer
 import com.hifnawy.caffeinate.ui.CheckBoxItem
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
@@ -268,51 +268,51 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * the observer to be notified. The callback should call the appropriate method on the observer to notify it of the change
      * in shared preferences.
      *
-     * @param notifyCallback [(observer: SharedPrefsChangedListener) -> Unit][notifyCallback] the callback to be called on each registered observer.
+     * @param notifyCallback [(observer: SharedPrefsObserver) -> Unit][notifyCallback] the callback to be called on each registered observer.
      */
     private fun notifySharedPrefsObservers(notifyCallback: (observer: SharedPrefsObserver) -> Unit) =
             caffeinateApplication.sharedPrefsObservers.forEach(notifyCallback)
+}
+
+/**
+ * A listener interface for observing changes to shared preferences.
+ *
+ * This interface should be implemented by classes that wish to be notified when specific shared preferences change.
+ * Implementing classes can register themselves as observers and respond to changes in preferences by overriding the
+ * methods provided in this interface. Each method corresponds to a specific preference and is called whenever the
+ * associated preference changes.
+ *
+ * @see Observer
+ * @see SharedPrefsManager
+ * @see com.hifnawy.caffeinate.services.ServiceStatusObserver
+ */
+interface SharedPrefsObserver : Observer {
 
     /**
-     * A listener interface for observing changes to shared preferences.
+     * Called when the "All Permissions Granted" preference changes.
      *
-     * This interface should be implemented by classes that wish to be notified when specific shared preferences change.
-     * Implementing classes can register themselves as observers and respond to changes in preferences by overriding the
-     * methods provided in this interface. Each method corresponds to a specific preference and is called whenever the
-     * associated preference changes.
-     *
-     * @see Observer
-     * @see com.hifnawy.caffeinate.ServiceStatusObserver
-     * @see SharedPrefsManager.notifySharedPrefsObservers
+     * @param isAllPermissionsGranted [Boolean] `true` if all permissions are granted, `false` otherwise.
      */
-    interface SharedPrefsObserver : Observer {
+    fun onIsAllPermissionsGrantedUpdated(isAllPermissionsGranted: Boolean) = Unit
 
-        /**
-         * Called when the "All Permissions Granted" preference changes.
-         *
-         * @param isAllPermissionsGranted [Boolean] `true` if all permissions are granted, `false` otherwise.
-         */
-        fun onIsAllPermissionsGrantedUpdated(isAllPermissionsGranted: Boolean) = Unit
+    /**
+     * Called when the "Overlay Enabled" preference changes.
+     *
+     * @param isOverlayEnabled [Boolean] `true` if the overlay is enabled, `false` otherwise.
+     */
+    fun onIsOverlayEnabledUpdated(isOverlayEnabled: Boolean) = Unit
 
-        /**
-         * Called when the "Overlay Enabled" preference changes.
-         *
-         * @param isOverlayEnabled [Boolean] `true` if the overlay is enabled, `false` otherwise.
-         */
-        fun onIsOverlayEnabledUpdated(isOverlayEnabled: Boolean) = Unit
+    /**
+     * Called when the "Dimming Enabled" preference changes.
+     *
+     * @param isDimmingEnabled [Boolean] `true` if dimming is enabled, `false` otherwise.
+     */
+    fun onIsDimmingEnabledUpdated(isDimmingEnabled: Boolean) = Unit
 
-        /**
-         * Called when the "Dimming Enabled" preference changes.
-         *
-         * @param isDimmingEnabled [Boolean] `true` if dimming is enabled, `false` otherwise.
-         */
-        fun onIsDimmingEnabledUpdated(isDimmingEnabled: Boolean) = Unit
-
-        /**
-         * Called when the "While Locked Enabled" preference changes.
-         *
-         * @param isWhileLockedEnabled [Boolean] `true` if the "While Locked" feature is enabled, `false` otherwise.
-         */
-        fun onIsWhileLockedEnabledUpdated(isWhileLockedEnabled: Boolean) = Unit
-    }
+    /**
+     * Called when the "While Locked Enabled" preference changes.
+     *
+     * @param isWhileLockedEnabled [Boolean] `true` if the "While Locked" feature is enabled, `false` otherwise.
+     */
+    fun onIsWhileLockedEnabledUpdated(isWhileLockedEnabled: Boolean) = Unit
 }

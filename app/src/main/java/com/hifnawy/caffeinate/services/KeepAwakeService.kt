@@ -14,8 +14,6 @@ import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.ServiceStatus
-import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_CHANGE_DIMMING_ENABLED
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_CHANGE_TIMEOUT
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_RESTART
@@ -34,6 +32,7 @@ import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.NotificationUtils
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
+import com.hifnawy.caffeinate.utils.SharedPrefsObserver
 import com.hifnawy.caffeinate.utils.WakeLockExtensionFunctions.releaseSafely
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -58,7 +57,7 @@ import timber.log.Timber as Log
  * @see ServiceStatusObserver
  * @see LocaleChangeReceiver
  */
-class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, ServiceStatusObserver {
+class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
 
     /**
      * A lazy delegate that provides a reference to the [CaffeinateApplication] instance that owns this service.
@@ -201,6 +200,18 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
     private var isDimmingEnabled = false
 
     /**
+     * A flag indicating whether the screen should be kept awake while the device is locked.
+     *
+     * This flag is used to determine whether the screen should be kept awake while the device is locked.
+     * When the flag is set to `true`, the service will keep running while the device is locked.
+     * When the flag is set to `false`, the service will stop running while the device is locked.
+     *
+     * This flag is initially set to the value that is stored in the shared preferences.
+     * The value of this flag is updated whenever the preference is changed by the user.
+     */
+    private var isWhileLockedEnabled = false
+
+    /**
      * A [PowerManager.WakeLock] that is used to keep the device awake while this service is running.
      *
      * This wake lock is used to prevent the device from going to sleep while the service is running.
@@ -271,8 +282,11 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
 
         Log.d("serviceAction: $keepAwakeServiceAction")
 
-        isOverlayEnabled = sharedPreferences.isOverlayEnabled
-        isDimmingEnabled = sharedPreferences.isDimmingEnabled
+        with(sharedPreferences) {
+            this@KeepAwakeService.isOverlayEnabled = isOverlayEnabled
+            this@KeepAwakeService.isDimmingEnabled = isDimmingEnabled
+            this@KeepAwakeService.isWhileLockedEnabled = isWhileLockedEnabled
+        }
 
         when (keepAwakeServiceAction) {
             ACTION_START                  -> prepareService()
@@ -322,10 +336,6 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
     /**
      * Called when the "Dimming Enabled" preference changes.
      *
-     * This is a part of the [SharedPrefsChangedListener][com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsObserver] interface.
-     * This method is called when the "Dimming Enabled" preference changes. The service will try to acquire a wake lock with the new value of
-     * [isDimmingEnabled].
-     *
      * @param isDimmingEnabled [Boolean] `true` if dimming is enabled, `false` otherwise.
      */
     override fun onIsDimmingEnabledUpdated(isDimmingEnabled: Boolean) {
@@ -345,19 +355,12 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
     /**
      * Called when the "While Locked Enabled" preference changes.
      *
-     * This is a part of the [SharedPrefsChangedListener][com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsObserver] interface.
-     * This method is called when the "While Locked Enabled" preference changes. The service will try to acquire a wake lock with the new value of
-     * [isWhileLockedEnabled].
-     *
      * @param isWhileLockedEnabled [Boolean] `true` if the "While Locked" feature is enabled, `false` otherwise.
      */
     override fun onIsWhileLockedEnabledUpdated(isWhileLockedEnabled: Boolean) {
         Log.d("isWhileLockedEnabled: $isWhileLockedEnabled")
 
-        when (caffeinateApplication.lastStatusUpdate) {
-            is ServiceStatus.Running -> if (isWhileLockedEnabled) screenLockReceiver.unregister() else screenLockReceiver.register()
-            is ServiceStatus.Stopped -> Unit
-        }
+        screenLockReceiver.isRegistered = !isWhileLockedEnabled
     }
 
     /**
@@ -406,8 +409,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
             keepAwakeServiceObservers.addObserver(this@KeepAwakeService)
             sharedPrefsObservers.addObserver(this@KeepAwakeService)
 
-            localeChangeReceiver.register()
-            if (!sharedPreferences.isWhileLockedEnabled) screenLockReceiver.register()
+            localeChangeReceiver.isRegistered = true
+            onIsWhileLockedEnabledUpdated(isWhileLockedEnabled)
 
             startCaffeine(status.remaining)
         }
@@ -618,8 +621,8 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
             Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} cancelled!")
         }
 
-        localeChangeReceiver.unregister()
-        screenLockReceiver.register()
+        localeChangeReceiver.isRegistered = false
+        screenLockReceiver.isRegistered = false
 
         keepAwakeServiceObservers.removeObserver(this@KeepAwakeService)
         sharedPrefsObservers.removeObserver(this@KeepAwakeService)
@@ -927,7 +930,7 @@ class KeepAwakeService : Service(), SharedPrefsManager.SharedPrefsObserver, Serv
         fun toggleState(
                 caffeinateApplication: CaffeinateApplication,
                 newKeepAwakeServiceState: KeepAwakeServiceState,
-                startTimeout: Duration? = null
+                startTimeout: Duration? = null,
         ): Unit = caffeinateApplication.run {
             Log.d("newState: $newKeepAwakeServiceState")
             val start = when (newKeepAwakeServiceState) {

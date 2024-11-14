@@ -10,8 +10,6 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.ServiceStatus
-import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.services.QuickTileService.Companion.requestTileStateUpdate
 import com.hifnawy.caffeinate.ui.MainActivity
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime

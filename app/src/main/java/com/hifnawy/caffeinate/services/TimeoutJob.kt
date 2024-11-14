@@ -1,7 +1,6 @@
 package com.hifnawy.caffeinate.services
 
 import com.hifnawy.caffeinate.CaffeinateApplication
-import com.hifnawy.caffeinate.ServiceStatus
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import kotlinx.coroutines.CoroutineScope

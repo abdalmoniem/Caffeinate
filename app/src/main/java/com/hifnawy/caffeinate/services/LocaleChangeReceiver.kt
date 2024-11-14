@@ -19,7 +19,7 @@ import timber.log.Timber as Log
  * @see CaffeinateApplication
  */
 class LocaleChangeReceiver(private val caffeinateApplication: CaffeinateApplication) :
-        BroadcastReceiverHandler(caffeinateApplication, IntentFilter(Intent.ACTION_LOCALE_CHANGED)) {
+        RegistrableBroadcastReceiver(caffeinateApplication, IntentFilter(Intent.ACTION_LOCALE_CHANGED)) {
 
     /**
      * Called when the BroadcastReceiver receives an Intent broadcast.
@@ -28,14 +28,14 @@ class LocaleChangeReceiver(private val caffeinateApplication: CaffeinateApplicat
      * @param intent [Intent] The Intent being received.
      *
      * @see BroadcastReceiver
-     * @see BroadcastReceiverHandler
+     * @see RegistrableBroadcastReceiver
      * @see KeepAwakeService
      */
     override fun onReceive(context: Context, intent: Intent) = when (intent.action) {
         Intent.ACTION_LOCALE_CHANGED -> {
             Log.d("App locale changed from system settings! Apply new Locale...")
             caffeinateApplication.applyLocaleConfiguration()
-            Log.d("Locale changed to ${CaffeinateApplication.applicationLocale.displayName} (${CaffeinateApplication.applicationLocale.language})")
+            CaffeinateApplication.applicationLocale.run { Log.d("Locale changed to $displayName ($language)") }
         }
 
         else                         -> Unit

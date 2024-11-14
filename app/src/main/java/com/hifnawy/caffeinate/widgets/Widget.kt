@@ -16,9 +16,9 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.ServiceStatus
 import com.hifnawy.caffeinate.databinding.WidgetBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
+import com.hifnawy.caffeinate.services.ServiceStatus
 import com.hifnawy.caffeinate.ui.MainActivity
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime

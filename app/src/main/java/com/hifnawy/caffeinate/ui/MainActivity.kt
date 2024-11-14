@@ -35,19 +35,20 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.ServiceStatus
-import com.hifnawy.caffeinate.ServiceStatusObserver
 import com.hifnawy.caffeinate.databinding.ActivityMainBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseThemeBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding
 import com.hifnawy.caffeinate.databinding.DialogSetCustomTimeoutBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
+import com.hifnawy.caffeinate.services.ServiceStatus
+import com.hifnawy.caffeinate.services.ServiceStatusObserver
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageDrawable
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
+import com.hifnawy.caffeinate.utils.SharedPrefsObserver
 import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.backgroundColor
 import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
 import timber.log.Timber
@@ -67,7 +68,7 @@ import kotlin.time.Duration.Companion.seconds
  * @see KeepAwakeService
  * @see SharedPrefsManager
  */
-class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver, ServiceStatusObserver {
+class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObserver {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
@@ -876,7 +877,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
     private fun showSetCustomTimeoutDialog(
             valueSetCallback: (timeout: Duration) -> Unit,
             onDialogStart: ((dialog: AlertDialog, dialogBinding: DialogSetCustomTimeoutBinding) -> Unit)? = null,
-            onDialogDismiss: ((dialog: AlertDialog, dialogBinding: DialogSetCustomTimeoutBinding) -> Unit)? = null
+            onDialogDismiss: ((dialog: AlertDialog, dialogBinding: DialogSetCustomTimeoutBinding) -> Unit)? = null,
     ) {
         with(binding) {
             val dialogBinding = DialogSetCustomTimeoutBinding.inflate(LayoutInflater.from(root.context))
@@ -985,7 +986,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
     private fun MaterialNumberPicker.animateRandom(
             animationDuration: Long = 1000L,
             onAnimationStart: (animator: Animator) -> Unit = {},
-            onAnimationEnd: (animator: Animator) -> Unit = {}
+            onAnimationEnd: (animator: Animator) -> Unit = {},
     ) {
         val toValue = Random.nextInt(minValue, maxValue)
 
@@ -1026,7 +1027,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsManager.SharedPrefsObserver
             fromValue: Int,
             animationDuration: Long = 1000L,
             onAnimationStart: (animator: Animator) -> Unit = {},
-            onAnimationEnd: (animator: Animator) -> Unit = {}
+            onAnimationEnd: (animator: Animator) -> Unit = {},
     ) {
         val minDistance = (minValue + maxValue) / 2
 
