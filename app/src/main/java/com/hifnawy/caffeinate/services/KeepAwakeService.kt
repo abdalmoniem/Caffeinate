@@ -287,10 +287,13 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
             this@KeepAwakeService.isDimmingEnabled = isDimmingEnabled
             this@KeepAwakeService.isWhileLockedEnabled = isWhileLockedEnabled
         }
-
+        val restartDuration = when (val lastTimeout = intent.getLongExtra(Intent.EXTRA_INTENT, -1L)) {
+            -1L  -> null
+            else -> lastTimeout.seconds
+        }
         when (keepAwakeServiceAction) {
             ACTION_START                  -> prepareService()
-            ACTION_RESTART                -> restart(caffeinateApplication)
+            ACTION_RESTART                -> restart(caffeinateApplication, restartDuration)
             ACTION_STOP                   -> stopCaffeine()
             ACTION_CHANGE_TIMEOUT         -> startNextTimeout(caffeinateApplication, debounce = false)
             ACTION_CHANGE_DIMMING_ENABLED -> sharedPreferences.isDimmingEnabled = !sharedPreferences.isDimmingEnabled
@@ -305,6 +308,28 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * This method is triggered when the user swipes away the app from the recent apps list.
      * It is responsible for cleaning up resources and stopping the caffeine session.
      *
+     *
+     * > TODO: Fix service stopping when overlay is shown and the app is swiped away
+     *         from the recent apps list on some chinese devices.
+     *
+     * > On some chinese devices, the service is stopped when the user swipes away the app
+     *   from the recent apps list. but the service is not stopped gracefully, so we need
+     *   to stop the service manually. This also seems to only happen when the overlay is
+     *   shown; but if it is not, the service is not stopped for some reason.
+     *
+     * > For now there is no way around this limitation except checking the device model
+     *   and gracefully stopping the service only if the overlay is shown. We use the
+     *   isOverlayEnabled flag from the shared preferences to check if the overlay was
+     *   shown or not before the service got killed, since the isOverlayEnabled flag will
+     *   be reset after the service instance is killed.
+     *
+     * > For now we can restart the service manually when the user swipes away the app
+     *   from the recent apps list passing the last remaining timeout to the service.
+     *   This is a crude solution, and may put a strain on the device's storage since
+     *   it will store the last remaining timeout in the shared preferences every time
+     *   the service status is updated. which is every one second.
+     *
+     *
      * @param rootIntent [Intent?] The root Intent that was used to launch the task.
      * This may be `null` if the task was removed via the task manager.
      *
@@ -313,8 +338,13 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
 
-        Log.d("${this::class.simpleName} service removed from task manager!")
-        if (sharedPreferences.isOverlayEnabled) stopCaffeine()
+        Log.d("${this::class.simpleName} service removed from task manager! restarting...")
+
+        Intent(this, KeepAwakeService::class.java).apply {
+            action = ACTION_RESTART.name
+            putExtra(Intent.EXTRA_INTENT, sharedPreferences.lastRemainingTimeout)
+            startService(this)
+        }
     }
 
     /**
@@ -383,6 +413,12 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
 
             is ServiceStatus.Stopped -> stopForeground(STOP_FOREGROUND_REMOVE)
         }
+        /* TODO: Remove or find a way to infer the service status without using shared preferences
+         *       because this will put a strain on the device's storage since it will store
+         *       the last remaining timeout in the shared preferences every time the service
+         *       status is updated. which is every one second.
+         */
+        sharedPreferences.isServiceRunning = status is ServiceStatus.Running
     }
 
     /**
@@ -912,8 +948,10 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
          * ```
          *
          * @param caffeinateApplication [CaffeinateApplication] The application context.
+         * @param startTimeout [Duration] The timeout duration to use when starting the service. If `null`, the service will use the previously set timeout.
          */
-        fun restart(caffeinateApplication: CaffeinateApplication) = toggleState(caffeinateApplication, STATE_START)
+        fun restart(caffeinateApplication: CaffeinateApplication, startTimeout: Duration? = null) =
+                toggleState(caffeinateApplication, STATE_START, startTimeout)
 
         /**
          * Toggles the state of the KeepAwakeService.
@@ -930,7 +968,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
         fun toggleState(
                 caffeinateApplication: CaffeinateApplication,
                 newKeepAwakeServiceState: KeepAwakeServiceState,
-                startTimeout: Duration? = null,
+                startTimeout: Duration? = null
         ): Unit = caffeinateApplication.run {
             Log.d("newState: $newKeepAwakeServiceState")
             val start = when (newKeepAwakeServiceState) {
