@@ -8,10 +8,15 @@
     <string name="background_optimization_granted">تحسين العمل فى الخلفية: تم منحها!</string>
     <string name="notifications_permission_not_granted">إذن الإخطارات: غير ممنوح!</string>
     <string name="notifications_permission_granted">إذن الإخطارات: مُنح!</string>
+    <string name="overlay_permission_not_granted">إذن الرسم على تطبيقات أخرى: غير ممنوح!</string>
+    <string name="overlay_permission_granted">إذن الرسم على تطبيقات أخرى: ممنوح!</string>
     <string name="dialog_battery_optimization_needed_title">تحسين البطارية مطلوب</string>
     <string name="dialog_battery_optimization_needed_message">يتطلب هذا التطبيق إذن تحسين البطارية للعمل بشكل صحيح.</string>
     <string name="app_theme_pref">السمة</string>
     <string name="material_you_pref">ألوان ديناميكية</string>
+    <string name="show_overlay_pref">عرض النافذة العائمة</string>
+    <string name="show_overlay_pref_description">عرض الوقت المتبقى فى نافذة عائمة أعلى الشاشة، ستظل هذه النافذة معروضة حتى عندما يكون التطبيق فى الخلفية.
+قد تتطلب بعض الأجهزة تفعيل هذا الخِيار لكى يعمل التطبيق بشكل صحيح.    </string>
     <string name="material_you_pref_description">الألوان الديناميكية متوفرة فقط على أندرويد ١٢ وما فوق</string>
     <string name="material_you_off">الألوان الديناميكية مُعطَّلة</string>
     <string name="material_you_on">الألوان الديناميكية مُفعَّلة</string>
@@ -39,6 +44,7 @@
     <string name="dialog_button_remove_timeout">احذف المُهلة / المُهَل</string>
     <string name="dialog_button_cancel">إلغاء</string>
     <string name="notifications_permission_required">إذن الإشعارات مطلوب</string>
+    <string name="overlay_permission_required">إذن الرسم على تطبيقات أخرى مطلوب</string>
     <string name="go_to_settings">الذَّهاب إلى الإعدادات</string>
     <string name="app_theme_system_default">افتراضى النظام</string>
     <string name="app_theme_system_light">ساطع</string>

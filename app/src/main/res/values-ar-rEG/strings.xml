@@ -8,10 +8,16 @@
     <string name="background_optimization_granted">تظبيط الشغل فى الخلفية: مِتَّاخِد!</string>
     <string name="notifications_permission_not_granted">إذن الإشعارات: مش مِتَّاخِد!</string>
     <string name="notifications_permission_granted">إذن الإشعارات: مِتَّاخِد!</string>
+    <string name="overlay_permission_not_granted">إذن الرسم على برامج تانية: مش مِتَّاخِد!</string>
+    <string name="overlay_permission_granted">إذن الرسم على برامج تانية: مِتَّاخِد!</string>
     <string name="dialog_battery_optimization_needed_title">محتاجين نِظَبَّط البطارية</string>
     <string name="dialog_battery_optimization_needed_message">البرنامج ده محتاج تَظبِيط البطارية عشان يشتغل كويس.</string>
     <string name="app_theme_pref">السيم</string>
     <string name="material_you_pref">ألوان متماشية مع النظام</string>
+    <string name="show_overlay_pref">اعرض شاشة عايمة</string>
+    <string name="show_overlay_pref_description">اعرض الوقت المتبقى فى شاشة عايمة على شاشة الموبايل من فوق، الشاشة دى هتفضل 
+ظاهرة حتى لما البرنامج يبقى في الخلفية.
+بعض الأجهزة ممكن تعوز تشغيل الخِيار ده عشان البرنامج يشتغل كويس.    </string>
     <string name="material_you_pref_description">الألوان المتماشية مع النظام موجودة بس على أندرويد ١٢ و طالع</string>
     <string name="material_you_off">الألوان المتماشية مش شغالة</string>
     <string name="material_you_on">الألوان المتماشية شغالة</string>
@@ -39,6 +45,7 @@
     <string name="dialog_button_remove_timeout">شيل المُهلة / المُهَل</string>
     <string name="dialog_button_cancel">الغى</string>
     <string name="notifications_permission_required">محتاج إذن الإشعارات</string>
+    <string name="overlay_permission_required">محتاج إذن الرسم على برامج تانية</string>
     <string name="go_to_settings">روح ع الإعدادات</string>
     <string name="app_theme_system_default">زى النظام</string>
     <string name="app_theme_system_light">فاتح</string>
