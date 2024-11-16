@@ -49,8 +49,6 @@ import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.SharedPrefsObserver
-import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.backgroundColor
-import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
 import timber.log.Timber
 import kotlin.math.abs
 import kotlin.random.Random
@@ -108,7 +106,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 showChooseThemeDialog()
             }
 
-            appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, theme.themeColor)
+            appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, getColor(R.color.colorPrimaryVariant))
 
             appThemeCard.setOnClickListener(themeClickListener)
             appThemeButton.setOnClickListener(themeClickListener)
@@ -156,9 +154,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         super.onResume()
 
         caffeinateApplication.run {
-            themeColor = this@MainActivity.theme.themeColor
-            backgroundColor = this@MainActivity.theme.backgroundColor
-
             applyLocaleConfiguration()
 
             checkOverlayPermission()
@@ -279,7 +274,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     restartButton.animateVisibility = false
 
                     caffeineButton.text = getString(R.string.caffeinate_button_off)
-                    appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, theme.themeColor)
+                    appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, getColor(R.color.colorPrimaryVariant))
                 }
 
                 is ServiceStatus.Running -> {
@@ -290,7 +285,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     }
 
                     caffeineButton.text = status.remaining.toLocalizedFormattedTime(root.context)
-                    appIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, theme.themeColor)
+                    appIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, getColor(R.color.colorPrimaryVariant))
                 }
             }
         }
@@ -898,16 +893,16 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 val onNumberPickerAnimationStart = { _: Animator -> dialogButtonRandomTimeout.isEnabled = false }
                 val onNumberPickerAnimationEnd = { _: Animator -> dialogButtonRandomTimeout.isEnabled = true }
 
-                hoursNumberPicker.textColor = theme.themeColor
-                minutesNumberPicker.textColor = theme.themeColor
-                secondsNumberPicker.textColor = theme.themeColor
+                hoursNumberPicker.textColor = getColor(R.color.colorPrimaryVariant)
+                minutesNumberPicker.textColor = getColor(R.color.colorPrimaryVariant)
+                secondsNumberPicker.textColor = getColor(R.color.colorPrimaryVariant)
 
-                hoursLabel.setTextColor(theme.themeColor)
-                minutesLabel.setTextColor(theme.themeColor)
-                secondsLabel.setTextColor(theme.themeColor)
+                hoursLabel.setTextColor(getColor(R.color.colorPrimaryVariant))
+                minutesLabel.setTextColor(getColor(R.color.colorPrimaryVariant))
+                secondsLabel.setTextColor(getColor(R.color.colorPrimaryVariant))
 
-                hoursSeparator.setTextColor(theme.themeColor)
-                minutesSeparator.setTextColor(theme.themeColor)
+                hoursSeparator.setTextColor(getColor(R.color.colorPrimaryVariant))
+                minutesSeparator.setTextColor(getColor(R.color.colorPrimaryVariant))
 
                 hoursNumberPicker.setFormatter { value -> "%02d".format(value) }
                 minutesNumberPicker.setFormatter { value -> "%02d".format(value) }

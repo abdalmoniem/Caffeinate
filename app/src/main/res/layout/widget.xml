@@ -3,15 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widgetRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:theme="@android:style/Theme.DeviceDefault.DayNight"
+    tools:ignore="NewApi">
 
     <ImageView
         android:id="@+id/widgetBackground"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:scaleType="fitXY"
         android:importantForAccessibility="no"
+        android:scaleType="fitXY"
         android:src="@drawable/widget_background" />
 
     <TextView
@@ -22,7 +24,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="5dp"
         android:text="@string/caffeinate_button_off"
-        android:textColor="@color/white"
+        android:textColor="@color/colorSecondaryVariant"
         android:textSize="15sp"
         tools:ignore="HardcodedText" />
 
@@ -44,7 +46,7 @@
         android:padding="0dp"
         android:scaleType="fitXY"
         android:src="@drawable/outline_coffee_24"
-        app:tint="@color/white" />
+        app:tint="@color/colorPrimaryVariant" />
 
     <TextView
         android:id="@+id/widgetLabel"
@@ -55,7 +57,7 @@
         android:layout_marginTop="5dp"
         android:text="@string/app_name"
         android:textAlignment="center"
-        android:textColor="@color/white"
+        android:textColor="@color/colorSecondaryVariant"
         android:textSize="15sp"
         tools:ignore="HardcodedText" />
 

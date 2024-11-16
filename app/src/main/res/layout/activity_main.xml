@@ -56,7 +56,7 @@
                 android:src="@drawable/outline_coffee_24"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/colorPrimary" />
+                app:tint="@color/colorPrimaryVariant" />
 
             <TextView
                 android:id="@+id/appNameTextView"

@@ -3,13 +3,18 @@ package com.hifnawy.caffeinate.ui
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
 import android.graphics.Canvas
+import android.graphics.PorterDuff
+import android.os.Build
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.hifnawy.caffeinate.CaffeinateApplication
+import androidx.appcompat.content.res.AppCompatResources
+import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.ActivityWidgetConfigurationBinding
 import com.hifnawy.caffeinate.databinding.WidgetBinding
 
@@ -85,8 +90,19 @@ class WidgetConfigurationActivity : AppCompatActivity() {
      */
     private fun widgetPreview(showBackground: Boolean): Bitmap =
             WidgetBinding.inflate(layoutInflater).run {
-                widgetBackground.setColorFilter((application as CaffeinateApplication).backgroundColor)
+                val iconOff = AppCompatResources.getDrawable(this@WidgetConfigurationActivity, R.drawable.outline_coffee_24)
+                    ?.apply {
+                        mutate()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            colorFilter = BlendModeColorFilter(getColor(R.color.colorNeutralVariant), BlendMode.SRC_IN)
+                        } else {
+                            @Suppress("DEPRECATION")
+                            setColorFilter(getColor(R.color.colorNeutralVariant), PorterDuff.Mode.SRC_IN)
+                        }
+                    }
+
                 widgetBackground.visibility = if (showBackground) View.VISIBLE else View.GONE
+                widgetImageView.setImageDrawable(iconOff)
 
                 root.run {
                     measure(

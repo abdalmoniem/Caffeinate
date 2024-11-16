@@ -6,12 +6,8 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.widget.RemoteViews
-import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import com.hifnawy.caffeinate.CaffeinateApplication
@@ -57,14 +53,11 @@ class Widget : AppWidgetProvider() {
      * @see ServiceStatus
      */
     override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-
         caffeinateApplication = context.applicationContext as CaffeinateApplication
 
         when (intent.action) {
             AppWidgetManager.ACTION_APPWIDGET_UPDATE, AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED -> updateAllWidgets(caffeinateApplication)
-            "CLICK"                                                                                     -> {
-                if (!checkPermissions()) return
+            Intent.ACTION_RUN                                                                           -> ifPermissionsGranted {
                 KeepAwakeService.startNextTimeout(caffeinateApplication)
             }
         }
@@ -76,9 +69,11 @@ class Widget : AppWidgetProvider() {
      * This method logs the current permission status and, if permissions are not granted,
      * it starts the MainActivity to prompt the user to grant the necessary permissions.
      *
+     * @param action [() -> Unit][action] A function to be executed if all permissions are granted.
+     *
      * @return [Boolean] `true` if all permissions are granted, `false` otherwise
      */
-    private fun checkPermissions(): Boolean {
+    private fun ifPermissionsGranted(action: () -> Unit) {
         val isAllPermissionsGranted by lazy { SharedPrefsManager(caffeinateApplication).isAllPermissionsGranted }
         Log.d("Permissions Granted: $isAllPermissionsGranted")
 
@@ -88,9 +83,9 @@ class Widget : AppWidgetProvider() {
             })
         }
 
-        return when {
-            !isAllPermissionsGranted -> false
-            else                     -> true
+        when {
+            isAllPermissionsGranted -> action()
+            else                    -> Unit
         }
     }
 
@@ -122,50 +117,18 @@ class Widget : AppWidgetProvider() {
          * @see updateAllWidgets
          */
         private lateinit var caffeinateApplication: CaffeinateApplication
-
-        /**
-         * Retrieves a Bitmap from the drawable resource and applies a tint with the theme's primary color.
-         *
-         * @receiver [DrawableRes] The drawable resource ID to convert into a Bitmap.
-         *
-         * @return [Bitmap] The tinted Bitmap representation of the drawable resource.
-         *
-         * @throws [UninitializedPropertyAccessException] if the application context is not initialized.
-         * @throws [android.content.res.Resources.NotFoundException] if the drawable resource ID is not valid.
-         *
-         * @see AppCompatResources
-         * @see AppCompatResources.getDrawable
-         * @see GradientDrawable
-         * @see UninitializedPropertyAccessException
-         * @see android.content.res.Resources.NotFoundException
-         */
-        private val @receiver:DrawableRes Int.themeColored: Bitmap
-            get() = caffeinateApplication.run {
-                (AppCompatResources.getDrawable(applicationContext, this@themeColored) as GradientDrawable)
-                    .apply { if (themeColor != 0) setColor(themeColor) }.toBitmap()
-            }
-
-        /**
-         * Retrieves a Bitmap from the drawable resource and applies a tint with the specified background color.
-         *
-         * @receiver [DrawableRes] The drawable resource ID to convert into a Bitmap.
-         *
-         * @return [Bitmap] The tinted Bitmap representation of the drawable resource.
-         *
-         * @throws [UninitializedPropertyAccessException] if the application context is not initialized.
-         * @throws [android.content.res.Resources.NotFoundException] if the drawable resource ID is not valid.
-         *
-         * @see AppCompatResources
-         * @see AppCompatResources.getDrawable
-         * @see Drawable
-         * @see UninitializedPropertyAccessException
-         * @see android.content.res.Resources.NotFoundException
-         */
-        private val @receiver:DrawableRes Int.backgroundColored: Bitmap
-            get() = caffeinateApplication.run {
-                (AppCompatResources.getDrawable(applicationContext, this@backgroundColored) as Drawable)
-                    .apply { if (backgroundColor != 0) setTint(backgroundColor) }.toBitmap()
-            }
+        private val iconOff
+            get() =
+                caffeinateApplication.run {
+                    AppCompatResources.getDrawable(applicationContext, R.drawable.outline_coffee_24)
+                        ?.apply { setTint(getColor(R.color.colorNeutralVariant)) }?.toBitmap()
+                }
+        private val iconOn
+            get() =
+                caffeinateApplication.run {
+                    AppCompatResources.getDrawable(applicationContext, R.drawable.baseline_coffee_24)
+                        ?.apply { setTint(getColor(R.color.colorPrimary)) }?.toBitmap()
+                }
 
         /**
          * Sets the click listeners for the widget.
@@ -182,7 +145,7 @@ class Widget : AppWidgetProvider() {
             val pendingIntent = PendingIntent.getBroadcast(
                     context,
                     0,
-                    Intent(context, Widget::class.java).apply { action = "CLICK" },
+                    Intent(context, Widget::class.java).apply { action = Intent.ACTION_RUN },
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
@@ -212,7 +175,6 @@ class Widget : AppWidgetProvider() {
 
             views.run {
                 setViewVisibility(widgetBinding.widgetBackground.id, if (showBackground) View.VISIBLE else View.GONE)
-                setImageViewBitmap(widgetBinding.widgetBackground.id, R.drawable.widget_background.backgroundColored)
 
                 setTextViewText(widgetBinding.widgetLabel.id, getString(R.string.app_name))
                 setTextViewText(widgetBinding.widgetText.id, widgetText)
@@ -220,12 +182,12 @@ class Widget : AppWidgetProvider() {
                 when (lastStatusUpdate) {
                     is ServiceStatus.Stopped -> {
                         setImageViewResource(widgetBinding.widgetBorder.id, R.drawable.widget_background_off)
-                        setImageViewResource(widgetBinding.widgetImageView.id, R.drawable.outline_coffee_24)
+                        setImageViewBitmap(widgetBinding.widgetImageView.id, iconOff)
                     }
 
                     is ServiceStatus.Running -> {
-                        setImageViewBitmap(widgetBinding.widgetBorder.id, R.drawable.widget_background_on.themeColored)
-                        setImageViewResource(widgetBinding.widgetImageView.id, R.drawable.baseline_coffee_24)
+                        setImageViewResource(widgetBinding.widgetBorder.id, R.drawable.widget_background_on)
+                        setImageViewBitmap(widgetBinding.widgetImageView.id, iconOn)
                     }
                 }
 

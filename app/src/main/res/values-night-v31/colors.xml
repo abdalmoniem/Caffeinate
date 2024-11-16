@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="colorPrimary">@color/material_dynamic_primary30</color>
+    <color name="colorPrimaryVariant">@color/material_dynamic_primary80</color>
+    <color name="colorSecondary">@color/material_dynamic_secondary30</color>
+    <color name="colorSecondaryVariant">@color/material_dynamic_secondary80</color>
+    <color name="colorNeutral">@color/material_dynamic_neutral30</color>
+    <color name="colorNeutralVariant">@color/material_dynamic_neutral_variant80</color>
+    <color name="colorBorder">@color/material_dynamic_primary20</color>
+</resources>

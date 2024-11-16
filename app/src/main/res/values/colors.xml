@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="white">#FFFFFFFF</color>
+    <color name="white">#ffffffff</color>
 
-    <color name="colorPrimary">#ff6200ee</color>
-    <color name="colorPrimaryVariant">#ff3700b3</color>
-    <color name="colorSecondary">#ff03dac6</color>
-    <color name="colorSecondaryVariant">#ff018786</color>
+    <color name="colorPrimary">#ff0288d1</color>
+    <color name="colorPrimaryVariant">#ff03a9f4</color>
+    <color name="colorSecondary">#ffb2fef7</color>
+    <color name="colorSecondaryVariant">#ff69e2c7</color>
+    <color name="colorNeutral">#ff607d8b</color>
+    <color name="colorNeutralVariant">#ffcfd8dc</color>
+    <color name="colorBorder">#ff2962ff</color>
 </resources>
