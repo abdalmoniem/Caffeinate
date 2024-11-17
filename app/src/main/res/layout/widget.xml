@@ -20,13 +20,22 @@
         android:id="@+id/widgetText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/widgetImageView"
+        android:layout_above="@+id/widgetIcon"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="5dp"
         android:text="@string/caffeinate_button_off"
-        android:textColor="@color/colorSecondaryVariant"
+        android:textColor="@color/colorWidgetTextOnBackground"
         android:textSize="15sp"
         tools:ignore="HardcodedText" />
+
+    <ImageView
+        android:id="@+id/widgetIconFill"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerInParent="true"
+        android:importantForAccessibility="no"
+        android:src="@drawable/widget_icon_fill"
+        app:tint="@color/colorWidgetIconFillOnBackground"/>
 
     <ImageView
         android:id="@+id/widgetBorder"
@@ -34,10 +43,11 @@
         android:layout_height="60dp"
         android:layout_centerInParent="true"
         android:importantForAccessibility="no"
-        android:src="@drawable/widget_background_off" />
+        android:src="@drawable/widget_border"
+        app:tint="@color/colorWidgetIconOnBackground"/>
 
     <ImageView
-        android:id="@+id/widgetImageView"
+        android:id="@+id/widgetIcon"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_centerHorizontal="true"
@@ -46,18 +56,18 @@
         android:padding="0dp"
         android:scaleType="fitXY"
         android:src="@drawable/outline_coffee_24"
-        app:tint="@color/colorPrimaryVariant" />
+        app:tint="@color/colorWidgetIconOnBackground" />
 
     <TextView
         android:id="@+id/widgetLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/widgetImageView"
+        android:layout_below="@+id/widgetIcon"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="5dp"
         android:text="@string/app_name"
         android:textAlignment="center"
-        android:textColor="@color/colorSecondaryVariant"
+        android:textColor="@color/colorWidgetTextOnBackground"
         android:textSize="15sp"
         tools:ignore="HardcodedText" />
 

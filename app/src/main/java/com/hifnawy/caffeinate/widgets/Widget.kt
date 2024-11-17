@@ -6,7 +6,6 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.view.View
 import android.widget.RemoteViews
 import androidx.appcompat.content.res.AppCompatResources
@@ -129,40 +128,6 @@ class Widget : AppWidgetProvider() {
         private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
 
         /**
-         * The bitmap of the icon to be used when the widget is in the "off" state.
-         *
-         * The bitmap is lazily initialized when the [caffeinateApplication] is available. The bitmap is tinted with the
-         * color [R.color.colorNeutralVariant] and is retrieved from the resources using
-         * [AppCompatResources.getDrawable].
-         *
-         * @return [Bitmap] the icon bitmap to be used when the widget is in the "off" state or `null` if
-         * [AppCompatResources.getDrawable] can't find the icon drawable
-         */
-        private val iconOff: Bitmap?
-            get() =
-                caffeinateApplication.run {
-                    AppCompatResources.getDrawable(applicationContext, R.drawable.outline_coffee_24)
-                        ?.apply { setTint(getColor(R.color.colorNeutralVariant)) }?.toBitmap()
-                }
-
-        /**
-         * The bitmap of the icon to be used when the widget is in the "on" state.
-         *
-         * The bitmap is lazily initialized when the [caffeinateApplication] is available. The bitmap is tinted with the
-         * color [R.color.colorPrimary] and is retrieved from the resources using
-         * [AppCompatResources.getDrawable].
-         *
-         * @return [Bitmap] the icon bitmap to be used when the widget is in the "on" state or `null` if
-         * [AppCompatResources.getDrawable] can't find the icon drawable
-         */
-        private val iconOn: Bitmap?
-            get() =
-                caffeinateApplication.run {
-                    AppCompatResources.getDrawable(applicationContext, R.drawable.baseline_coffee_24)
-                        ?.apply { setTint(getColor(R.color.colorPrimary)) }?.toBitmap()
-                }
-
-        /**
          * Sets the click listeners for the widget.
          *
          * This method sets the [PendingIntent] for the clicks on the widget text and image views. The [PendingIntent] is used to start the [Widget]
@@ -199,28 +164,56 @@ class Widget : AppWidgetProvider() {
             val views = RemoteViews(applicationContext.packageName, R.layout.widget)
             val widgetView = views.apply(applicationContext, null)
             val widgetBinding = WidgetBinding.bind(widgetView)
+            val textColor = when {
+                showBackground -> getColor(R.color.colorWidgetTextOnBackground)
+                else           -> getColor(R.color.colorWidgetText)
+            }
+            val iconColor = when {
+                showBackground -> getColor(R.color.colorWidgetIconOnBackground)
+                else           -> getColor(R.color.colorWidgetIcon)
+            }
+            val iconFillColor = when {
+                showBackground -> getColor(R.color.colorWidgetIconFillOnBackground)
+                else           -> getColor(R.color.colorWidgetIconFill)
+            }
+            val widgetIcon = when (caffeinateApplication.lastStatusUpdate) {
+                is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.outline_coffee_24)
+                is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.baseline_coffee_24)
+            }?.apply {
+                setTint(iconColor)
+            }?.toBitmap()
+            val widgetIconFill = AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_icon_fill)?.apply {
+                setTint(iconFillColor)
+            }?.toBitmap()
+            val widgetBorder = AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_border)?.apply {
+                setTint(iconColor)
+            }?.toBitmap()
+            val backgroundVisibility = when {
+                showBackground -> View.VISIBLE
+                else           -> View.GONE
+            }
+            val iconFillVisibility = when (caffeinateApplication.lastStatusUpdate) {
+                is ServiceStatus.Stopped -> View.GONE
+                is ServiceStatus.Running -> View.VISIBLE
+            }
             val widgetText = when (val status = caffeinateApplication.lastStatusUpdate) {
                 is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
                 is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(localizedApplicationContext)
             }
 
             views.run {
-                setViewVisibility(widgetBinding.widgetBackground.id, if (showBackground) View.VISIBLE else View.GONE)
+                setViewVisibility(widgetBinding.widgetBackground.id, backgroundVisibility)
 
-                setTextViewText(widgetBinding.widgetLabel.id, getString(R.string.app_name))
+                setTextColor(widgetBinding.widgetText.id, textColor)
                 setTextViewText(widgetBinding.widgetText.id, widgetText)
 
-                when (lastStatusUpdate) {
-                    is ServiceStatus.Stopped -> {
-                        setImageViewResource(widgetBinding.widgetBorder.id, R.drawable.widget_background_off)
-                        setImageViewBitmap(widgetBinding.widgetImageView.id, iconOff)
-                    }
+                setViewVisibility(widgetBinding.widgetIconFill.id, iconFillVisibility)
+                setImageViewBitmap(widgetBinding.widgetIconFill.id, widgetIconFill)
+                setImageViewBitmap(widgetBinding.widgetBorder.id, widgetBorder)
+                setImageViewBitmap(widgetBinding.widgetIcon.id, widgetIcon)
 
-                    is ServiceStatus.Running -> {
-                        setImageViewResource(widgetBinding.widgetBorder.id, R.drawable.widget_background_on)
-                        setImageViewBitmap(widgetBinding.widgetImageView.id, iconOn)
-                    }
-                }
+                setTextColor(widgetBinding.widgetLabel.id, textColor)
+                setTextViewText(widgetBinding.widgetLabel.id, getString(R.string.app_name))
 
                 setClickListeners(applicationContext)
             }

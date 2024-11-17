@@ -6,7 +6,12 @@
     <color name="colorPrimaryVariant">#ff03a9f4</color>
     <color name="colorSecondary">#ffb2fef7</color>
     <color name="colorSecondaryVariant">#ff69e2c7</color>
-    <color name="colorNeutral">#ff607d8b</color>
-    <color name="colorNeutralVariant">#ffcfd8dc</color>
-    <color name="colorBorder">#ff2962ff</color>
+
+    <color name="colorWidgetBackground">#ff20846f</color>
+    <color name="colorWidgetText">#ff19121f</color>
+    <color name="colorWidgetTextOnBackground">#ffefefef</color>
+    <color name="colorWidgetIcon">#ff245f0a</color>
+    <color name="colorWidgetIconOnBackground">#fffa8923</color>
+    <color name="colorWidgetIconFill">#ffaa10ff</color>
+    <color name="colorWidgetIconFillOnBackground">#ffaa2300</color>
 </resources>

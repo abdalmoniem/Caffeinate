@@ -6,7 +6,12 @@
     <color name="colorPrimaryVariant">@color/material_dynamic_primary30</color>
     <color name="colorSecondary">@color/material_dynamic_secondary80</color>
     <color name="colorSecondaryVariant">@color/material_dynamic_secondary30</color>
-    <color name="colorNeutral">@color/material_dynamic_neutral80</color>
-    <color name="colorNeutralVariant">@color/material_dynamic_neutral_variant30</color>
-    <color name="colorBorder">@color/material_dynamic_primary80</color>
+
+    <color name="colorWidgetBackground">@color/material_dynamic_neutral_variant90</color>
+    <color name="colorWidgetText">@color/material_dynamic_primary80</color>
+    <color name="colorWidgetTextOnBackground">@color/material_dynamic_primary40</color>
+    <color name="colorWidgetIcon">@color/material_dynamic_secondary80</color>
+    <color name="colorWidgetIconOnBackground">@color/material_dynamic_secondary20</color>
+    <color name="colorWidgetIconFill">@color/material_dynamic_tertiary30</color>
+    <color name="colorWidgetIconFillOnBackground">@color/material_dynamic_tertiary80</color>
 </resources>

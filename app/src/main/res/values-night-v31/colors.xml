@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="white">#FFFFFFFF</color>
+    <color name="white">#ffffffff</color>
 
     <color name="colorPrimary">@color/material_dynamic_primary30</color>
     <color name="colorPrimaryVariant">@color/material_dynamic_primary80</color>
     <color name="colorSecondary">@color/material_dynamic_secondary30</color>
     <color name="colorSecondaryVariant">@color/material_dynamic_secondary80</color>
-    <color name="colorNeutral">@color/material_dynamic_neutral30</color>
-    <color name="colorNeutralVariant">@color/material_dynamic_neutral_variant80</color>
-    <color name="colorBorder">@color/material_dynamic_primary20</color>
+
+    <color name="colorWidgetBackground">@color/material_dynamic_secondary20</color>
+    <color name="colorWidgetText">@color/material_dynamic_primary90</color>
+    <color name="colorWidgetTextOnBackground">@color/material_dynamic_primary90</color>
+    <color name="colorWidgetIcon">@color/material_dynamic_secondary90</color>
+    <color name="colorWidgetIconOnBackground">@color/material_dynamic_primary90</color>
+    <color name="colorWidgetIconFill">@color/material_dynamic_tertiary30</color>
+    <color name="colorWidgetIconFillOnBackground">@color/material_dynamic_tertiary50</color>
 </resources>
