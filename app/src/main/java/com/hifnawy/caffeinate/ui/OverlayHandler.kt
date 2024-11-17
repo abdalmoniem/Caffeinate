@@ -1,13 +1,17 @@
 package com.hifnawy.caffeinate.ui
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
 import com.hifnawy.caffeinate.CaffeinateApplication
+import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.OverlayBinding
+import com.hifnawy.caffeinate.services.LocaleChangeReceiver
 import timber.log.Timber as Log
 
 /**
@@ -38,6 +42,18 @@ class OverlayHandler(private val context: Context) {
      * @return [OverlayBinding] The binding for the overlay layout.
      */
     private val overlayBinding by lazy { OverlayBinding.inflate(LayoutInflater.from(context)) }
+
+    /**
+     * A lazy delegate that provides a reference to the [LocaleChangeReceiver] instance that handles Locale changes.
+     *
+     * This delegate is used to register and unregister a [LocaleChangeReceiver] instance with the system,
+     * allowing the service to respond to changes in the system locale.
+     *
+     * @return [LocaleChangeReceiver] the instance handling Locale changes.
+     *
+     * @see LocaleChangeReceiver
+     */
+    private val localeChangeReceiver by lazy { LocaleChangeReceiver(context.applicationContext as CaffeinateApplication, ::onLocaleChanged) }
 
     /**
      * The window manager used to display the overlay.
@@ -105,6 +121,22 @@ class OverlayHandler(private val context: Context) {
     private var isOverlayVisible = false
 
     /**
+     * A property that gets/sets the text size of the overlay in pixels.
+     *
+     * This property is used to set the text size of the overlay when the overlay is first
+     * shown. It is also used to get the current text size of the overlay when the overlay
+     * is currently visible.
+     *
+     * The text size is used to size the text of the overlay such that it is visible and
+     * readable on the screen. The text size is specified in pixels.
+     *
+     * @return [Float] The current text size of the overlay in pixels.
+     */
+    private var overlayTextSize: Float
+        get() = overlayBinding.remaining.textSize
+        set(value) = overlayBinding.remaining.setTextSize(TypedValue.COMPLEX_UNIT_PX, value)
+
+    /**
      * The text displayed in the overlay.
      *
      * This property is used to set the text of the overlay when the overlay is first
@@ -116,7 +148,8 @@ class OverlayHandler(private val context: Context) {
     var overlayText: String
         get() = overlayBinding.remaining.text.toString()
         set(value) {
-            Log.d("Setting overlay text to $value...")
+            Log.d("Setting overlay text to $value, isRTL: ${CaffeinateApplication.isRTL}...")
+
             overlayBinding.remaining.text = value
         }
 
@@ -129,13 +162,11 @@ class OverlayHandler(private val context: Context) {
      *
      * @return [Float] The alpha value of the overlay.
      */
-    var alpha: Float
-        get() = layoutParams.alpha
+    var alpha
+        get() = overlayBinding.root.alpha
         set(value) {
-            // layoutParams.alpha = value
             Log.d("changing overlay alpha to $value...")
             overlayBinding.root.alpha = value
-            // windowManager.updateViewLayout(overlayBinding.root, layoutParams)
         }
 
     /**
@@ -151,17 +182,29 @@ class OverlayHandler(private val context: Context) {
      * @see hideOverlay
      */
     fun showOverlay() {
-        layoutParams.gravity = Gravity.TOP or when {
-            CaffeinateApplication.isRTL -> Gravity.START
-            else                        -> Gravity.END
-        }
-        layoutParams.x = 30
-        layoutParams.y = 0
-
         if (!isOverlayVisible) {
             Log.d("Showing overlay...")
+
+            layoutParams.run {
+                gravity = Gravity.TOP or when {
+                    CaffeinateApplication.isRTL -> Gravity.START
+                    else                        -> Gravity.END
+                }
+                x = 30
+                y = 0
+            }
+
+            overlayTextSize = when {
+                CaffeinateApplication.isRTL -> context.resources.getDimension(R.dimen.overlayTextSizeRTL)
+                else                        -> context.resources.getDimension(R.dimen.overlayTextSizeLTR)
+            }
+
             windowManager.addView(overlayBinding.root, layoutParams)
+
+            localeChangeReceiver.isRegistered = true
+
             isOverlayVisible = true
+
             Log.d("Overlay shown.")
         }
     }
@@ -179,9 +222,42 @@ class OverlayHandler(private val context: Context) {
     fun hideOverlay() {
         if (isOverlayVisible) {
             Log.d("Hiding overlay...")
+
             windowManager.removeViewImmediate(overlayBinding.root)
+
+            localeChangeReceiver.isRegistered = false
+
             isOverlayVisible = false
+
             Log.d("Overlay hidden.")
         }
+    }
+
+    /**
+     * Called when the locale has changed.
+     *
+     * This method is called when the [Intent.ACTION_LOCALE_CHANGED] broadcast is received.
+     * It is responsible for updating the overlay's position and text size based on the new locale.
+     *
+     * @param context [Context] the context in which the locale change occurred.
+     * @param intent [Intent] the intent that triggered the locale change.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    private fun onLocaleChanged(context: Context, intent: Intent) {
+        Log.d("App locale changed from system settings! Apply new Locale...")
+
+        layoutParams.gravity = Gravity.TOP or when {
+            CaffeinateApplication.isRTL -> Gravity.START
+            else                        -> Gravity.END
+        }
+
+        overlayTextSize = when {
+            CaffeinateApplication.isRTL -> context.resources.getDimension(R.dimen.overlayTextSizeRTL)
+            else                        -> context.resources.getDimension(R.dimen.overlayTextSizeLTR)
+        }
+
+        windowManager.updateViewLayout(overlayBinding.root, layoutParams)
+
+        CaffeinateApplication.applicationLocale.run { Log.d("Locale changed to $displayName ($language)") }
     }
 }
