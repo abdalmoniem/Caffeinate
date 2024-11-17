@@ -21,8 +21,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/widgetBorder"
-        android:layout_marginBottom="-4dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="-4dp"
         android:padding="3dp"
         android:shadowColor="@color/black"
         android:shadowDx="7"
@@ -68,9 +68,9 @@
         android:id="@+id/widgetLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-6dp"
         android:layout_below="@+id/widgetBorder"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="-6dp"
         android:padding="3dp"
         android:shadowColor="@color/black"
         android:shadowDx="7"
@@ -81,5 +81,4 @@
         android:textColor="@color/colorWidgetTextOnBackground"
         android:textSize="15sp"
         tools:ignore="HardcodedText" />
-
 </RelativeLayout>

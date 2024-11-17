@@ -14,21 +14,23 @@
     <string name="dialog_battery_optimization_needed_message">البرنامج ده محتاج تَظبِيط البطارية عشان يشتغل كويس.</string>
     <string name="app_theme_pref">السيم</string>
     <string name="material_you_pref">ألوان متماشية مع النظام</string>
-    <string name="show_overlay_pref">اعرض شاشة عايمة</string>
-    <string name="show_overlay_pref_description">اعرض الوقت المتبقى فى شاشة عايمة على شاشة الموبايل من فوق، الشاشة دى هتفضل 
-ظاهرة حتى لما البرنامج يبقى في الخلفية.
-بعض الأجهزة ممكن تعوز تشغيل الخِيار ده عشان البرنامج يشتغل كويس.    </string>
     <string name="material_you_pref_description">الألوان المتماشية مع النظام موجودة بس على أندرويد ١٢ و طالع</string>
     <string name="material_you_off">الألوان المتماشية مش شغالة</string>
     <string name="material_you_on">الألوان المتماشية شغالة</string>
+    <string name="show_overlay_pref">اعرض شاشة عايمة</string>
+    <string name="show_overlay_pref_description">اعرض الوقت المتبقى فى شاشة عايمة على شاشة الموبايل من فوق، الشاشة دى هتفضل
+ظاهرة حتى لما البرنامج يبقى في الخلفية.
+بعض الأجهزة ممكن تعوز تشغيل الخِيار ده عشان البرنامج يشتغل كويس.    </string>
+    <string name="show_overlay_off">الشاشة العايمة مش شغالة</string>
+    <string name="show_overlay_on">الشاشة العايمة شغالة</string>
     <string name="allow_dimming_pref">خَفت الشاشة</string>
     <string name="allow_dimming_pref_description">خلى الشاشة تِخفِت لما البرنامج يكون شغال</string>
     <string name="allow_dimming_on">خَفت الشاشة شغال</string>
     <string name="allow_dimming_off">خَفت الشاشة مش شغال</string>
     <string name="allow_while_locked_pref">كَمِّل شغل</string>
     <string name="allow_while_locked_pref_description">خلى البرنامج يكَمِّل شغل لما الشاشة تِطفِى</string>
-    <string name="allow_while_locked_off">تكميل الشغل شغال</string>
-    <string name="allow_while_locked_on">تكميل الشغل مَطفى</string>
+    <string name="allow_while_locked_off">تكميل الشغل مَطفى</string>
+    <string name="allow_while_locked_on">تكميل الشغل شغال</string>
     <string name="timeouts_pref">المُهَل</string>
     <string name="timeouts_change">غيَّر</string>
     <string name="caffeinate_button_off">مش شغال</string>

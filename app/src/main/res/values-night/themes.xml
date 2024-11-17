@@ -5,5 +5,8 @@
         <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
         <item name="colorSecondary">@color/colorSecondary</item>
         <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
+        <item name="colorOnPrimary">@color/colorSecondaryVariant</item>
+        <item name="colorOnPrimaryContainer">@color/colorPrimary</item>
+        <item name="colorOnSecondary">@color/colorPrimaryVariant</item>
     </style>
 </resources>

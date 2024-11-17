@@ -284,7 +284,6 @@
                         android:id="@+id/appThemeButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:checked="false"
                         android:text="@string/app_theme_system_default"
                         android:textSize="@dimen/appThemeButtonTextSize"
                         app:cornerRadius="20dp"
@@ -348,8 +347,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:thumbIcon="@drawable/switch_thumb_selector"
-                        tools:ignore="DuplicateSpeakableTextCheck" />
+                        app:thumbIcon="@drawable/switch_thumb_selector" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -403,8 +401,8 @@
                         android:layout_height="wrap_content"
                         android:checked="false"
                         android:enabled="false"
-                        android:textOff="@string/material_you_off"
-                        android:textOn="@string/material_you_on"
+                        android:textOff="@string/show_overlay_off"
+                        android:textOn="@string/show_overlay_on"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -574,7 +572,6 @@
                         android:id="@+id/timeoutChoiceButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:checked="false"
                         android:enabled="false"
                         android:text="@string/timeouts_change"
                         android:textSize="@dimen/timeoutsButtonTextSize"

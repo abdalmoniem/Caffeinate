@@ -21,8 +21,8 @@
     <string name="allow_dimming_off">禁用允许暗屏</string>
     <string name="allow_while_locked_pref">允许锁屏时运行</string>
     <string name="allow_while_locked_pref_description">屏幕锁屏期间，允许应用继续运行</string>
-    <string name="allow_while_locked_off">启用允许锁屏时运行</string>
-    <string name="allow_while_locked_on">禁用允许锁屏时运行</string>
+    <string name="allow_while_locked_off">禁用允许锁屏时运行</string>
+    <string name="allow_while_locked_on">启用允许锁屏时运行</string>
     <string name="timeouts_pref">倒计时</string>
     <string name="timeouts_change">更改倒</string>
     <string name="caffeinate_button_off">关闭</string>
