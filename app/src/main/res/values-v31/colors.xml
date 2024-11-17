@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="white">#FFFFFFFF</color>
-
     <color name="colorPrimary">@color/material_dynamic_primary80</color>
     <color name="colorPrimaryVariant">@color/material_dynamic_primary30</color>
     <color name="colorSecondary">@color/material_dynamic_secondary80</color>

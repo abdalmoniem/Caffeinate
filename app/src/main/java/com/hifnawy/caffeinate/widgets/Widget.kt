@@ -179,15 +179,15 @@ class Widget : AppWidgetProvider() {
             val widgetIcon = when (caffeinateApplication.lastStatusUpdate) {
                 is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.outline_coffee_24)
                 is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.baseline_coffee_24)
-            }?.apply {
-                setTint(iconColor)
-            }?.toBitmap()
-            val widgetIconFill = AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_icon_fill)?.apply {
-                setTint(iconFillColor)
-            }?.toBitmap()
-            val widgetBorder = AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_border)?.apply {
-                setTint(iconColor)
-            }?.toBitmap()
+            }?.apply { setTint(iconColor) }?.toBitmap()
+            val widgetIconFill = when (caffeinateApplication.lastStatusUpdate) {
+                is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_icon_fill_off)
+                is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_icon_fill_on)
+            }?.apply { setTint(iconFillColor) }?.toBitmap()
+            val widgetBorder = when (caffeinateApplication.lastStatusUpdate) {
+                is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_border_off)
+                is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_border_on)
+            }?.apply { setTint(iconColor) }?.toBitmap()
             val backgroundVisibility = when {
                 showBackground -> View.VISIBLE
                 else           -> View.GONE

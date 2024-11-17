@@ -8,10 +8,10 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        app:cardCornerRadius="20dp"
+        android:layout_margin="5dp"
+        app:cardCornerRadius="10dp"
         app:cardElevation="5dp"
-        app:contentPadding="20dp"
+        app:contentPadding="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,7 +20,8 @@
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:overScrollMode="always">
+            android:overScrollMode="always"
+            tools:ignore="SpeakableTextPresentCheck">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -30,9 +31,8 @@
                     android:id="@+id/widgetPreviewCard1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="10dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="100dp"
                     app:contentPadding="20dp"
                     app:layout_constraintBottom_toTopOf="@+id/widgetPreviewCard2"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -54,9 +54,9 @@
                     android:id="@+id/widgetPreviewCard2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="10dp"
+                    android:layout_marginTop="5dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="100dp"
                     app:contentPadding="20dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
