@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.view.View
 import android.widget.RemoteViews
 import androidx.appcompat.content.res.AppCompatResources
@@ -117,13 +118,44 @@ class Widget : AppWidgetProvider() {
          * @see updateAllWidgets
          */
         private lateinit var caffeinateApplication: CaffeinateApplication
-        private val iconOff
+
+        /**
+         * A [SharedPrefsManager] instance that provides access to the SharedPreferences storage.
+         *
+         * This instance is lazily initialized when the [caffeinateApplication] is available.
+         *
+         * @see SharedPrefsManager
+         */
+        private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
+
+        /**
+         * The bitmap of the icon to be used when the widget is in the "off" state.
+         *
+         * The bitmap is lazily initialized when the [caffeinateApplication] is available. The bitmap is tinted with the
+         * color [R.color.colorNeutralVariant] and is retrieved from the resources using
+         * [AppCompatResources.getDrawable].
+         *
+         * @return [Bitmap] the icon bitmap to be used when the widget is in the "off" state or `null` if
+         * [AppCompatResources.getDrawable] can't find the icon drawable
+         */
+        private val iconOff: Bitmap?
             get() =
                 caffeinateApplication.run {
                     AppCompatResources.getDrawable(applicationContext, R.drawable.outline_coffee_24)
                         ?.apply { setTint(getColor(R.color.colorNeutralVariant)) }?.toBitmap()
                 }
-        private val iconOn
+
+        /**
+         * The bitmap of the icon to be used when the widget is in the "on" state.
+         *
+         * The bitmap is lazily initialized when the [caffeinateApplication] is available. The bitmap is tinted with the
+         * color [R.color.colorPrimary] and is retrieved from the resources using
+         * [AppCompatResources.getDrawable].
+         *
+         * @return [Bitmap] the icon bitmap to be used when the widget is in the "on" state or `null` if
+         * [AppCompatResources.getDrawable] can't find the icon drawable
+         */
+        private val iconOn: Bitmap?
             get() =
                 caffeinateApplication.run {
                     AppCompatResources.getDrawable(applicationContext, R.drawable.baseline_coffee_24)
@@ -163,8 +195,7 @@ class Widget : AppWidgetProvider() {
          * @see CaffeinateApplication
          */
         private fun updateAppWidget(appWidgetManager: AppWidgetManager, appWidgetId: Int) = caffeinateApplication.run {
-            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-            val showBackground = options.getBoolean("showBackground")
+            val showBackground = sharedPreferences.widgetsConfiguration[appWidgetId]?.showBackground ?: false
             val views = RemoteViews(applicationContext.packageName, R.layout.widget)
             val widgetView = views.apply(applicationContext, null)
             val widgetBinding = WidgetBinding.bind(widgetView)

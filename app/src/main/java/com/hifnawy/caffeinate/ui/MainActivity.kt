@@ -49,13 +49,13 @@ import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.SharedPrefsObserver
-import timber.log.Timber
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import timber.log.Timber as Log
 
 /**
  * The main activity of the application, which is responsible for displaying the list of timeouts that can be used to keep the screen on. It also
@@ -267,7 +267,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      */
     override fun onServiceStatusUpdated(status: ServiceStatus) {
         with(binding) {
-            Timber.d("Status Changed: $status")
+            Log.d("Status Changed: $status")
 
             when (status) {
                 is ServiceStatus.Stopped -> {
