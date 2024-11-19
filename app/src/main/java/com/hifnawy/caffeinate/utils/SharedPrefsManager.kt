@@ -132,9 +132,9 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @property LIGHT A light theme.
      * @property DARK A dark theme.
      *
-     * @property value [Int] The value of the theme, which is used to set the theme for the application.
+     * @property mode [Int] The value of the theme, which is used to set the theme for the application.
      */
-    enum class Theme(var value: Int) {
+    enum class Theme(var mode: Int) {
 
         /**
          * A theme that follows the device's system theme.

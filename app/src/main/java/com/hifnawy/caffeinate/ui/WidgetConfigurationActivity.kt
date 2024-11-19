@@ -9,15 +9,13 @@ import android.widget.FrameLayout
 import android.widget.RemoteViews
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.color.DynamicColors
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.ActivityWidgetConfigurationBinding
 import com.hifnawy.caffeinate.services.ServiceStatus
 import com.hifnawy.caffeinate.services.ServiceStatusObserver
-import com.hifnawy.caffeinate.utils.ColorUtil
+import com.hifnawy.caffeinate.utils.ActivityExtensionFunctions.setActivityTheme
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
@@ -66,16 +64,7 @@ class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
      * created from the [CaffeinateApplication] instance that is the context of this activity.
      */
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
-    /**
-     * A lazy delegate that provides an instance of [ColorUtil] for managing colors.
-     *
-     * This delegate is used to access and modify the application's colors, allowing the service
-     * to respond to changes in the application's theme.
-     *
-     * @return [ColorUtil] the instance for handling colors.
-     *
-     * @see ColorUtil
-     */
+
     /**
      * Lazily initializes the [RemoteViews] for the widget.
      *
@@ -100,11 +89,7 @@ class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        AppCompatDelegate.setDefaultNightMode(sharedPreferences.theme.value)
-        if (DynamicColors.isDynamicColorAvailable() && sharedPreferences.isMaterialYouEnabled) {
-            setTheme(R.style.Theme_Caffeinate_Dynamic)
-            DynamicColors.applyToActivityIfAvailable(this)
-        } else setTheme(R.style.Theme_Caffeinate_Baseline)
+        sharedPreferences.run { setActivityTheme(theme.mode, isMaterialYouEnabled) }
 
         enableEdgeToEdge()
         setContentView(binding.root)
@@ -211,7 +196,7 @@ class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
      * @param showBackground [Boolean] `true` if the widget preview should show its background, `false` otherwise
      */
     private fun updateWidgetPreview(widgetPreviewContainer: FrameLayout, showBackground: Boolean) {
-        Widget.updateRemoteViews(remoteViews, showBackground)
+        Widget.updateRemoteViews(caffeinateApplication, remoteViews, showBackground)
         remoteViews.reapply(applicationContext, widgetPreviewContainer)
     }
 }

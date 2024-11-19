@@ -43,6 +43,7 @@ import com.hifnawy.caffeinate.services.KeepAwakeService
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
 import com.hifnawy.caffeinate.services.ServiceStatus
 import com.hifnawy.caffeinate.services.ServiceStatusObserver
+import com.hifnawy.caffeinate.utils.ActivityExtensionFunctions.setActivityTheme
 import com.hifnawy.caffeinate.utils.ColorUtil
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageDrawable
@@ -95,11 +96,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        AppCompatDelegate.setDefaultNightMode(sharedPreferences.theme.value)
-        if (DynamicColors.isDynamicColorAvailable() && sharedPreferences.isMaterialYouEnabled) {
-            setTheme(R.style.Theme_Caffeinate_Dynamic)
-            DynamicColors.applyToActivityIfAvailable(this)
-        } else setTheme(R.style.Theme_Caffeinate_Baseline)
+        sharedPreferences.run { setActivityTheme(theme.mode, isMaterialYouEnabled) }
 
         enableEdgeToEdge()
         setContentView(binding.root)
@@ -701,7 +698,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     )
                 }
 
-            when (theme.value) {
+            when (theme.mode) {
                 AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> {
                     dialogBinding.themeRadioGroup.check(R.id.themeSystemDefault)
                     appThemeButton.text = getString(R.string.app_theme_system_default)
@@ -735,7 +732,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     dialog.dismiss()
 
                     sharedPreferences.theme = theme
-                    AppCompatDelegate.setDefaultNightMode(theme.value)
+                    AppCompatDelegate.setDefaultNightMode(theme.mode)
 
                     recreate()
                 }
