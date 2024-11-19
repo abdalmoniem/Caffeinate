@@ -18,11 +18,11 @@
     <string name="material_you_off">الألوان المتماشية مش شغالة</string>
     <string name="material_you_on">الألوان المتماشية شغالة</string>
     <string name="show_overlay_pref">اعرض شاشة عايمة</string>
-    <string name="show_overlay_pref_description">اعرض الوقت المتبقى فى شاشة عايمة على شاشة الموبايل من فوق، الشاشة دى هتفضل
+    <string name="show_overlay_pref_description">اعرض الوقت المتبقى فى شاشة عايمة على شاشة الموبايل من فوق، الشاشة دى هتفضل 
 ظاهرة حتى لما البرنامج يبقى في الخلفية.
 بعض الأجهزة ممكن تعوز تشغيل الخِيار ده عشان البرنامج يشتغل كويس.    </string>
-    <string name="show_overlay_off">الشاشة العايمة مش شغالة</string>
     <string name="show_overlay_on">الشاشة العايمة شغالة</string>
+    <string name="show_overlay_off">الشاشة العايمة مش شغالة</string>
     <string name="allow_dimming_pref">خَفت الشاشة</string>
     <string name="allow_dimming_pref_description">خلى الشاشة تِخفِت لما البرنامج يكون شغال</string>
     <string name="allow_dimming_on">خَفت الشاشة شغال</string>
