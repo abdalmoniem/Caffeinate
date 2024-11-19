@@ -2,10 +2,8 @@ package com.hifnawy.caffeinate
 
 import android.app.Application
 import android.content.Context
-import android.graphics.Color
 import android.os.Build
 import android.util.LayoutDirection
-import androidx.annotation.ColorInt
 import androidx.core.text.layoutDirection
 import com.hifnawy.caffeinate.services.QuickTileService
 import com.hifnawy.caffeinate.services.ServiceStatus
@@ -128,35 +126,6 @@ class CaffeinateApplication : Application() {
      * @see SharedPrefsManager.timeouts
      */
     var timeout: Duration = sharedPreferences.timeouts.first()
-
-    /**
-     * The color of the application's theme.
-     *
-     * This is the color that is used for the application's theme. This color is used for the application's primary color, and is used to color the
-     * application's UI components such as the action bar, buttons, and text.
-     *
-     * @return [Int] The [ColorInt] color of the application's theme.
-     *
-     * @see android.content.res.Resources.Theme
-     * @see com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
-     * @see android.util.TypedValue
-     */
-    @ColorInt
-    var themeColor: Int = Color.TRANSPARENT
-
-    /**
-     * The background color of the application's theme.
-     *
-     * This is the color that is used for the background of the application's UI components such as the action bar, buttons, and text.
-     *
-     * @return [Int] The [ColorInt] background color of the application's theme.
-     *
-     * @see android.content.res.Resources.Theme
-     * @see com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.backgroundColor
-     * @see android.util.TypedValue
-     */
-    @ColorInt
-    var backgroundColor: Int = Color.TRANSPARENT
 
     /**
      * A list of observers that are notified whenever the status of the KeepAwakeService changes.

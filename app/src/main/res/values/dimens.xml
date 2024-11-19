@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="permissions_text_size">15sp</dimen>
-    <dimen name="prefs_description_text_size">15sp</dimen>
-    <dimen name="pref_text_size">20sp</dimen>
-    <dimen name="caffeinate_button_text_size">35sp</dimen>
-    <dimen name="app_theme_button_text_size">20sp</dimen>
-    <dimen name="timeouts_button_text_size">20sp</dimen>
+    <dimen name="permissionsTextSize">15sp</dimen>
+    <dimen name="prefsDescriptionTextSize">15sp</dimen>
+    <dimen name="prefTextSize">20sp</dimen>
+    <dimen name="caffeinateButtonTextSize">35sp</dimen>
+    <dimen name="appThemeButtonTextSize">20sp</dimen>
+    <dimen name="timeoutsButtonTextSize">20sp</dimen>
+    <dimen name="overlayTextSizeLTR">20sp</dimen>
+    <dimen name="overlayTextSizeRTL">30sp</dimen>
+    <dimen name="widgetIconSize">60dp</dimen>
+    <dimen name="widgetBorderSize">70dp</dimen>
 </resources>

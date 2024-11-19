@@ -6,10 +6,13 @@ import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.services.Observer
 import com.hifnawy.caffeinate.services.ServiceStatus
 import com.hifnawy.caffeinate.ui.CheckBoxItem
+import com.hifnawy.caffeinate.ui.WidgetConfiguration
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableList
+import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableMap
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableList
+import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableMap
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ALL_PERMISSIONS_GRANTED
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_DIMMING
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_MATERIAL_YOU
@@ -19,6 +22,7 @@ import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.IS_SERVIC
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.LAST_REMAINING_TIMEOUT
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.THEME
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.TIMEOUT_CHECK_BOXES
+import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.WIDGET_CONFIGURATION
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.Theme.DARK
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.Theme.LIGHT
 import com.hifnawy.caffeinate.utils.SharedPrefsManager.Theme.SYSTEM_DEFAULT
@@ -112,7 +116,12 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
          *         the last remaining timeout in the shared preferences every time the service
          *         status is updated. which is every one second.
          */
-        LAST_REMAINING_TIMEOUT
+        LAST_REMAINING_TIMEOUT,
+
+        /**
+         * A [WidgetConfiguration] value indicating the widget configuration.
+         */
+        WIDGET_CONFIGURATION
     }
 
     /**
@@ -283,6 +292,18 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         set(value) = sharedPreferences.edit().putSerializableList(TIMEOUT_CHECK_BOXES.name, value.map { checkBoxItem ->
             checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext))
         }).apply()
+
+    /**
+     * Retrieves or sets the widget configuration.
+     *
+     * This property manages the configuration of widgets, stored in shared preferences.
+     * It allows the application to persist widget configuration across sessions.
+     *
+     * @return [MutableMap] A map of widget IDs to their [WidgetConfiguration].
+     */
+    var widgetsConfiguration: MutableMap<Int, WidgetConfiguration>
+        get() = sharedPreferences.getSerializableMap<MutableMap<Int, WidgetConfiguration>>(WIDGET_CONFIGURATION.name)
+        set(value) = sharedPreferences.edit().putSerializableMap(WIDGET_CONFIGURATION.name, value).apply()
 
     /**
      * Retrieves or sets whether the service is running.

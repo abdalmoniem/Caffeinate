@@ -5,8 +5,8 @@
     <size
         android:width="256dp"
         android:height="256dp" />
-    <corners android:radius="100dp" />
+    <corners android:radius="90dp" />
     <stroke
         android:width="15dp"
-        android:color="@color/white" />
+        android:color="@color/colorWidgetIcon" />
 </shape>

@@ -1,62 +1,81 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widgetRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/widgetBackground"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:scaleType="fitXY"
         android:importantForAccessibility="no"
+        android:scaleType="fitXY"
         android:src="@drawable/widget_background" />
 
     <TextView
         android:id="@+id/widgetText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/widgetImageView"
+        android:layout_above="@+id/widgetBorder"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="-4dp"
+        android:padding="3dp"
+        android:shadowColor="@color/black"
+        android:shadowDx="5"
+        android:shadowDy="5"
+        android:shadowRadius="3"
         android:text="@string/caffeinate_button_off"
-        android:textColor="@color/white"
-        android:textSize="15sp"
-        tools:ignore="HardcodedText" />
+        android:textColor="@color/colorWidgetTextOnBackground"
+        android:textSize="15sp" />
 
     <ImageView
-        android:id="@+id/widgetBorder"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_centerInParent="true"
-        android:importantForAccessibility="no"
-        android:src="@drawable/widget_background_off" />
-
-    <ImageView
-        android:id="@+id/widgetImageView"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:id="@+id/widgetIconFill"
+        android:layout_width="@dimen/widgetBorderSize"
+        android:layout_height="@dimen/widgetBorderSize"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:importantForAccessibility="no"
-        android:padding="0dp"
+        android:src="@drawable/widget_icon_fill"
+        app:tint="@color/colorWidgetIconFill" />
+
+    <ImageView
+        android:id="@+id/widgetBorder"
+        android:layout_width="@dimen/widgetBorderSize"
+        android:layout_height="@dimen/widgetBorderSize"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:importantForAccessibility="no"
+        android:src="@drawable/widget_border_on"
+        app:tint="@color/colorWidgetIconOnBackground" />
+
+    <ImageView
+        android:id="@+id/widgetIcon"
+        android:layout_width="@dimen/widgetIconSize"
+        android:layout_height="@dimen/widgetIconSize"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:importantForAccessibility="no"
         android:scaleType="fitXY"
-        android:src="@drawable/outline_coffee_24"
-        app:tint="@color/white" />
+        android:src="@drawable/widget_icon_off"
+        app:tint="@color/colorWidgetIconOnBackground" />
 
     <TextView
         android:id="@+id/widgetLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/widgetImageView"
+        android:layout_below="@+id/widgetBorder"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="-6dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:padding="3dp"
+        android:shadowColor="@color/black"
+        android:shadowDx="5"
+        android:shadowDy="5"
+        android:shadowRadius="3"
         android:text="@string/app_name"
         android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="15sp"
-        tools:ignore="HardcodedText" />
-
+        android:textColor="@color/colorWidgetTextOnBackground"
+        android:textSize="15sp" />
 </RelativeLayout>

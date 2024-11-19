@@ -9,12 +9,13 @@ import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServi
 import timber.log.Timber as Log
 
 /**
- * A BroadcastReceiver that listens for the ACTION_SCREEN_OFF intent, which is broadcast whenever the screen is turned off.
+ * A BroadcastReceiver that listens for the [Intent.ACTION_SCREEN_OFF] intent, which is broadcast whenever the screen is turned off.
  *
  * This receiver is responsible for handling the screen lock event and stopping the KeepAwakeService when the screen is locked.
  *
  * @param caffeinateApplication [CaffeinateApplication] The application instance.
- *
+ * @param onReceiveCallback [((Context, Intent) -> Unit)][onReceiveCallback] An optional callback function that is invoked when the
+ * [Intent.ACTION_SCREEN_OFF] intent is received.
  * @constructor Creates an instance of [ScreenLockReceiver] with the provided [CaffeinateApplication].
  *
  * @throws IllegalStateException if the application state is not properly initialized.
@@ -25,7 +26,10 @@ import timber.log.Timber as Log
  * @see RegistrableBroadcastReceiver
  * @see KeepAwakeService
  */
-class ScreenLockReceiver(private val caffeinateApplication: CaffeinateApplication) :
+open class ScreenLockReceiver(
+        private val caffeinateApplication: CaffeinateApplication,
+        private val onReceiveCallback: ((Context, Intent) -> Unit)? = null
+) :
         RegistrableBroadcastReceiver(caffeinateApplication, IntentFilter(Intent.ACTION_SCREEN_OFF)) {
 
     /**
@@ -38,8 +42,10 @@ class ScreenLockReceiver(private val caffeinateApplication: CaffeinateApplicatio
      */
     override fun onReceive(context: Context, intent: Intent) = when (intent.action) {
         Intent.ACTION_SCREEN_OFF -> {
-            Log.d("Screen Locked, Stopping...")
-            KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
+            onReceiveCallback?.invoke(context, intent) ?: run {
+                Log.d("Screen Locked, Stopping...")
+                KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
+            }
         }
 
         else                     -> Unit

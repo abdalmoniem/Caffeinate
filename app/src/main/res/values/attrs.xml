@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ThemedColors">
+        <!-- Primary static colors -->
+        <attr name="themeColorPrimary" format="color" />
+        <attr name="themeColorPrimaryVariant" format="color" />
+        <attr name="themeColorSecondary" format="color" />
+        <attr name="themeColorSecondaryVariant" format="color" />
+
+        <!-- Background and surfaces static colors -->
+        <attr name="themeColorBackground" format="color" />
+        <attr name="themeColorSurface" format="color" />
+
+        <!-- Text and icons static colors -->
+        <attr name="themeColorOnPrimary" format="color" />
+        <attr name="themeColorOnSecondary" format="color" />
+        <attr name="themeColorOnBackground" format="color" />
+        <attr name="themeColorOnSurface" format="color" />
+
+        <!-- Error static colors -->
+        <attr name="themeColorError" format="color" />
+        <attr name="themeColorOnError" format="color" />
+
+        <!-- Widget colors -->
+        <attr name="colorWidgetText" format="color" />
+        <attr name="colorWidgetIcon" format="color" />
+        <attr name="colorWidgetIconFill" format="color" />
+        <attr name="colorWidgetBackground" format="color" />
+        <attr name="colorWidgetTextOnBackground" format="color" />
+        <attr name="colorWidgetIconOnBackground" format="color" />
+
+        <!-- App UI colors -->
+        <attr name="themeColorAppBarIcon" format="color" />
+    </declare-styleable>
+</resources>

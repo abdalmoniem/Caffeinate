@@ -8,11 +8,15 @@
         android:id="@+id/remaining"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:shadowColor="@color/black"
+        android:shadowDx="7"
+        android:shadowDy="7"
+        android:shadowRadius="3"
         android:text="@string/caffeinate_button_off"
-        android:textSize="20sp"
+        android:textColor="@color/colorOverlayText"
+        android:textSize="@dimen/overlayTextSizeLTR"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

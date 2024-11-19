@@ -43,21 +43,20 @@ import com.hifnawy.caffeinate.services.KeepAwakeService
 import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
 import com.hifnawy.caffeinate.services.ServiceStatus
 import com.hifnawy.caffeinate.services.ServiceStatusObserver
+import com.hifnawy.caffeinate.utils.ColorUtil
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageDrawable
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.SharedPrefsObserver
-import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.backgroundColor
-import com.hifnawy.caffeinate.utils.ThemeExtensionFunctions.themeColor
-import timber.log.Timber
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import timber.log.Timber as Log
 
 /**
  * The main activity of the application, which is responsible for displaying the list of timeouts that can be used to keep the screen on. It also
@@ -73,8 +72,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
-    private val grantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.baseline_check_circle_24) }
-    private val notGrantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.baseline_cancel_24) }
+    private val colorUtils by lazy { ColorUtil(this, sharedPreferences) }
+    private val grantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.ok_icon_circle) }
+    private val notGrantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.nok_icon_circle) }
     private lateinit var overlayPermissionLauncher: ActivityResultLauncher<Intent>
     private val Iterable<CheckBoxItem>.enabledDurations: CharSequence
         get() =
@@ -96,7 +96,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         super.onCreate(savedInstanceState)
 
         AppCompatDelegate.setDefaultNightMode(sharedPreferences.theme.value)
-        if (DynamicColors.isDynamicColorAvailable() && sharedPreferences.isMaterialYouEnabled) DynamicColors.applyToActivityIfAvailable(this@MainActivity)
+        if (DynamicColors.isDynamicColorAvailable() && sharedPreferences.isMaterialYouEnabled) {
+            setTheme(R.style.Theme_Caffeinate_Dynamic)
+            DynamicColors.applyToActivityIfAvailable(this)
+        } else setTheme(R.style.Theme_Caffeinate_Baseline)
 
         enableEdgeToEdge()
         setContentView(binding.root)
@@ -108,7 +111,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 showChooseThemeDialog()
             }
 
-            appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, theme.themeColor)
+            appIcon.setColoredImageDrawable(R.drawable.coffee_icon_off, colorUtils.colorAppBarIcon)
 
             appThemeCard.setOnClickListener(themeClickListener)
             appThemeButton.setOnClickListener(themeClickListener)
@@ -156,9 +159,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         super.onResume()
 
         caffeinateApplication.run {
-            themeColor = this@MainActivity.theme.themeColor
-            backgroundColor = this@MainActivity.theme.backgroundColor
-
             applyLocaleConfiguration()
 
             checkOverlayPermission()
@@ -272,14 +272,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      */
     override fun onServiceStatusUpdated(status: ServiceStatus) {
         with(binding) {
-            Timber.d("Status Changed: $status")
+            Log.d("Status Changed: $status")
 
             when (status) {
                 is ServiceStatus.Stopped -> {
                     restartButton.animateVisibility = false
 
                     caffeineButton.text = getString(R.string.caffeinate_button_off)
-                    appIcon.setColoredImageDrawable(R.drawable.outline_coffee_24, theme.themeColor)
+                    appIcon.setColoredImageDrawable(R.drawable.coffee_icon_off, colorUtils.colorAppBarIcon)
                 }
 
                 is ServiceStatus.Running -> {
@@ -290,7 +290,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     }
 
                     caffeineButton.text = status.remaining.toLocalizedFormattedTime(root.context)
-                    appIcon.setColoredImageDrawable(R.drawable.baseline_coffee_24, theme.themeColor)
+                    appIcon.setColoredImageDrawable(R.drawable.coffee_icon_on, colorUtils.colorAppBarIcon)
                 }
             }
         }
@@ -898,16 +898,16 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 val onNumberPickerAnimationStart = { _: Animator -> dialogButtonRandomTimeout.isEnabled = false }
                 val onNumberPickerAnimationEnd = { _: Animator -> dialogButtonRandomTimeout.isEnabled = true }
 
-                hoursNumberPicker.textColor = theme.themeColor
-                minutesNumberPicker.textColor = theme.themeColor
-                secondsNumberPicker.textColor = theme.themeColor
+                hoursNumberPicker.textColor = colorUtils.colorPrimaryVariant
+                minutesNumberPicker.textColor = colorUtils.colorPrimaryVariant
+                secondsNumberPicker.textColor = colorUtils.colorPrimaryVariant
 
-                hoursLabel.setTextColor(theme.themeColor)
-                minutesLabel.setTextColor(theme.themeColor)
-                secondsLabel.setTextColor(theme.themeColor)
+                hoursLabel.setTextColor(colorUtils.colorPrimaryVariant)
+                minutesLabel.setTextColor(colorUtils.colorPrimaryVariant)
+                secondsLabel.setTextColor(colorUtils.colorPrimaryVariant)
 
-                hoursSeparator.setTextColor(theme.themeColor)
-                minutesSeparator.setTextColor(theme.themeColor)
+                hoursSeparator.setTextColor(colorUtils.colorPrimaryVariant)
+                minutesSeparator.setTextColor(colorUtils.colorPrimaryVariant)
 
                 hoursNumberPicker.setFormatter { value -> "%02d".format(value) }
                 minutesNumberPicker.setFormatter { value -> "%02d".format(value) }

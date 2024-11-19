@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="10dp">
@@ -20,8 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="@string/app_theme_system_default"
-            android:textSize="25sp"
-            tools:ignore="VisualLintButtonSize" />
+            android:textSize="25sp" />
 
         <RadioButton
             android:id="@+id/themeSystemLight"
@@ -29,8 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="@string/app_theme_system_light"
-            android:textSize="25sp"
-            tools:ignore="VisualLintButtonSize" />
+            android:textSize="25sp" />
 
         <RadioButton
             android:id="@+id/themeSystemDark"
@@ -38,8 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="@string/app_theme_system_dark"
-            android:textSize="25sp"
-            tools:ignore="VisualLintButtonSize" />
+            android:textSize="25sp" />
     </RadioGroup>
 
     <com.google.android.material.button.MaterialButton
@@ -62,11 +58,11 @@
         android:layout_marginEnd="30dp"
         android:text="@string/dialog_button_cancel"
         android:textAllCaps="false"
+        android:textColor="?attr/themeColorSecondaryVariant"
         android:textSize="13sp"
         app:cornerRadius="30dp"
         app:layout_constraintBottom_toBottomOf="@+id/dialogButtonOk"
         app:layout_constraintEnd_toStartOf="@+id/dialogButtonOk"
         app:layout_constraintTop_toTopOf="@+id/dialogButtonOk"
         app:strokeWidth="0dp" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,6 @@
 <!-- res/mipmap-anydpi-v26/ic_launcher_themed.xml -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/colorSecondaryVariant" />
+    <background android:drawable="?attr/themeColorSecondaryVariant" />
     <foreground android:drawable="@drawable/coffee_icon" />
-    <monochrome android:drawable="@drawable/coffee_icon_monochrome"/>
+    <monochrome android:drawable="@drawable/coffee_icon_monochrome" />
 </adaptive-icon>

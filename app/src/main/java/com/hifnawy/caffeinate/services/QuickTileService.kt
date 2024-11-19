@@ -131,8 +131,8 @@ class QuickTileService : TileService(), ServiceStatusObserver {
             is ServiceStatus.Running -> Tile.STATE_ACTIVE to status.remaining.toLocalizedFormattedTime(this, true)
         }
         val iconDrawable = when (tileState) {
-            Tile.STATE_ACTIVE -> R.drawable.baseline_coffee_24
-            else              -> R.drawable.outline_coffee_24
+            Tile.STATE_ACTIVE -> R.drawable.coffee_icon_on
+            else              -> R.drawable.coffee_icon_off
         }
 
         quickTile.run {

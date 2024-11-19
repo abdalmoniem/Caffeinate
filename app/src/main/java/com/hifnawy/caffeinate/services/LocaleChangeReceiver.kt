@@ -8,9 +8,11 @@ import com.hifnawy.caffeinate.CaffeinateApplication
 import timber.log.Timber as Log
 
 /**
- * A BroadcastReceiver that listens for the ACTION_LOCALE_CHANGED intent, which is broadcast whenever the system locale changes.
+ * A BroadcastReceiver that listens for the [Intent.ACTION_LOCALE_CHANGED] intent, which is broadcast whenever the system locale changes.
  *
  * @param caffeinateApplication [CaffeinateApplication] The application instance.
+ * @param onReceiveCallback [((Context, Intent) -> Unit)][onReceiveCallback] An optional callback function that is invoked when the
+ * [Intent.ACTION_LOCALE_CHANGED] intent is received.
  *
  * @constructor Creates an instance of [LocaleChangeReceiver] with the provided [CaffeinateApplication].
  *
@@ -18,7 +20,10 @@ import timber.log.Timber as Log
  *
  * @see CaffeinateApplication
  */
-class LocaleChangeReceiver(private val caffeinateApplication: CaffeinateApplication) :
+open class LocaleChangeReceiver(
+        private val caffeinateApplication: CaffeinateApplication,
+        private val onReceiveCallback: ((Context, Intent) -> Unit)? = null
+) :
         RegistrableBroadcastReceiver(caffeinateApplication, IntentFilter(Intent.ACTION_LOCALE_CHANGED)) {
 
     /**
@@ -33,9 +38,11 @@ class LocaleChangeReceiver(private val caffeinateApplication: CaffeinateApplicat
      */
     override fun onReceive(context: Context, intent: Intent) = when (intent.action) {
         Intent.ACTION_LOCALE_CHANGED -> {
-            Log.d("App locale changed from system settings! Apply new Locale...")
-            caffeinateApplication.applyLocaleConfiguration()
-            CaffeinateApplication.applicationLocale.run { Log.d("Locale changed to $displayName ($language)") }
+            onReceiveCallback?.invoke(context, intent) ?: run {
+                Log.d("App locale changed from system settings! Apply new Locale...")
+                caffeinateApplication.applyLocaleConfiguration()
+                CaffeinateApplication.applicationLocale.run { Log.d("Locale changed to $displayName ($language)") }
+            }
         }
 
         else                         -> Unit

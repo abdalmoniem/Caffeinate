@@ -485,7 +485,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                 localizedApplicationContext,
                 KeepAwakeService::class.java,
                 ACTION_CHANGE_TIMEOUT.name,
-                R.drawable.baseline_coffee_24,
+                R.drawable.coffee_icon_on,
                 notificationActionNextTimeoutStr,
                 REQUEST_CODE_NEXT_TIMEOUT.ordinal
         )
@@ -495,7 +495,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                         this,
                         KeepAwakeService::class.java,
                         ACTION_RESTART.name,
-                        R.drawable.baseline_coffee_24,
+                        R.drawable.coffee_icon_on,
                         getString(R.string.foreground_notification_action_restart_timeout),
                         REQUEST_CODE_RESTART_TIMEOUT.ordinal
                 )
@@ -509,7 +509,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                 this,
                 KeepAwakeService::class.java,
                 ACTION_CHANGE_DIMMING_ENABLED.name,
-                R.drawable.baseline_coffee_24,
+                R.drawable.coffee_icon_on,
                 if (isDimmingEnabled) notificationActionDimmingEnabledStr else notificationActionDimmingDisabledStr,
                 REQUEST_CODE_TOGGLE_DIMMING.ordinal
         )
@@ -532,7 +532,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
             .setSubText(durationStr)
             .setContentTitle(contentTitle)
             .setContentIntent(notificationActionStopIntent)
-            .setSmallIcon(R.drawable.baseline_coffee_24)
+            .setSmallIcon(R.drawable.coffee_icon_on)
             .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
             .addAction(notificationActionNextTimeout)
             .addAction(notificationActionRestartTimeout)

@@ -26,7 +26,7 @@
             app:contentInsetEnd="15dp"
             app:contentInsetLeft="15dp"
             app:contentInsetStart="15dp"
-            app:logo="@drawable/baseline_coffee_32"
+            app:logo="@drawable/coffee_icon_on"
             app:title="@string/app_name"
             app:titleMarginStart="30dp" />
 
@@ -53,10 +53,10 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="30dp"
                 android:contentDescription="@string/app_icon"
-                android:src="@drawable/outline_coffee_24"
+                android:src="@drawable/coffee_icon_off"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/colorPrimary" />
+                app:tint="?attr/themeColorAppBarIcon" />
 
             <TextView
                 android:id="@+id/appNameTextView"
@@ -96,7 +96,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/battery_optimization_not_granted"
-                        android:textSize="@dimen/permissions_text_size"
+                        android:textSize="@dimen/permissionsTextSize"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/batteryOptimizationImageView"
                         app:layout_constraintStart_toStartOf="parent"
@@ -107,7 +107,7 @@
                         android:layout_width="25dp"
                         android:layout_height="25dp"
                         android:contentDescription="@string/battery_optimization_not_granted"
-                        android:src="@drawable/baseline_cancel_24"
+                        android:src="@drawable/nok_icon_circle"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/batteryOptimizationTextView"
@@ -141,7 +141,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/background_optimization_not_granted"
-                        android:textSize="@dimen/permissions_text_size"
+                        android:textSize="@dimen/permissionsTextSize"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/backgroundOptimizationImageView"
                         app:layout_constraintStart_toStartOf="parent"
@@ -152,7 +152,7 @@
                         android:layout_width="25dp"
                         android:layout_height="25dp"
                         android:contentDescription="@string/background_optimization_not_granted"
-                        android:src="@drawable/baseline_cancel_24"
+                        android:src="@drawable/nok_icon_circle"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/backgroundOptimizationTextView"
@@ -186,7 +186,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/notifications_permission_not_granted"
-                        android:textSize="@dimen/permissions_text_size"
+                        android:textSize="@dimen/permissionsTextSize"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/notificationPermissionImageView"
                         app:layout_constraintStart_toStartOf="parent"
@@ -197,7 +197,7 @@
                         android:layout_width="25dp"
                         android:layout_height="25dp"
                         android:contentDescription="@string/notifications_permission_not_granted"
-                        android:src="@drawable/baseline_cancel_24"
+                        android:src="@drawable/nok_icon_circle"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/notificationPermissionTextView"
@@ -231,7 +231,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/overlay_permission_not_granted"
-                        android:textSize="@dimen/permissions_text_size"
+                        android:textSize="@dimen/permissionsTextSize"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/overlayPermissionImageView"
                         app:layout_constraintStart_toStartOf="parent"
@@ -242,7 +242,7 @@
                         android:layout_width="25dp"
                         android:layout_height="25dp"
                         android:contentDescription="@string/notifications_permission_not_granted"
-                        android:src="@drawable/baseline_cancel_24"
+                        android:src="@drawable/nok_icon_circle"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/overlayPermissionTextView"
@@ -275,7 +275,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/app_theme_pref"
-                        android:textSize="@dimen/pref_text_size"
+                        android:textSize="@dimen/prefTextSize"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -284,9 +284,8 @@
                         android:id="@+id/appThemeButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:checked="false"
                         android:text="@string/app_theme_system_default"
-                        android:textSize="@dimen/app_theme_button_text_size"
+                        android:textSize="@dimen/appThemeButtonTextSize"
                         app:cornerRadius="20dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -320,7 +319,7 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:text="@string/material_you_pref"
-                        android:textSize="@dimen/pref_text_size"
+                        android:textSize="@dimen/prefTextSize"
                         app:layout_constraintBottom_toTopOf="@+id/materialYouSubTextTextView"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -331,7 +330,7 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:text="@string/material_you_pref_description"
-                        android:textSize="@dimen/prefs_description_text_size"
+                        android:textSize="@dimen/prefsDescriptionTextSize"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/materialYouSwitch"
                         app:layout_constraintStart_toStartOf="parent"
@@ -348,8 +347,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:thumbIcon="@drawable/switch_thumb_selector"
-                        tools:ignore="DuplicateSpeakableTextCheck" />
+                        app:thumbIcon="@drawable/switch_thumb_icon" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -379,7 +377,7 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:text="@string/show_overlay_pref"
-                        android:textSize="@dimen/pref_text_size"
+                        android:textSize="@dimen/prefTextSize"
                         app:layout_constraintBottom_toTopOf="@+id/overlaySubTextTextView"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -390,7 +388,7 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:text="@string/show_overlay_pref_description"
-                        android:textSize="@dimen/prefs_description_text_size"
+                        android:textSize="@dimen/prefsDescriptionTextSize"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/overlaySwitch"
                         app:layout_constraintStart_toStartOf="parent"
@@ -403,12 +401,12 @@
                         android:layout_height="wrap_content"
                         android:checked="false"
                         android:enabled="false"
-                        android:textOff="@string/material_you_off"
-                        android:textOn="@string/material_you_on"
+                        android:textOff="@string/show_overlay_off"
+                        android:textOn="@string/show_overlay_on"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:thumbIcon="@drawable/switch_thumb_selector" />
+                        app:thumbIcon="@drawable/switch_thumb_icon" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -438,7 +436,7 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:text="@string/allow_dimming_pref"
-                        android:textSize="@dimen/pref_text_size"
+                        android:textSize="@dimen/prefTextSize"
                         app:layout_constraintBottom_toTopOf="@+id/allowDimmingSubTextTextView"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -448,7 +446,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/allow_dimming_pref_description"
-                        android:textSize="@dimen/prefs_description_text_size"
+                        android:textSize="@dimen/prefsDescriptionTextSize"
                         android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/allowDimmingSwitch"
@@ -466,7 +464,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:thumbIcon="@drawable/switch_thumb_selector" />
+                        app:thumbIcon="@drawable/switch_thumb_icon" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -496,7 +494,7 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:text="@string/allow_while_locked_pref"
-                        android:textSize="@dimen/pref_text_size"
+                        android:textSize="@dimen/prefTextSize"
                         app:layout_constraintBottom_toTopOf="@+id/allowWhileLockedSubTextTextView"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -506,7 +504,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/allow_while_locked_pref_description"
-                        android:textSize="@dimen/prefs_description_text_size"
+                        android:textSize="@dimen/prefsDescriptionTextSize"
                         android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/allowWhileLockedSwitch"
@@ -524,7 +522,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:thumbIcon="@drawable/switch_thumb_selector" />
+                        app:thumbIcon="@drawable/switch_thumb_icon" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -553,7 +551,7 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:text="@string/timeouts_pref"
-                        android:textSize="@dimen/pref_text_size"
+                        android:textSize="@dimen/prefTextSize"
                         app:layout_constraintBottom_toTopOf="@+id/timeoutChoiceSubTextTextView"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -563,7 +561,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:enabled="false"
-                        android:textSize="@dimen/prefs_description_text_size"
+                        android:textSize="@dimen/prefsDescriptionTextSize"
                         android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/timeoutChoiceButton"
@@ -574,10 +572,9 @@
                         android:id="@+id/timeoutChoiceButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:checked="false"
                         android:enabled="false"
                         android:text="@string/timeouts_change"
-                        android:textSize="@dimen/timeouts_button_text_size"
+                        android:textSize="@dimen/timeoutsButtonTextSize"
                         app:cornerRadius="20dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -592,7 +589,7 @@
                 android:enabled="false"
                 android:minWidth="200dp"
                 android:text="@string/caffeinate_button_off"
-                android:textSize="@dimen/caffeinate_button_text_size"
+                android:textSize="@dimen/caffeinateButtonTextSize"
                 app:cornerRadius="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/restartButton"
@@ -612,7 +609,7 @@
                 android:insetRight="0dp"
                 android:insetBottom="0dp"
                 app:cornerRadius="50dp"
-                app:icon="@drawable/baseline_restart_alt_24"
+                app:icon="@drawable/restart_icon"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
                 app:iconSize="32dp"
