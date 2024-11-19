@@ -5,8 +5,6 @@ import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
-import com.hifnawy.caffeinate.R
 
 /**
  * A utility class that provides extension functions for [ImageView].
@@ -24,13 +22,13 @@ object ImageViewExtensionFunctions {
      *
      * @throws [UninitializedPropertyAccessException] if the view's context is not initialized.
      * @throws [android.content.res.Resources.NotFoundException] if the drawable resource ID is not valid.
-     * @throws Resources.NotFoundException If the [color] param or [colorPrimary][R.color.colorPrimary] attribute is not defined in the current theme.
+     * @throws Resources.NotFoundException If the [color] param attribute is not defined in the current theme.
      */
     fun ImageView.setColoredImageDrawable(
             @DrawableRes
             drawableResId: Int,
             @ColorInt
-            color: Int = ContextCompat.getColor(context, R.color.colorPrimary)
+            color: Int
     ) = AppCompatResources.getDrawable(context, drawableResId).run {
         setImageDrawable(this)
         setColorFilter(color)

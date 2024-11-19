@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:icon="@mipmap/app_icon_themed_debug"
-        android:roundIcon="@mipmap/app_icon_themed_debug"
+        android:icon="@mipmap/app_icon_debug"
+        android:roundIcon="@mipmap/app_icon_debug"
         tools:replace="android:icon,android:roundIcon" />
 
 </manifest>

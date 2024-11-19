@@ -12,6 +12,8 @@ import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.OverlayBinding
 import com.hifnawy.caffeinate.services.LocaleChangeReceiver
+import com.hifnawy.caffeinate.utils.ColorUtil
+import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import timber.log.Timber as Log
 
 /**
@@ -107,6 +109,30 @@ class OverlayHandler(private val context: Context) {
     }
 
     /**
+     * A lazy delegate that provides an instance of [SharedPrefsManager] for managing shared preferences.
+     *
+     * This delegate is used to access and modify the application's shared preferences, allowing the service
+     * to respond to changes in settings such as theme, permissions, and other user preferences.
+     *
+     * @return [SharedPrefsManager] the instance for handling shared preferences.
+     *
+     * @see SharedPrefsManager
+     */
+    private val sharedPreferences by lazy { SharedPrefsManager(context.applicationContext as CaffeinateApplication) }
+
+    /**
+     * A lazy delegate that provides an instance of [ColorUtil] for managing colors.
+     *
+     * This delegate is used to access and modify the application's colors, allowing the service
+     * to respond to changes in the application's theme.
+     *
+     * @return [ColorUtil] the instance for handling colors.
+     *
+     * @see ColorUtil
+     */
+    private val colorUtils by lazy { ColorUtil(context, sharedPreferences) }
+
+    /**
      * A flag indicating whether the overlay is currently visible.
      *
      * This flag is used to determine whether the overlay should be removed or not.
@@ -151,6 +177,7 @@ class OverlayHandler(private val context: Context) {
             Log.d("Setting overlay text to $value, isRTL: ${CaffeinateApplication.isRTL}...")
 
             overlayBinding.remaining.text = value
+            overlayBinding.remaining.setTextColor(context.getColor(R.color.colorOverlayText))
         }
 
     /**
@@ -198,6 +225,7 @@ class OverlayHandler(private val context: Context) {
                 CaffeinateApplication.isRTL -> context.resources.getDimension(R.dimen.overlayTextSizeRTL)
                 else                        -> context.resources.getDimension(R.dimen.overlayTextSizeLTR)
             }
+            overlayBinding.remaining.setTextColor(context.getColor(R.color.colorOverlayText))
 
             windowManager.addView(overlayBinding.root, layoutParams)
 

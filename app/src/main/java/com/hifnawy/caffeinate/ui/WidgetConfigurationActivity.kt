@@ -2,23 +2,22 @@ package com.hifnawy.caffeinate.ui
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.RemoteViews
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.graphics.drawable.toBitmap
+import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.color.DynamicColors
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.ActivityWidgetConfigurationBinding
-import com.hifnawy.caffeinate.databinding.WidgetBinding
 import com.hifnawy.caffeinate.services.ServiceStatus
 import com.hifnawy.caffeinate.services.ServiceStatusObserver
-import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
+import com.hifnawy.caffeinate.utils.ColorUtil
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
@@ -38,13 +37,15 @@ import timber.log.Timber as Log
 class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
 
     /**
-     * The binding for the activity's layout.
+     * Lazily initializes the [ActivityWidgetConfigurationBinding] for this activity.
      *
-     * This field is used to access the views and resources defined in the
-     * activity's layout file. It is initialized in the [onCreate] method
-     * using view binding.
+     * This binding is used to access and manipulate the views in the layout file
+     * associated with this activity. It is inflated using the [getLayoutInflater] and
+     * provides a type-safe way to interact with the views.
+     *
+     * @return [ActivityWidgetConfigurationBinding] the binding instance for this activity.
      */
-    private lateinit var binding: ActivityWidgetConfigurationBinding
+    private val binding by lazy { ActivityWidgetConfigurationBinding.inflate(layoutInflater) }
 
     /**
      * The [CaffeinateApplication] instance that is the context of this activity.
@@ -65,6 +66,25 @@ class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
      * created from the [CaffeinateApplication] instance that is the context of this activity.
      */
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
+    /**
+     * A lazy delegate that provides an instance of [ColorUtil] for managing colors.
+     *
+     * This delegate is used to access and modify the application's colors, allowing the service
+     * to respond to changes in the application's theme.
+     *
+     * @return [ColorUtil] the instance for handling colors.
+     *
+     * @see ColorUtil
+     */
+    /**
+     * Lazily initializes the [RemoteViews] for the widget.
+     *
+     * This [RemoteViews] instance is used to manage the layout of the widget,
+     * allowing the application to update its UI remotely.
+     *
+     * @return [RemoteViews] the remote views instance for the widget.
+     */
+    private val remoteViews by lazy { RemoteViews(packageName, R.layout.widget) }
 
     /**
      * Called when the activity is starting.
@@ -79,22 +99,28 @@ class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        AppCompatDelegate.setDefaultNightMode(sharedPreferences.theme.value)
+        if (DynamicColors.isDynamicColorAvailable() && sharedPreferences.isMaterialYouEnabled) {
+            setTheme(R.style.Theme_Caffeinate_Dynamic)
+            DynamicColors.applyToActivityIfAvailable(this)
+        } else setTheme(R.style.Theme_Caffeinate_Baseline)
+
         enableEdgeToEdge()
-        binding = ActivityWidgetConfigurationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         with(binding) {
             val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
             val widgetsConfiguration = sharedPreferences.widgetsConfiguration.ifEmpty { mutableMapOf() }
             val widgetPreviewsConfiguration = mutableMapOf(
-                    widgetPreviewCard1.id to WidgetConfiguration(appWidgetId, true),
-                    widgetPreviewCard2.id to WidgetConfiguration(appWidgetId, false)
+                    widgetPreviewContainer1.id to WidgetConfiguration(appWidgetId, true),
+                    widgetPreviewContainer2.id to WidgetConfiguration(appWidgetId, false)
             )
 
             Log.d("Configuring widget $appWidgetId")
             val clickListener = View.OnClickListener { view ->
                 view ?: return@OnClickListener
-                val widgetConfiguration = widgetPreviewsConfiguration[view.id] ?: return@OnClickListener
+                val widgetConfiguration = widgetPreviewsConfiguration[view.tag] ?: return@OnClickListener
 
                 view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
@@ -110,7 +136,16 @@ class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
                 finish()
             }
 
-            widgetPreviewsConfiguration.keys.forEach { findViewById<MaterialCardView>(it)?.setOnClickListener(clickListener) }
+            widgetPreviewsConfiguration.forEach { entry ->
+                val widgetPreviewContainer = findViewById<FrameLayout>(entry.key) ?: return@forEach
+                widgetPreviewContainer.removeAllViews()
+                addWidgetPreview(widgetPreviewContainer, entry.value.showBackground)
+                val widgetPreviewContainerParent = widgetPreviewContainer.parent as MaterialCardView
+                widgetPreviewContainerParent.apply {
+                    tag = entry.key
+                    widgetPreviewContainerParent.setOnClickListener(clickListener)
+                }
+            }
         }
 
         onServiceStatusUpdated(caffeinateApplication.lastStatusUpdate)
@@ -152,78 +187,32 @@ class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
      * @param status [ServiceStatus] the new status of the service
      */
     override fun onServiceStatusUpdated(status: ServiceStatus) = with(binding) {
-        widgetPreview1.setImageBitmap(widgetPreview(true))
-        widgetPreview2.setImageBitmap(widgetPreview(false))
+        updateWidgetPreview(widgetPreviewContainer1, true)
+        updateWidgetPreview(widgetPreviewContainer2, false)
     }
 
     /**
-     * Returns a [Bitmap] representing a preview of the Caffeinate widget with the specified [showBackground].
+     * Adds a widget preview to the specified container.
      *
-     * @param showBackground [Boolean] `true` if the background should be shown in the preview, `false` otherwise.
-     *
-     * @return [Bitmap] the preview of the Caffeinate widget.
+     * @param widgetPreviewContainer [FrameLayout] the container to add the widget preview to
+     * @param showBackground [Boolean] `true` if the widget preview should show its background, `false` otherwise
      */
-    private fun widgetPreview(showBackground: Boolean): Bitmap = WidgetBinding.inflate(layoutInflater).let { widgetBinding ->
-        val textColor = when {
-            showBackground -> getColor(R.color.colorWidgetTextOnBackground)
-            else           -> getColor(R.color.colorWidgetText)
-        }
-        val iconColor = when {
-            showBackground -> getColor(R.color.colorWidgetIconOnBackground)
-            else           -> getColor(R.color.colorWidgetIcon)
-        }
-        val iconFillColor = when {
-            showBackground -> getColor(R.color.colorWidgetIconFillOnBackground)
-            else           -> getColor(R.color.colorWidgetIconFill)
-        }
-        val widgetIcon = when (caffeinateApplication.lastStatusUpdate) {
-            is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.outline_coffee_24)
-            is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.baseline_coffee_24)
-        }?.apply { setTint(iconColor) }?.toBitmap()
-        val widgetIconFill = when (caffeinateApplication.lastStatusUpdate) {
-            is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_icon_fill_off)
-            is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_icon_fill_on)
-        }?.apply { setTint(iconFillColor) }?.toBitmap()
-        val widgetBorder = when (caffeinateApplication.lastStatusUpdate) {
-            is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_border_off)
-            is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_border_on)
-        }?.apply { setTint(iconColor) }?.toBitmap()
-        val backgroundVisibility = when {
-            showBackground -> View.VISIBLE
-            else           -> View.GONE
-        }
-        val iconFillVisibility = when (caffeinateApplication.lastStatusUpdate) {
-            is ServiceStatus.Stopped -> View.GONE
-            is ServiceStatus.Running -> View.VISIBLE
-        }
-        val widgetText = when (val status = caffeinateApplication.lastStatusUpdate) {
-            is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
-            is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext)
-        }
+    private fun addWidgetPreview(widgetPreviewContainer: FrameLayout, showBackground: Boolean) {
+        val widgetView = remoteViews.apply(applicationContext, widgetPreviewContainer)
+        widgetPreviewContainer.addView(widgetView)
 
-        widgetBinding.widgetBackground.visibility = backgroundVisibility
+        updateWidgetPreview(widgetPreviewContainer, showBackground)
+    }
 
-        widgetBinding.widgetText.setTextColor(textColor)
-        widgetBinding.widgetText.text = widgetText
-        widgetBinding.widgetIconFill.visibility = iconFillVisibility
-        widgetBinding.widgetIconFill.setImageBitmap(widgetIconFill)
-        widgetBinding.widgetBorder.setImageBitmap(widgetBorder)
-        widgetBinding.widgetIcon.setImageBitmap(widgetIcon)
-        widgetBinding.widgetLabel.setTextColor(textColor)
-        widgetBinding.widgetLabel.text = getString(R.string.app_name)
-
-        widgetBinding.root.run {
-            measure(
-                    View.MeasureSpec.makeMeasureSpec(400, View.MeasureSpec.EXACTLY),
-                    View.MeasureSpec.makeMeasureSpec(400, View.MeasureSpec.EXACTLY)
-            )
-            layout(0, 0, measuredWidth, measuredHeight)
-            val bitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(bitmap)
-            draw(canvas)
-
-            bitmap
-        }
+    /**
+     * Updates the widget preview in the specified container to show or hide its background depending on the given flag.
+     *
+     * @param widgetPreviewContainer [FrameLayout] the container holding the widget preview
+     * @param showBackground [Boolean] `true` if the widget preview should show its background, `false` otherwise
+     */
+    private fun updateWidgetPreview(widgetPreviewContainer: FrameLayout, showBackground: Boolean) {
+        Widget.updateRemoteViews(remoteViews, showBackground)
+        remoteViews.reapply(applicationContext, widgetPreviewContainer)
     }
 }
 

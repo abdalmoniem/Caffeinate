@@ -1,11 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widgetRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:theme="@android:style/Theme.DeviceDefault.DayNight"
-    tools:ignore="NewApi">
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/widgetBackground"
@@ -25,43 +22,42 @@
         android:layout_marginBottom="-4dp"
         android:padding="3dp"
         android:shadowColor="@color/black"
-        android:shadowDx="7"
-        android:shadowDy="7"
+        android:shadowDx="5"
+        android:shadowDy="5"
         android:shadowRadius="3"
         android:text="@string/caffeinate_button_off"
         android:textColor="@color/colorWidgetTextOnBackground"
-        android:textSize="15sp"
-        tools:ignore="HardcodedText" />
+        android:textSize="15sp" />
 
     <ImageView
         android:id="@+id/widgetIconFill"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="@dimen/widgetBorderSize"
+        android:layout_height="@dimen/widgetBorderSize"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:importantForAccessibility="no"
-        android:src="@drawable/widget_icon_fill_off"
-        app:tint="@color/colorWidgetIconFillOnBackground" />
+        android:src="@drawable/widget_icon_fill"
+        app:tint="@color/colorWidgetIconFill" />
 
     <ImageView
         android:id="@+id/widgetBorder"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="@dimen/widgetBorderSize"
+        android:layout_height="@dimen/widgetBorderSize"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:importantForAccessibility="no"
-        android:src="@drawable/widget_border_off"
+        android:src="@drawable/widget_border_on"
         app:tint="@color/colorWidgetIconOnBackground" />
 
     <ImageView
         android:id="@+id/widgetIcon"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/widgetIconSize"
+        android:layout_height="@dimen/widgetIconSize"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:importantForAccessibility="no"
         android:scaleType="fitXY"
-        android:src="@drawable/outline_coffee_24"
+        android:src="@drawable/widget_icon_off"
         app:tint="@color/colorWidgetIconOnBackground" />
 
     <TextView
@@ -71,14 +67,15 @@
         android:layout_below="@+id/widgetBorder"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="-6dp"
+        android:ellipsize="end"
+        android:maxLines="2"
         android:padding="3dp"
         android:shadowColor="@color/black"
-        android:shadowDx="7"
-        android:shadowDy="7"
+        android:shadowDx="5"
+        android:shadowDy="5"
         android:shadowRadius="3"
         android:text="@string/app_name"
         android:textAlignment="center"
         android:textColor="@color/colorWidgetTextOnBackground"
-        android:textSize="15sp"
-        tools:ignore="HardcodedText" />
+        android:textSize="15sp" />
 </RelativeLayout>

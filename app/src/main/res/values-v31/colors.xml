@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">@color/material_dynamic_primary80</color>
-    <color name="colorPrimaryVariant">@color/material_dynamic_primary30</color>
-    <color name="colorSecondary">@color/material_dynamic_secondary80</color>
-    <color name="colorSecondaryVariant">@color/material_dynamic_secondary30</color>
+    <!-- Primary colors -->
+    <color name="colorPrimaryDynamic">@color/material_dynamic_primary80</color>
+    <color name="colorPrimaryVariantDynamic">@color/material_dynamic_primary30</color>
+    <color name="colorSecondaryDynamic">@color/material_dynamic_secondary80</color>
+    <color name="colorSecondaryVariantDynamic">@color/material_dynamic_secondary30</color>
 
-    <color name="colorWidgetBackground">@color/material_dynamic_neutral_variant90</color>
+    <!-- Background and surfaces -->
+    <color name="colorBackgroundDynamic">@color/material_dynamic_neutral99</color>
+    <color name="colorSurfaceDynamic">@color/material_dynamic_neutral95</color>
+
+    <!-- Text and icons -->
+    <color name="colorOnPrimaryDynamic">@color/material_dynamic_primary90</color>
+    <color name="colorOnSecondaryDynamic">@color/material_dynamic_secondary90</color>
+    <color name="colorOnBackgroundDynamic">@color/material_dynamic_neutral90</color>
+    <color name="colorOnSurfaceDynamic">@color/material_dynamic_neutral90</color>
+
+    <!-- Error colors -->
+    <color name="colorErrorDynamic">#ffb3261e</color>
+    <color name="colorOnErrorDynamic">@color/white</color>
+
+    <!-- Widget colors -->
     <color name="colorWidgetText">@color/material_dynamic_primary80</color>
-    <color name="colorWidgetTextOnBackground">@color/material_dynamic_primary40</color>
     <color name="colorWidgetIcon">@color/material_dynamic_secondary80</color>
+    <color name="colorWidgetIconFill">@color/material_dynamic_primary70</color>
+    <color name="colorWidgetBackground">@color/material_dynamic_neutral_variant90</color>
+    <color name="colorWidgetTextOnBackground">@color/material_dynamic_primary40</color>
     <color name="colorWidgetIconOnBackground">@color/material_dynamic_secondary20</color>
-    <color name="colorWidgetIconFill">@color/material_dynamic_tertiary30</color>
-    <color name="colorWidgetIconFillOnBackground">@color/material_dynamic_tertiary80</color>
+
+    <!-- Overlay colors -->
+    <color name="colorOverlayText">@color/colorPrimaryVariantDynamic</color>
+
+    <!-- App UI colors -->
+    <color name="colorAppBarIconDynamic">@color/colorPrimaryVariantDynamic</color>
 </resources>

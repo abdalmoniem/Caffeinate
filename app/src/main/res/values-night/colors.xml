@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ff40c4ff</color>
-    <color name="colorPrimaryVariant">#ff00b0ff</color>
-    <color name="colorSecondary">#ff64ffda</color>
-    <color name="colorSecondaryVariant">#ff1de9b6</color>
+    <!-- Primary colors -->
+    <color name="colorPrimaryBaseline">#d0bcfe</color>
+    <color name="colorPrimaryVariantBaseline">#3700B3</color>
+    <color name="colorSecondaryBaseline">#ccc2dc</color>
+    <color name="colorSecondaryVariantBaseline">#018786</color>
 
-    <color name="colorWidgetBackground">#ff30a4af</color>
-    <color name="colorWidgetText">#ffd9e2ff</color>
-    <color name="colorWidgetTextOnBackground">#ff111111</color>
-    <color name="colorWidgetIcon">#ff64ffda</color>
-    <color name="colorWidgetIconOnBackground">#ff444444</color>
-    <color name="colorWidgetIconFill">#ffff8943</color>
-    <color name="colorWidgetIconFillOnBackground">#ffff8943</color>
+    <!-- Background and surfaces -->
+    <color name="colorBackgroundBaseline">#141218</color>
+    <color name="colorSurfaceBaseline">#141218</color>
+
+    <!-- Text and icons -->
+    <color name="colorOnPrimaryBaseline">#381e72</color>
+    <color name="colorOnSecondaryBaseline">#332d41</color>
+    <color name="colorOnBackgroundBaseline">#e6e0e9</color>
+    <color name="colorOnSurfaceBaseline">#cac4d0</color>
+
+    <!-- Error colors -->
+    <color name="colorErrorBaseline">#f2b8b5</color>
+    <color name="colorOnErrorBaseline">#601410</color>
+
+    <!-- Widget colors -->
+    <color name="colorWidgetText">#fff9f2ff</color>
+    <color name="colorWidgetIcon">#ff205ffa</color>
+    <color name="colorWidgetIconFill">#ffaaf0ff</color>
+    <color name="colorWidgetBackground">#ff20446f</color>
+    <color name="colorWidgetTextOnBackground">#ffaaf0ff</color>
+    <color name="colorWidgetIconOnBackground">#ffa00923</color>
+
+    <!-- Overlay colors -->
+    <color name="colorOverlayText">@color/colorPrimaryVariantBaseline</color>
+
+    <!-- App UI colors -->
+    <color name="colorAppBarIconBaseline">@color/colorPrimaryBaseline</color>
 </resources>

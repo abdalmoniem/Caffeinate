@@ -12,13 +12,13 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.databinding.WidgetBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
 import com.hifnawy.caffeinate.services.ServiceStatus
 import com.hifnawy.caffeinate.ui.MainActivity
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
+import com.hifnawy.caffeinate.widgets.Widget.Companion.caffeinateApplication
 import timber.log.Timber as Log
 
 /**
@@ -137,8 +137,6 @@ class Widget : AppWidgetProvider() {
          * @param context [Context] the context of the app.
          */
         private fun RemoteViews.setClickListeners(context: Context) {
-            val widgetView = apply(context, null)
-            val widgetBinding = WidgetBinding.bind(widgetView)
             val pendingIntent = PendingIntent.getBroadcast(
                     context,
                     0,
@@ -146,7 +144,7 @@ class Widget : AppWidgetProvider() {
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            setOnClickPendingIntent(widgetBinding.widgetRoot.id, pendingIntent)
+            setOnClickPendingIntent(R.id.widgetRoot, pendingIntent)
         }
 
         /**
@@ -162,28 +160,43 @@ class Widget : AppWidgetProvider() {
         private fun updateAppWidget(appWidgetManager: AppWidgetManager, appWidgetId: Int) = caffeinateApplication.run {
             val showBackground = sharedPreferences.widgetsConfiguration[appWidgetId]?.showBackground ?: false
             val views = RemoteViews(applicationContext.packageName, R.layout.widget)
-            val widgetView = views.apply(applicationContext, null)
-            val widgetBinding = WidgetBinding.bind(widgetView)
+
+            updateRemoteViews(views, showBackground, true)
+
+            appWidgetManager.updateAppWidget(appWidgetId, views)
+        }
+
+        /**
+         * Updates the remote views with the given values.
+         *
+         * @param views [RemoteViews] the remote views to update
+         * @param showBackground [Boolean] `true` if the widget should show its background, `false` otherwise
+         * @param isClickable [Boolean] `true` if the widget should be clickable, `false` otherwise. Defaults to `false`.
+         *
+         * @see CaffeinateApplication
+         */
+        fun updateRemoteViews(views: RemoteViews, showBackground: Boolean, isClickable: Boolean = false) = caffeinateApplication.run {
             val textColor = when {
                 showBackground -> getColor(R.color.colorWidgetTextOnBackground)
                 else           -> getColor(R.color.colorWidgetText)
             }
+            val backgroundColor = getColor(R.color.colorWidgetBackground)
             val iconColor = when {
                 showBackground -> getColor(R.color.colorWidgetIconOnBackground)
                 else           -> getColor(R.color.colorWidgetIcon)
             }
             val iconFillColor = when {
-                showBackground -> getColor(R.color.colorWidgetIconFillOnBackground)
+                showBackground -> getColor(R.color.colorWidgetIconFill)
                 else           -> getColor(R.color.colorWidgetIconFill)
             }
+            val widgetBackground = AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_background)
+                ?.apply { setTint(backgroundColor) }?.toBitmap()
             val widgetIcon = when (caffeinateApplication.lastStatusUpdate) {
-                is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.outline_coffee_24)
-                is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.baseline_coffee_24)
+                is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.coffee_icon_off)
+                is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.coffee_icon_on)
             }?.apply { setTint(iconColor) }?.toBitmap()
-            val widgetIconFill = when (caffeinateApplication.lastStatusUpdate) {
-                is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_icon_fill_off)
-                is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_icon_fill_on)
-            }?.apply { setTint(iconFillColor) }?.toBitmap()
+            val widgetIconFill = AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_icon_fill)
+                ?.apply { setTint(iconFillColor) }?.toBitmap()
             val widgetBorder = when (caffeinateApplication.lastStatusUpdate) {
                 is ServiceStatus.Stopped -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_border_off)
                 is ServiceStatus.Running -> AppCompatResources.getDrawable(caffeinateApplication, R.drawable.widget_border_on)
@@ -202,23 +215,22 @@ class Widget : AppWidgetProvider() {
             }
 
             views.run {
-                setViewVisibility(widgetBinding.widgetBackground.id, backgroundVisibility)
+                setViewVisibility(R.id.widgetBackground, backgroundVisibility)
+                setImageViewBitmap(R.id.widgetBackground, widgetBackground)
 
-                setTextColor(widgetBinding.widgetText.id, textColor)
-                setTextViewText(widgetBinding.widgetText.id, widgetText)
+                setTextColor(R.id.widgetText, textColor)
+                setTextViewText(R.id.widgetText, widgetText)
 
-                setViewVisibility(widgetBinding.widgetIconFill.id, iconFillVisibility)
-                setImageViewBitmap(widgetBinding.widgetIconFill.id, widgetIconFill)
-                setImageViewBitmap(widgetBinding.widgetBorder.id, widgetBorder)
-                setImageViewBitmap(widgetBinding.widgetIcon.id, widgetIcon)
+                setViewVisibility(R.id.widgetIconFill, iconFillVisibility)
+                setImageViewBitmap(R.id.widgetIconFill, widgetIconFill)
+                setImageViewBitmap(R.id.widgetBorder, widgetBorder)
+                setImageViewBitmap(R.id.widgetIcon, widgetIcon)
 
-                setTextColor(widgetBinding.widgetLabel.id, textColor)
-                setTextViewText(widgetBinding.widgetLabel.id, getString(R.string.app_name))
+                setTextColor(R.id.widgetLabel, textColor)
+                setTextViewText(R.id.widgetLabel, getString(R.string.app_name))
 
-                setClickListeners(applicationContext)
+                if (isClickable) setClickListeners(applicationContext)
             }
-
-            appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
         /**

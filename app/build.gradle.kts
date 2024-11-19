@@ -32,14 +32,14 @@ android {
                 signingProperties.all { property -> property in keystoreProperties.keys } &&
                 rootProject.file(keystoreProperties["storeFile"] as String).exists()
 
-        when (isSigningConfigEnabled) {
-            false -> {
+        when {
+            !isSigningConfigEnabled -> {
                 signingProperties
                     .filter { property -> property !in keystoreProperties.keys }
                     .forEach { missingKey -> project.logger.warn("WARNING: missing key in '${localPropertiesFile.absolutePath}': $missingKey") }
             }
 
-            else  -> {
+            else                    -> {
                 signingConfigs {
                     project.logger.lifecycle("INFO: keystore: ${rootProject.file(keystoreProperties["storeFile"] as String).absolutePath}")
 
@@ -73,8 +73,8 @@ android {
             )
 
             signingConfigs.findByName("release")?.also { signingConfiguration ->
-                when (isSigningConfigEnabled) {
-                    true -> {
+                when {
+                    isSigningConfigEnabled -> {
                         signingConfig = signingConfiguration
                         project.logger.lifecycle("INFO: $name buildType is signed with release signing config.")
                         project.logger.lifecycle("INFO: $name signing config is located in ${signingConfiguration.storeFile?.absolutePath}")
@@ -98,14 +98,14 @@ android {
             )
 
             signingConfigs.findByName("release")?.also { signingConfiguration ->
-                when (isSigningConfigEnabled) {
-                    true -> {
+                when {
+                    isSigningConfigEnabled -> {
                         signingConfig = signingConfiguration
                         project.logger.lifecycle("INFO: $name buildType is signed with release signing config.")
                         project.logger.lifecycle("INFO: $name signing config is located in ${signingConfiguration.storeFile?.absolutePath}")
                     }
 
-                    else -> project.logger.lifecycle(
+                    else                   -> project.logger.lifecycle(
                             "INFO: $name buildType is signed with default signing config, " +
                             "add signing config in local.properties to enable signing."
                     )
@@ -155,6 +155,10 @@ android {
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
+    }
+
+    dataBinding {
+        enable = true
     }
 }
 

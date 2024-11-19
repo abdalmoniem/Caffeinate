@@ -1,12 +1,95 @@
 <resources>
-    <!-- Base application theme. -->
-    <style name="Theme.Caffeinate" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
-        <item name="colorSecondary">@color/colorSecondary</item>
-        <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
-        <item name="colorOnPrimary">@color/colorSecondaryVariant</item>
-        <item name="colorOnPrimaryContainer">@color/colorPrimary</item>
-        <item name="colorOnSecondary">@color/colorPrimaryVariant</item>
+    <!-- Baseline Colors Application Theme. -->
+    <style name="Theme.Caffeinate.Baseline" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- Primary colors -->
+        <item name="themeColorPrimary">@color/colorPrimaryBaseline</item>
+        <item name="themeColorPrimaryVariant">@color/colorPrimaryVariantBaseline</item>
+        <item name="themeColorSecondary">@color/colorSecondaryBaseline</item>
+        <item name="themeColorSecondaryVariant">@color/colorSecondaryVariantBaseline</item>
+
+        <!-- Background and surfaces -->
+        <item name="themeColorBackground">@color/colorBackgroundBaseline</item>
+        <item name="themeColorSurface">@color/colorSurfaceBaseline</item>
+
+        <!-- Text and icons -->
+        <item name="themeColorOnPrimary">@color/colorOnPrimaryBaseline</item>
+        <item name="themeColorOnSecondary">@color/colorOnSecondaryBaseline</item>
+        <item name="themeColorOnBackground">@color/colorOnBackgroundBaseline</item>
+        <item name="themeColorOnSurface">@color/colorOnSurfaceBaseline</item>
+
+        <!-- Error colors -->
+        <item name="themeColorError">@color/colorErrorBaseline</item>
+        <item name="themeColorOnError">@color/colorOnErrorBaseline</item>
+
+        <!-- App UI colors -->
+        <item name="themeColorAppBarIcon">?attr/themeColorPrimary</item>
+
+        <!-- Update Theme Colors -->
+        <!-- Primary colors -->
+        <item name="colorPrimary">?attr/themeColorPrimary</item>
+        <item name="colorPrimaryVariant">?attr/themeColorPrimaryVariant</item>
+        <item name="colorSecondary">?attr/themeColorSecondary</item>
+        <item name="colorSecondaryVariant">?attr/themeColorSecondaryVariant</item>
+
+        <!-- Background and surfaces -->
+        <item name="colorBackgroundFloating">?attr/themeColorBackground</item>
+        <item name="colorSurface">?attr/themeColorSurface</item>
+
+        <!-- Text and icons -->
+        <item name="colorOnPrimary">?attr/themeColorOnPrimary</item>
+        <item name="colorOnSecondary">?attr/themeColorOnSecondary</item>
+        <item name="colorOnBackground">?attr/themeColorOnBackground</item>
+        <item name="colorOnSurface">?attr/themeColorOnSurface</item>
+
+        <!-- Error colors -->
+        <item name="colorError">?attr/themeColorError</item>
+        <item name="colorOnError">?attr/themeColorOnError</item>
+    </style>
+
+    <!-- Dynamic Colors Application Theme. -->
+    <style name="Theme.Caffeinate.Dynamic" parent="Theme.Caffeinate.Baseline">
+        <!-- Primary colors -->
+        <item name="themeColorPrimary">@color/colorPrimaryDynamic</item>
+        <item name="themeColorPrimaryVariant">@color/colorPrimaryVariantDynamic</item>
+        <item name="themeColorSecondary">@color/colorSecondaryDynamic</item>
+        <item name="themeColorSecondaryVariant">@color/colorSecondaryVariantDynamic</item>
+
+        <!-- Background and surfaces -->
+        <item name="themeColorBackground">@color/colorBackgroundDynamic</item>
+        <item name="themeColorSurface">@color/colorSurfaceDynamic</item>
+
+        <!-- Text and icons -->
+        <item name="themeColorOnPrimary">@color/colorOnPrimaryDynamic</item>
+        <item name="themeColorOnSecondary">@color/colorOnSecondaryDynamic</item>
+        <item name="themeColorOnBackground">@color/colorOnBackgroundDynamic</item>
+        <item name="themeColorOnSurface">@color/colorOnSurfaceDynamic</item>
+
+        <!-- Error colors -->
+        <item name="themeColorError">@color/colorErrorDynamic</item>
+        <item name="themeColorOnError">@color/colorOnErrorDynamic</item>
+
+        <!-- App UI colors -->
+        <item name="themeColorAppBarIcon">?attr/themeColorPrimaryVariant</item>
+
+        <!-- Update Theme Colors -->
+        <!-- Primary colors -->
+        <item name="colorPrimary">?attr/themeColorPrimary</item>
+        <item name="colorPrimaryVariant">?attr/themeColorPrimaryVariant</item>
+        <item name="colorSecondary">?attr/themeColorSecondary</item>
+        <item name="colorSecondaryVariant">?attr/themeColorSecondaryVariant</item>
+
+        <!-- Background and surfaces -->
+        <item name="colorBackgroundFloating">?attr/themeColorBackground</item>
+        <item name="colorSurface">?attr/themeColorSurface</item>
+
+        <!-- Text and icons -->
+        <item name="colorOnPrimary">?attr/themeColorOnPrimary</item>
+        <item name="colorOnSecondary">?attr/themeColorOnSecondary</item>
+        <item name="colorOnBackground">?attr/themeColorOnBackground</item>
+        <item name="colorOnSurface">?attr/themeColorOnSurface</item>
+
+        <!-- Error colors -->
+        <item name="colorError">?attr/themeColorError</item>
+        <item name="colorOnError">?attr/themeColorOnError</item>
     </style>
 </resources>

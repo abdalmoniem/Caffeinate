@@ -13,7 +13,7 @@
         android:shadowDy="7"
         android:shadowRadius="3"
         android:text="@string/caffeinate_button_off"
-        android:textColor="@color/colorWidgetText"
+        android:textColor="@color/colorOverlayText"
         android:textSize="@dimen/overlayTextSizeLTR"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

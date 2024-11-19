@@ -8,4 +8,6 @@
     <dimen name="timeoutsButtonTextSize">20sp</dimen>
     <dimen name="overlayTextSizeLTR">20sp</dimen>
     <dimen name="overlayTextSizeRTL">30sp</dimen>
+    <dimen name="widgetIconSize">60dp</dimen>
+    <dimen name="widgetBorderSize">70dp</dimen>
 </resources>
