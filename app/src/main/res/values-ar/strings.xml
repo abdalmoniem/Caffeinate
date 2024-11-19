@@ -14,20 +14,22 @@
     <string name="dialog_battery_optimization_needed_message">يتطلب هذا التطبيق إذن تحسين البطارية للعمل بشكل صحيح.</string>
     <string name="app_theme_pref">السمة</string>
     <string name="material_you_pref">ألوان ديناميكية</string>
-    <string name="show_overlay_pref">عرض النافذة العائمة</string>
-    <string name="show_overlay_pref_description">عرض الوقت المتبقى فى نافذة عائمة أعلى الشاشة، ستظل هذه النافذة معروضة حتى عندما يكون التطبيق فى الخلفية.
-قد تتطلب بعض الأجهزة تفعيل هذا الخِيار لكى يعمل التطبيق بشكل صحيح.    </string>
     <string name="material_you_pref_description">الألوان الديناميكية متوفرة فقط على أندرويد ١٢ وما فوق</string>
     <string name="material_you_off">الألوان الديناميكية مُعطَّلة</string>
     <string name="material_you_on">الألوان الديناميكية مُفعَّلة</string>
+    <string name="show_overlay_pref">عرض النافذة العائمة</string>
+    <string name="show_overlay_pref_description">عرض الوقت المتبقى فى نافذة عائمة أعلى الشاشة، ستظل هذه النافذة معروضة حتى عندما يكون التطبيق فى الخلفية.
+قد تتطلب بعض الأجهزة تفعيل هذا الخِيار لكى يعمل التطبيق بشكل صحيح.    </string>
+    <string name="show_overlay_on">النافذة العائمة مُفعَّلة</string>
+    <string name="show_overlay_off">النافذة العائمة مُعطَّلة</string>
     <string name="allow_dimming_pref">السماح بالتعتيم</string>
     <string name="allow_dimming_pref_description">السماح بتعتيم الشاشة عندما يكون التطبيق قيد التشغيل.</string>
     <string name="allow_dimming_on">السماح بالتعتيم مُفعَّل</string>
     <string name="allow_dimming_off">السماح بالتعتيم مُعطَّل</string>
     <string name="allow_while_locked_pref">السماح أثناء القفل</string>
     <string name="allow_while_locked_pref_description">السماح للتطبيق بالاستمرار في العمل بينما تكون الشاشة مقفلة</string>
-    <string name="allow_while_locked_off">السماح أثناء قفل الشاشة مُفعَّل</string>
-    <string name="allow_while_locked_on">السماح أثناء قفل الشاشة مُعطَّل</string>
+    <string name="allow_while_locked_off">السماح أثناء قفل الشاشة مُعطَّل</string>
+    <string name="allow_while_locked_on">السماح أثناء قفل الشاشة مُفعَّل</string>
     <string name="timeouts_pref">المُهَل</string>
     <string name="timeouts_change">تغيير</string>
     <string name="caffeinate_button_off">مُوقف</string>
