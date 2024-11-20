@@ -187,14 +187,8 @@ class Widget : AppWidgetProvider() {
                 else           -> getColor(R.color.colorWidgetText)
             }
             val backgroundColor = getColor(R.color.colorWidgetBackground)
-            val iconColor = when {
-                showBackground -> getColor(R.color.colorWidgetIconOnBackground)
-                else           -> getColor(R.color.colorWidgetIcon)
-            }
-            val iconFillColor = when {
-                showBackground -> getColor(R.color.colorWidgetIconFill)
-                else           -> getColor(R.color.colorWidgetIconFill)
-            }
+            val iconColor = getColor(R.color.colorWidgetIcon)
+            val iconFillColor = getColor(R.color.colorWidgetIconFill)
             val widgetBackground = AppCompatResources.getDrawable(this, R.drawable.widget_background)
                 ?.apply { setTint(backgroundColor) }?.toBitmap()
             val widgetIcon = when (lastStatusUpdate) {

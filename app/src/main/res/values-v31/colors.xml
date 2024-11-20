@@ -1,36 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Primary colors -->
-    <color name="colorPrimaryDynamic">@color/material_dynamic_primary80</color>
-    <color name="colorPrimaryVariantDynamic">@color/material_dynamic_primary30</color>
-    <color name="colorSecondaryDynamic">@color/material_dynamic_secondary80</color>
-    <color name="colorSecondaryVariantDynamic">@color/material_dynamic_secondary30</color>
+    <color name="colorPrimaryDynamic">@color/material_dynamic_primary40</color>
+    <color name="colorPrimaryVariantDynamic">@color/material_dynamic_primary90</color>
+    <color name="colorSecondaryDynamic">@color/material_dynamic_secondary40</color>
+    <color name="colorSecondaryVariantDynamic">@color/material_dynamic_secondary90</color>
+    <color name="colorTertiaryDynamic">@color/material_dynamic_tertiary40</color>
+    <color name="colorTertiaryVariantDynamic">@color/material_dynamic_tertiary90</color>
 
     <!-- Background and surfaces -->
-    <color name="colorBackgroundDynamic">@color/material_dynamic_neutral99</color>
+    <color name="colorBackgroundDynamic">@color/material_dynamic_neutral80</color>
     <color name="colorSurfaceDynamic">@color/material_dynamic_neutral95</color>
 
     <!-- Text and icons -->
-    <color name="colorOnPrimaryDynamic">@color/material_dynamic_primary90</color>
-    <color name="colorOnSecondaryDynamic">@color/material_dynamic_secondary90</color>
-    <color name="colorOnBackgroundDynamic">@color/material_dynamic_neutral90</color>
-    <color name="colorOnSurfaceDynamic">@color/material_dynamic_neutral90</color>
+    <color name="colorOnPrimaryDynamic">@color/material_dynamic_primary100</color>
+    <color name="colorOnPrimaryVariantDynamic">@color/material_dynamic_primary10</color>
+    <color name="colorOnSecondaryDynamic">@color/material_dynamic_secondary100</color>
+    <color name="colorOnSecondaryVariantDynamic">@color/material_dynamic_secondary10</color>
+    <color name="colorOnTertiaryDynamic">@color/material_dynamic_tertiary100</color>
+    <color name="colorOnTertiaryVariantDynamic">@color/material_dynamic_tertiary10</color>
+    <color name="colorOnBackgroundDynamic">@color/material_dynamic_neutral10</color>
+    <color name="colorOnSurfaceDynamic">@color/material_dynamic_neutral_variant30</color>
 
     <!-- Error colors -->
-    <color name="colorErrorDynamic">#ffb3261e</color>
-    <color name="colorOnErrorDynamic">@color/white</color>
+    <color name="colorErrorDynamic">@color/colorErrorBaseline</color>
+    <color name="colorOnErrorDynamic">@color/colorOnErrorBaseline</color>
 
     <!-- Widget colors -->
-    <color name="colorWidgetText">@color/material_dynamic_primary80</color>
-    <color name="colorWidgetIcon">@color/material_dynamic_secondary80</color>
-    <color name="colorWidgetIconFill">@color/material_dynamic_primary70</color>
-    <color name="colorWidgetBackground">@color/material_dynamic_neutral_variant90</color>
-    <color name="colorWidgetTextOnBackground">@color/material_dynamic_primary40</color>
-    <color name="colorWidgetIconOnBackground">@color/material_dynamic_secondary20</color>
+    <color name="colorWidgetText">@color/colorPrimaryDynamic</color>
+    <color name="colorWidgetIcon">@color/colorPrimaryDynamic</color>
+    <color name="colorWidgetIconFill">@color/colorTertiaryVariantDynamic</color>
+    <color name="colorWidgetBackground">@color/colorBackgroundDynamic</color>
+    <color name="colorWidgetTextOnBackground">@color/colorOnPrimaryVariantDynamic</color>
 
     <!-- Overlay colors -->
-    <color name="colorOverlayText">@color/colorPrimaryVariantDynamic</color>
+    <color name="colorOverlayText">@color/colorPrimaryDynamic</color>
 
     <!-- App UI colors -->
-    <color name="colorAppBarIconDynamic">@color/colorPrimaryVariantDynamic</color>
+    <color name="colorAppBarIconDynamic">@color/colorPrimaryDynamic</color>
 </resources>

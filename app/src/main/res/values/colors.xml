@@ -4,32 +4,37 @@
     <color name="black">#ff000000</color>
 
     <!-- Primary colors -->
-    <color name="colorPrimaryBaseline">#6200EE</color>
-    <color name="colorPrimaryVariantBaseline">#3700B3</color>
-    <color name="colorSecondaryBaseline">#03DAC6</color>
-    <color name="colorSecondaryVariantBaseline">#018786</color>
+    <color name="colorPrimaryBaseline">#3f6900</color>
+    <color name="colorPrimaryVariantBaseline">#6fae19</color>
+    <color name="colorSecondaryBaseline">#4b662a</color>
+    <color name="colorSecondaryVariantBaseline">#d0f2a5</color>
+    <color name="colorTertiaryBaseline">#006c50</color>
+    <color name="colorTertiaryVariantBaseline">#24b087</color>
 
     <!-- Background and surfaces -->
-    <color name="colorBackgroundBaseline">#FFFFFF</color>
-    <color name="colorSurfaceBaseline">#F1F1F1</color>
+    <color name="colorBackgroundBaseline">#d8dccc</color>
+    <color name="colorSurfaceBaseline">#f7fbea</color>
 
     <!-- Text and icons -->
-    <color name="colorOnPrimaryBaseline">#FFFFFF</color>
-    <color name="colorOnSecondaryBaseline">#000000</color>
-    <color name="colorOnBackgroundBaseline">#000000</color>
-    <color name="colorOnSurfaceBaseline">#000000</color>
+    <color name="colorOnPrimaryBaseline">#ffffff</color>
+    <color name="colorOnPrimaryVariantBaseline">#071200</color>
+    <color name="colorOnSecondaryBaseline">#ffffff</color>
+    <color name="colorOnSecondaryVariantBaseline">#385217</color>
+    <color name="colorOnTertiaryBaseline">#ffffff</color>
+    <color name="colorOnTertiaryVariantBaseline">#00110a</color>
+    <color name="colorOnBackgroundBaseline">#424937</color>
+    <color name="colorOnSurfaceBaseline">#191d13</color>
 
     <!-- Error colors -->
-    <color name="colorErrorBaseline">#B00020</color>
-    <color name="colorOnErrorBaseline">#FFFFFF</color>
+    <color name="colorErrorBaseline">#ba1a1a</color>
+    <color name="colorOnErrorBaseline">#ffffff</color>
 
     <!-- Widget colors -->
-    <color name="colorWidgetText">#015726</color>
-    <color name="colorWidgetIcon">#2700B3</color>
-    <color name="colorWidgetIconFill">#ffff8943</color>
-    <color name="colorWidgetBackground">#ffe2dc</color>
-    <color name="colorWidgetTextOnBackground">#015786</color>
-    <color name="colorWidgetIconOnBackground">#015786</color>
+    <color name="colorWidgetText">@color/colorPrimaryBaseline</color>
+    <color name="colorWidgetIcon">@color/colorOnTertiaryVariantBaseline</color>
+    <color name="colorWidgetIconFill">@color/colorTertiaryVariantBaseline</color>
+    <color name="colorWidgetBackground">@color/colorBackgroundBaseline</color>
+    <color name="colorWidgetTextOnBackground">@color/colorPrimaryBaseline</color>
 
     <!-- Overlay colors -->
     <color name="colorOverlayText">@color/colorPrimaryVariantBaseline</color>

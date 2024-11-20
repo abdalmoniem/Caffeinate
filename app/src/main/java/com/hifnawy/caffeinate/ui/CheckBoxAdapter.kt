@@ -144,7 +144,7 @@ class CheckBoxAdapter(timeoutCheckBoxes: List<CheckBoxItem>, private val onItems
             }
 
             checkBox.setOnCheckedChangeListener { _, isChecked ->
-                itemView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                itemView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                 item.isChecked = isChecked
 

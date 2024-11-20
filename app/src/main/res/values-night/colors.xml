@@ -1,36 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Primary colors -->
-    <color name="colorPrimaryBaseline">#d0bcfe</color>
-    <color name="colorPrimaryVariantBaseline">#3700B3</color>
-    <color name="colorSecondaryBaseline">#ccc2dc</color>
-    <color name="colorSecondaryVariantBaseline">#018786</color>
+    <color name="colorPrimaryBaseline">#97d945</color>
+    <color name="colorPrimaryVariantBaseline">#4f8200</color>
+    <color name="colorSecondaryBaseline">#b1d188</color>
+    <color name="colorSecondaryVariantBaseline">#2c460c</color>
+    <color name="colorTertiaryBaseline">#5ddcb0</color>
+    <color name="colorTertiaryVariantBaseline">#008564</color>
 
     <!-- Background and surfaces -->
-    <color name="colorBackgroundBaseline">#141218</color>
-    <color name="colorSurfaceBaseline">#141218</color>
+    <color name="colorBackgroundBaseline">#11150b</color>
+    <color name="colorSurfaceBaseline">#11150b</color>
 
     <!-- Text and icons -->
-    <color name="colorOnPrimaryBaseline">#381e72</color>
-    <color name="colorOnSecondaryBaseline">#332d41</color>
-    <color name="colorOnBackgroundBaseline">#e6e0e9</color>
-    <color name="colorOnSurfaceBaseline">#cac4d0</color>
+    <color name="colorOnPrimaryBaseline">#1f3700</color>
+    <color name="colorOnPrimaryVariantBaseline">#ffffff</color>
+    <color name="colorOnSecondaryBaseline">#1f3700</color>
+    <color name="colorOnSecondaryVariantBaseline">#bdde94</color>
+    <color name="colorOnTertiaryBaseline">#003828</color>
+    <color name="colorOnTertiaryVariantBaseline">#ffffff</color>
+    <color name="colorOnBackgroundBaseline">#c2cab2</color>
+    <color name="colorOnSurfaceBaseline">#e0e4d4</color>
 
     <!-- Error colors -->
-    <color name="colorErrorBaseline">#f2b8b5</color>
-    <color name="colorOnErrorBaseline">#601410</color>
-
-    <!-- Widget colors -->
-    <color name="colorWidgetText">#fff9f2ff</color>
-    <color name="colorWidgetIcon">#ff205ffa</color>
-    <color name="colorWidgetIconFill">#ffaaf0ff</color>
-    <color name="colorWidgetBackground">#ff20446f</color>
-    <color name="colorWidgetTextOnBackground">#ffaaf0ff</color>
-    <color name="colorWidgetIconOnBackground">#ffa00923</color>
-
-    <!-- Overlay colors -->
-    <color name="colorOverlayText">@color/colorPrimaryVariantBaseline</color>
-
-    <!-- App UI colors -->
-    <color name="colorAppBarIconBaseline">@color/colorPrimaryBaseline</color>
+    <color name="colorErrorBaseline">#ffb4ab</color>
+    <color name="colorOnErrorBaseline">#690005</color>
 </resources>

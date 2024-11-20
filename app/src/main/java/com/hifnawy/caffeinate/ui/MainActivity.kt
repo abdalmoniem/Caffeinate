@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
         with(binding) {
             val themeClickListener = View.OnClickListener {
-                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                it.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 showChooseThemeDialog()
             }
 
@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             caffeineButton.setOnClickListener { buttonView ->
                 if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
 
-                buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 KeepAwakeService.startNextTimeout(caffeinateApplication)
             }
 
@@ -314,7 +314,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
             materialYouCard.setOnClickListener { materialYouSwitch.isChecked = !sharedPreferences.isMaterialYouEnabled }
             materialYouSwitch.setOnCheckedChangeListener { switch, isChecked ->
-                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 sharedPreferences.isMaterialYouEnabled = isChecked
                 recreate()
             }
@@ -332,7 +332,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
             overlayCard.setOnClickListener { overlaySwitch.isChecked = !sharedPreferences.isOverlayEnabled }
             overlaySwitch.setOnCheckedChangeListener { switch, isChecked ->
-                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 sharedPreferences.isOverlayEnabled = isChecked
             }
         }
@@ -356,7 +356,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
             allowWhileLockedCard.setOnClickListener { allowWhileLockedSwitch.isChecked = !sharedPreferences.isWhileLockedEnabled }
             allowWhileLockedSwitch.setOnCheckedChangeListener { switch, isChecked ->
-                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 sharedPreferences.isWhileLockedEnabled = isChecked
             }
         }
@@ -379,7 +379,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
             allowDimmingCard.setOnClickListener { allowDimmingSwitch.isChecked = !sharedPreferences.isDimmingEnabled }
             allowDimmingSwitch.setOnCheckedChangeListener { switch, isChecked ->
-                switch.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 sharedPreferences.isDimmingEnabled = isChecked
             }
         }
@@ -395,7 +395,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private fun changeTimeoutsPreferences(isAllPermissionsGranted: Boolean) {
         with(binding) {
             val timeoutChoiceClickListener = View.OnClickListener {
-                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                it.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 showChooseTimeoutDialog()
             }
 
@@ -453,7 +453,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                             .start()
 
                         setOnClickListener { buttonView ->
-                            buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                            buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                             KeepAwakeService.restart(caffeinateApplication)
                         }
@@ -717,7 +717,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
             with(dialogBinding) {
                 themeRadioGroup.setOnCheckedChangeListener { radioGroup, checkedRadioButtonId ->
-                    radioGroup.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    radioGroup.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                     when (checkedRadioButtonId) {
                         R.id.themeSystemDefault -> theme = SharedPrefsManager.Theme.SYSTEM_DEFAULT
@@ -727,7 +727,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 }
 
                 dialogButtonOk.setOnClickListener {
-                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    it.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                     dialog.dismiss()
 
@@ -738,7 +738,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 }
 
                 dialogButtonCancel.setOnClickListener {
-                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    it.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                     dialog.dismiss()
                 }
             }
@@ -789,7 +789,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 timeoutsRecyclerView.adapter = checkBoxAdapter
 
                 dialogButtonRemoveTimeout.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                     checkBoxAdapter.checkBoxItems
                         .filter { checkBoxItem -> checkBoxItem.isChecked }
@@ -797,7 +797,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 }
 
                 dialogButtonAddTimeout.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                     showSetCustomTimeoutDialog(
                             valueSetCallback = { timeout ->
@@ -816,14 +816,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 }
 
                 dialogButtonCancel.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                     dialog.dismiss()
                     timeoutChoiceCard.isClickable = true
                     timeoutChoiceButton.isClickable = true
                 }
 
                 dialogButtonOk.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                     caffeinateApplication.run {
                         timeoutCheckBoxes.clear()
@@ -895,34 +895,24 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 val onNumberPickerAnimationStart = { _: Animator -> dialogButtonRandomTimeout.isEnabled = false }
                 val onNumberPickerAnimationEnd = { _: Animator -> dialogButtonRandomTimeout.isEnabled = true }
 
-                hoursNumberPicker.textColor = colorUtils.colorPrimaryVariant
-                minutesNumberPicker.textColor = colorUtils.colorPrimaryVariant
-                secondsNumberPicker.textColor = colorUtils.colorPrimaryVariant
-
-                hoursLabel.setTextColor(colorUtils.colorPrimaryVariant)
-                minutesLabel.setTextColor(colorUtils.colorPrimaryVariant)
-                secondsLabel.setTextColor(colorUtils.colorPrimaryVariant)
-
-                hoursSeparator.setTextColor(colorUtils.colorPrimaryVariant)
-                minutesSeparator.setTextColor(colorUtils.colorPrimaryVariant)
-
                 hoursNumberPicker.setFormatter { value -> "%02d".format(value) }
                 minutesNumberPicker.setFormatter { value -> "%02d".format(value) }
                 secondsNumberPicker.setFormatter { value -> "%02d".format(value) }
 
-                NumberPicker.OnValueChangeListener { numberPicker, _, _ -> numberPicker.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY) }
-                    .run {
-                        hoursNumberPicker.setOnValueChangedListener(this)
-                        minutesNumberPicker.setOnValueChangedListener(this)
-                        secondsNumberPicker.setOnValueChangedListener(this)
-                    }
+                NumberPicker.OnValueChangeListener { numberPicker, _, _ ->
+                    numberPicker.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                }.run {
+                    hoursNumberPicker.setOnValueChangedListener(this)
+                    minutesNumberPicker.setOnValueChangedListener(this)
+                    secondsNumberPicker.setOnValueChangedListener(this)
+                }
 
                 hoursNumberPicker.animateRandom(onAnimationStart = onNumberPickerAnimationStart, onAnimationEnd = onNumberPickerAnimationEnd)
                 minutesNumberPicker.animateRandom(onAnimationStart = onNumberPickerAnimationStart, onAnimationEnd = onNumberPickerAnimationEnd)
                 secondsNumberPicker.animateRandom(onAnimationStart = onNumberPickerAnimationStart, onAnimationEnd = onNumberPickerAnimationEnd)
 
                 dialogButtonRandomTimeout.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                     hoursNumberPicker.animateFrom(
                             hoursNumberPicker.value,
@@ -942,7 +932,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 }
 
                 dialogButtonCancel.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                     dialog.dismiss()
 
@@ -950,7 +940,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 }
 
                 dialogButtonOk.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                     val timeout = when {
                         hoursNumberPicker.value + minutesNumberPicker.value + secondsNumberPicker.value == 0 -> Duration.INFINITE
                         else                                                                                 ->
@@ -996,7 +986,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
         ValueAnimator.ofInt(startValue, endValue).apply {
             addUpdateListener { animator ->
-                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 value = animator.animatedValue as Int
             }
 
@@ -1037,7 +1027,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
         ValueAnimator.ofInt(startValue, endValue).apply {
             addUpdateListener { animator ->
-                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 value = animator.animatedValue as Int
             }
 
