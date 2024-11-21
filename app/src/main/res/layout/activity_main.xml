@@ -21,7 +21,7 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="?actionBarSize"
             android:gravity="center"
             app:contentInsetEnd="15dp"
             app:contentInsetLeft="15dp"
@@ -56,7 +56,7 @@
                 android:src="@drawable/coffee_icon_off"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="?attr/themeColorAppBarIcon" />
+                app:tint="?colorPrimary" />
 
             <TextView
                 android:id="@+id/appNameTextView"

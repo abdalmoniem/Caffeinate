@@ -182,25 +182,15 @@ class Widget : AppWidgetProvider() {
                 showBackground: Boolean,
                 isClickable: Boolean = false
         ) = caffeinateApplication.run {
-            val textColor = when {
-                showBackground -> getColor(R.color.colorWidgetTextOnBackground)
-                else           -> getColor(R.color.colorWidgetText)
-            }
-            val backgroundColor = getColor(R.color.colorWidgetBackground)
-            val iconColor = getColor(R.color.colorWidgetIcon)
-            val iconFillColor = getColor(R.color.colorWidgetIconFill)
-            val widgetBackground = AppCompatResources.getDrawable(this, R.drawable.widget_background)
-                ?.apply { setTint(backgroundColor) }?.toBitmap()
             val widgetIcon = when (lastStatusUpdate) {
                 is ServiceStatus.Stopped -> AppCompatResources.getDrawable(this, R.drawable.coffee_icon_off)
                 is ServiceStatus.Running -> AppCompatResources.getDrawable(this, R.drawable.coffee_icon_on)
-            }?.apply { setTint(iconColor) }?.toBitmap()
-            val widgetIconFill = AppCompatResources.getDrawable(this, R.drawable.widget_icon_fill)
-                ?.apply { setTint(iconFillColor) }?.toBitmap()
+            }?.toBitmap()
+            val widgetIconFill = AppCompatResources.getDrawable(this, R.drawable.widget_icon_fill)?.toBitmap()
             val widgetBorder = when (lastStatusUpdate) {
                 is ServiceStatus.Stopped -> AppCompatResources.getDrawable(this, R.drawable.widget_border_off)
                 is ServiceStatus.Running -> AppCompatResources.getDrawable(this, R.drawable.widget_border_on)
-            }?.apply { setTint(iconColor) }?.toBitmap()
+            }?.toBitmap()
             val backgroundVisibility = when {
                 showBackground -> View.VISIBLE
                 else           -> View.GONE
@@ -216,17 +206,12 @@ class Widget : AppWidgetProvider() {
 
             views.run {
                 setViewVisibility(R.id.widgetBackground, backgroundVisibility)
-                setImageViewBitmap(R.id.widgetBackground, widgetBackground)
-
-                setTextColor(R.id.widgetText, textColor)
                 setTextViewText(R.id.widgetText, widgetText)
 
                 setViewVisibility(R.id.widgetIconFill, iconFillVisibility)
                 setImageViewBitmap(R.id.widgetIconFill, widgetIconFill)
                 setImageViewBitmap(R.id.widgetBorder, widgetBorder)
                 setImageViewBitmap(R.id.widgetIcon, widgetIcon)
-
-                setTextColor(R.id.widgetLabel, textColor)
                 setTextViewText(R.id.widgetLabel, getString(R.string.app_name))
 
                 if (isClickable) setClickListeners(applicationContext)

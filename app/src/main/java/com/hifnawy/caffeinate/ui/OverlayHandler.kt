@@ -2,18 +2,20 @@ package com.hifnawy.caffeinate.ui
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
+import androidx.annotation.AttrRes
+import com.google.android.material.color.DynamicColors
+import com.google.android.material.color.MaterialColors
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.OverlayBinding
 import com.hifnawy.caffeinate.services.LocaleChangeReceiver
-import com.hifnawy.caffeinate.utils.ColorUtil
-import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import timber.log.Timber as Log
 
 /**
@@ -109,30 +111,6 @@ class OverlayHandler(private val context: Context) {
     }
 
     /**
-     * A lazy delegate that provides an instance of [SharedPrefsManager] for managing shared preferences.
-     *
-     * This delegate is used to access and modify the application's shared preferences, allowing the service
-     * to respond to changes in settings such as theme, permissions, and other user preferences.
-     *
-     * @return [SharedPrefsManager] the instance for handling shared preferences.
-     *
-     * @see SharedPrefsManager
-     */
-    private val sharedPreferences by lazy { SharedPrefsManager(context.applicationContext as CaffeinateApplication) }
-
-    /**
-     * A lazy delegate that provides an instance of [ColorUtil] for managing colors.
-     *
-     * This delegate is used to access and modify the application's colors, allowing the service
-     * to respond to changes in the application's theme.
-     *
-     * @return [ColorUtil] the instance for handling colors.
-     *
-     * @see ColorUtil
-     */
-    private val colorUtils by lazy { ColorUtil(context, sharedPreferences) }
-
-    /**
      * A flag indicating whether the overlay is currently visible.
      *
      * This flag is used to determine whether the overlay should be removed or not.
@@ -163,6 +141,47 @@ class OverlayHandler(private val context: Context) {
         set(value) = overlayBinding.remaining.setTextSize(TypedValue.COMPLEX_UNIT_PX, value)
 
     /**
+     * A property that gets/sets the resource ID of the color attribute used to color the overlay's text.
+     *
+     * This property is used to set the color of the overlay's text when the overlay is first shown.
+     * It is also used to get the current resource ID of the color attribute used to color the overlay's
+     * text when the overlay is currently visible.
+     *
+     * The resource ID of the color attribute is used to get the color from the theme. The color is used
+     * to color the text of the overlay such that it is visible and readable on the screen.
+     *
+     * The default value of this property is [com.google.android.material.R.attr.colorPrimary].
+     *
+     * @return [Int] The current resource ID of the color attribute used to color the overlay's text.
+     */
+    @setparam:AttrRes
+    private var textColorAttr: Int = com.google.android.material.R.attr.colorPrimary
+        set(resId) {
+            field = resId
+            val dynamicColorContext = DynamicColors.wrapContextIfAvailable(overlayBinding.root.context)
+            overlayBinding.remaining.setTextColor(MaterialColors.getColor(dynamicColorContext, resId, Color.MAGENTA))
+        }
+
+    /**
+     * A property that gets/sets the resource ID of the color attribute used to color the overlay's text.
+     *
+     * This property is used to set the color of the overlay's text when the overlay is first
+     * shown. It is also used to get the current color of the overlay's text when the overlay
+     * is currently visible.
+     *
+     * The color is specified as a resource ID of a color attribute in the theme.
+     *
+     * @return [Int] The resource ID of the color attribute used to color the overlay's text.
+     */
+    @get:AttrRes
+    @setparam:AttrRes
+    private var overlayTextColorAttr: Int
+        get() = textColorAttr
+        set(resId) {
+            textColorAttr = resId
+        }
+
+    /**
      * The text displayed in the overlay.
      *
      * This property is used to set the text of the overlay when the overlay is first
@@ -177,7 +196,7 @@ class OverlayHandler(private val context: Context) {
             Log.d("Setting overlay text to $value, isRTL: ${CaffeinateApplication.isRTL}...")
 
             overlayBinding.remaining.text = value
-            overlayBinding.remaining.setTextColor(context.getColor(R.color.colorOverlayText))
+            overlayTextColorAttr = com.google.android.material.R.attr.colorPrimary
         }
 
     /**
@@ -225,7 +244,8 @@ class OverlayHandler(private val context: Context) {
                 CaffeinateApplication.isRTL -> context.resources.getDimension(R.dimen.overlayTextSizeRTL)
                 else                        -> context.resources.getDimension(R.dimen.overlayTextSizeLTR)
             }
-            overlayBinding.remaining.setTextColor(context.getColor(R.color.colorOverlayText))
+            overlayTextColorAttr = com.google.android.material.R.attr.colorPrimary
+
 
             windowManager.addView(overlayBinding.root, layoutParams)
 

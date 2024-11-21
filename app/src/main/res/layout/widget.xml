@@ -1,8 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widgetRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:theme="@style/WidgetTheme"
+    tools:ignore="UseAppTint">
 
     <ImageView
         android:id="@+id/widgetBackground"
@@ -11,7 +13,8 @@
         android:layout_centerInParent="true"
         android:importantForAccessibility="no"
         android:scaleType="fitXY"
-        android:src="@drawable/widget_background" />
+        android:src="@drawable/widget_background"
+        android:tint="?colorOnSecondary" />
 
     <TextView
         android:id="@+id/widgetText"
@@ -20,12 +23,12 @@
         android:layout_above="@+id/widgetBorder"
         android:layout_centerHorizontal="true"
         android:padding="3dp"
-        android:shadowColor="@color/black"
+        android:shadowColor="?colorOnSurfaceInverse"
         android:shadowDx="3"
         android:shadowDy="3"
         android:shadowRadius="3"
         android:text="@string/caffeinate_button_off"
-        android:textColor="@color/colorWidgetTextOnBackground"
+        android:textColor="?colorOnSurface"
         android:textSize="15sp" />
 
     <ImageView
@@ -36,7 +39,7 @@
         android:layout_centerVertical="true"
         android:importantForAccessibility="no"
         android:src="@drawable/widget_icon_fill"
-        app:tint="@color/colorWidgetIconFill" />
+        android:tint="?colorTertiaryContainer" />
 
     <ImageView
         android:id="@+id/widgetBorder"
@@ -46,7 +49,7 @@
         android:layout_centerVertical="true"
         android:importantForAccessibility="no"
         android:src="@drawable/widget_border_on"
-        app:tint="@color/colorWidgetIcon" />
+        android:tint="?colorOnPrimaryContainer" />
 
     <ImageView
         android:id="@+id/widgetIcon"
@@ -57,7 +60,7 @@
         android:importantForAccessibility="no"
         android:scaleType="fitXY"
         android:src="@drawable/widget_icon_off"
-        app:tint="@color/colorWidgetIcon" />
+        android:tint="?colorOnPrimaryContainer" />
 
     <TextView
         android:id="@+id/widgetLabel"
@@ -68,12 +71,12 @@
         android:ellipsize="end"
         android:maxLines="2"
         android:padding="3dp"
-        android:shadowColor="@color/black"
+        android:shadowColor="?colorOnSurfaceInverse"
         android:shadowDx="3"
         android:shadowDy="3"
         android:shadowRadius="3"
         android:text="@string/app_name"
         android:textAlignment="center"
-        android:textColor="@color/colorWidgetTextOnBackground"
+        android:textColor="?colorOnSurface"
         android:textSize="15sp" />
 </RelativeLayout>

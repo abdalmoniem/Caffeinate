@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:text="00m 30s"
-        android:textColor="?attr/themeColorOnBackground"
+        android:textColor="?colorOnBackground"
         android:textSize="20sp"
         tools:ignore="HardcodedText,VisualLintButtonSize" />
 </com.google.android.material.card.MaterialCardView>

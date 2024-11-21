@@ -48,8 +48,7 @@ object ActivityExtensionFunctions {
 
         setDefaultNightMode(nightMode)
         if (DynamicColors.isDynamicColorAvailable() && isMaterialYouEnabled) {
-            setTheme(R.style.Theme_Caffeinate_Dynamic)
             DynamicColors.applyToActivityIfAvailable(this)
-        } else setTheme(R.style.Theme_Caffeinate_Baseline)
+        } else setTheme(R.style.AppTheme)
     }
 }

@@ -44,9 +44,7 @@ import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServi
 import com.hifnawy.caffeinate.services.ServiceStatus
 import com.hifnawy.caffeinate.services.ServiceStatusObserver
 import com.hifnawy.caffeinate.utils.ActivityExtensionFunctions.setActivityTheme
-import com.hifnawy.caffeinate.utils.ColorUtil
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
-import com.hifnawy.caffeinate.utils.ImageViewExtensionFunctions.setColoredImageDrawable
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.SharedPrefsManager
@@ -73,7 +71,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
-    private val colorUtils by lazy { ColorUtil(this, sharedPreferences) }
     private val grantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.ok_icon_circle) }
     private val notGrantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.nok_icon_circle) }
     private lateinit var overlayPermissionLauncher: ActivityResultLauncher<Intent>
@@ -108,7 +105,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 showChooseThemeDialog()
             }
 
-            appIcon.setColoredImageDrawable(R.drawable.coffee_icon_off, colorUtils.colorAppBarIcon)
+            appIcon.setImageResource(R.drawable.coffee_icon_off)
 
             appThemeCard.setOnClickListener(themeClickListener)
             appThemeButton.setOnClickListener(themeClickListener)
@@ -276,7 +273,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     restartButton.animateVisibility = false
 
                     caffeineButton.text = getString(R.string.caffeinate_button_off)
-                    appIcon.setColoredImageDrawable(R.drawable.coffee_icon_off, colorUtils.colorAppBarIcon)
+                    appIcon.setImageResource(R.drawable.coffee_icon_off)
                 }
 
                 is ServiceStatus.Running -> {
@@ -287,7 +284,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     }
 
                     caffeineButton.text = status.remaining.toLocalizedFormattedTime(root.context)
-                    appIcon.setColoredImageDrawable(R.drawable.coffee_icon_on, colorUtils.colorAppBarIcon)
+                    appIcon.setImageResource(R.drawable.coffee_icon_on)
                 }
             }
         }
