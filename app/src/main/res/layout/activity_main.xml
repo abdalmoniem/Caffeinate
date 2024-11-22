@@ -266,8 +266,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginVertical="5dp"
-                            android:clickable="true"
-                            android:focusable="true"
                             app:cardCornerRadius="10dp"
                             app:cardElevation="3dp"
                             app:layout_constraintEnd_toEndOf="parent"
@@ -290,13 +288,11 @@
                                     app:layout_constraintStart_toStartOf="parent"
                                     app:layout_constraintTop_toTopOf="parent" />
 
-                                <com.google.android.material.button.MaterialButton
-                                    android:id="@+id/appThemeButton"
+                                <include
+                                    android:id="@+id/appThemeSelectionView"
+                                    layout="@layout/theme_button_group"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/app_theme_system_default"
-                                    android:textSize="@dimen/appThemeButtonTextSize"
-                                    app:cornerRadius="20dp"
                                     app:layout_constraintBottom_toBottomOf="parent"
                                     app:layout_constraintEnd_toEndOf="parent"
                                     app:layout_constraintTop_toTopOf="parent" />

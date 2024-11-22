@@ -38,7 +38,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.ActivityMainBinding
-import com.hifnawy.caffeinate.databinding.DialogChooseThemeBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding
 import com.hifnawy.caffeinate.databinding.DialogSetCustomTimeoutBinding
 import com.hifnawy.caffeinate.services.KeepAwakeService
@@ -113,18 +112,34 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     bitmap.toDrawable(resources)
                 }
             }
-            val themeClickListener = View.OnClickListener {
-                it.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                showChooseThemeDialog()
-            }
 
-            appThemeCard.setOnClickListener(themeClickListener)
-            appThemeButton.setOnClickListener(themeClickListener)
+            appThemeSelectionView.run {
+                appThemeToggleGroup.run {
+                    when (sharedPreferences.theme.mode) {
+                        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> check(R.id.appThemeSystemDefaultButton)
+                        AppCompatDelegate.MODE_NIGHT_NO            -> check(R.id.appThemeSystemLightButton)
+                        AppCompatDelegate.MODE_NIGHT_YES           -> check(R.id.appThemeSystemDarkButton)
+                    }
 
-            when (sharedPreferences.theme) {
-                SharedPrefsManager.Theme.SYSTEM_DEFAULT -> appThemeButton.text = getString(R.string.app_theme_system_default)
-                SharedPrefsManager.Theme.LIGHT          -> appThemeButton.text = getString(R.string.app_theme_system_light)
-                SharedPrefsManager.Theme.DARK           -> appThemeButton.text = getString(R.string.app_theme_system_dark)
+                    addOnButtonCheckedListener { group, checkedId, isChecked ->
+                        if (isChecked) {
+                            group.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                            val newTheme = when (checkedId) {
+                                R.id.appThemeSystemDefaultButton -> SharedPrefsManager.Theme.SYSTEM_DEFAULT
+                                R.id.appThemeSystemLightButton   -> SharedPrefsManager.Theme.LIGHT
+                                R.id.appThemeSystemDarkButton    -> SharedPrefsManager.Theme.DARK
+                                else                             -> sharedPreferences.theme // Fallback to the current theme
+                            }
+
+                            if (newTheme != sharedPreferences.theme) {
+                                sharedPreferences.theme = newTheme
+                                AppCompatDelegate.setDefaultNightMode(newTheme.mode)
+
+                                recreate()
+                            }
+                        }
+                    }
+                }
             }
 
             registerForOverlayPermission()
@@ -677,79 +692,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     overlayPermissionImageView.setColorFilter(Color.argb(255, 0, 255, 0))
                 }
             }
-        }
-    }
-
-    /**
-     * Shows a dialog to the user to let them choose a theme.
-     *
-     * The dialog has 4 options to choose from:
-     * 1. System default
-     * 2. Light
-     * 3. Dark
-     * 4. Material You (only available on Android 12+)
-     */
-    private fun showChooseThemeDialog() {
-        with(binding) {
-            var theme = sharedPreferences.theme
-            val dialogBinding = DialogChooseThemeBinding.inflate(LayoutInflater.from(root.context))
-            val dialog = MaterialAlertDialogBuilder(root.context)
-                .setView(dialogBinding.root)
-                .create()
-                .apply {
-                    setCancelable(false)
-                    window?.setLayout(
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                    )
-                }
-
-            when (theme.mode) {
-                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> {
-                    dialogBinding.themeRadioGroup.check(R.id.themeSystemDefault)
-                    appThemeButton.text = getString(R.string.app_theme_system_default)
-                }
-
-                AppCompatDelegate.MODE_NIGHT_NO            -> {
-                    dialogBinding.themeRadioGroup.check(R.id.themeSystemLight)
-                    appThemeButton.text = getString(R.string.app_theme_system_light)
-                }
-
-                AppCompatDelegate.MODE_NIGHT_YES           -> {
-                    dialogBinding.themeRadioGroup.check(R.id.themeSystemDark)
-                    appThemeButton.text = getString(R.string.app_theme_system_dark)
-                }
-            }
-
-            with(dialogBinding) {
-                themeRadioGroup.setOnCheckedChangeListener { radioGroup, checkedRadioButtonId ->
-                    radioGroup.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-
-                    when (checkedRadioButtonId) {
-                        R.id.themeSystemDefault -> theme = SharedPrefsManager.Theme.SYSTEM_DEFAULT
-                        R.id.themeSystemLight   -> theme = SharedPrefsManager.Theme.LIGHT
-                        R.id.themeSystemDark    -> theme = SharedPrefsManager.Theme.DARK
-                    }
-                }
-
-                dialogButtonOk.setOnClickListener {
-                    it.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-
-                    dialog.dismiss()
-
-                    sharedPreferences.theme = theme
-                    AppCompatDelegate.setDefaultNightMode(theme.mode)
-
-                    recreate()
-                }
-
-                dialogButtonCancel.setOnClickListener {
-                    it.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                    dialog.dismiss()
-                }
-            }
-
-            dialog.show()
         }
     }
 
