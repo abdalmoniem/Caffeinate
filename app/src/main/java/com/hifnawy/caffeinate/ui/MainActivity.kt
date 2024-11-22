@@ -71,6 +71,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
+    private var appBarVerticalOffset = 0
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
     private val grantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.ok_icon_circle) }
     private val notGrantedDrawable by lazy { AppCompatResources.getDrawable(binding.root.context, R.drawable.nok_icon_circle) }
@@ -82,6 +83,34 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     limit = 10,
                     truncated = "..."
             ) { checkBoxItem -> checkBoxItem.duration.toLocalizedFormattedTime(binding.root.context) }
+
+    /**
+     * Called to retrieve per-instance state from an activity before being
+     * killed so that the state can be restored in [onRestoreInstanceState]
+     * or [onCreate] (the [Parcelable][android.os.Parcelable] returned here
+     * will be available in the Bundle returned to you in the aforementioned methods).
+     *
+     * @param outState [Bundle] a bundle to save the per-instance state of the activity
+     */
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putInt(::appBarVerticalOffset.name, appBarVerticalOffset)
+    }
+
+    /**
+     * Restores the state of the activity from a [Bundle] containing the information
+     * previously saved by [onSaveInstanceState].
+     *
+     * @param savedInstanceState [Bundle] a bundle to restore the per-instance state
+     * of the activity
+     */
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+
+        appBarVerticalOffset = savedInstanceState.getInt(::appBarVerticalOffset.name)
+        binding.appBar.setExpanded(appBarVerticalOffset == 0)
+    }
 
     /**
      * Called when the activity is starting.
@@ -101,6 +130,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
         with(binding) {
             appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+                appBarVerticalOffset = verticalOffset
                 val totalScrollRange = appBarLayout.totalScrollRange
                 val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.5f)
 
