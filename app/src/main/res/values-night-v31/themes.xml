@@ -48,7 +48,5 @@
         <item name="colorSurfaceContainer">@color/md_theme_surfaceContainer_dynamic</item>
         <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh_dynamic</item>
         <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest_dynamic</item>
-
-        <item name="android:windowTranslucentNavigation">false</item>
     </style>
 </resources>

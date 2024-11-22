@@ -26,11 +26,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.animation.addListener
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.stephenvinouze.materialnumberpickercore.MaterialNumberPicker
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -109,7 +111,16 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         super.onRestoreInstanceState(savedInstanceState)
 
         appBarVerticalOffset = savedInstanceState.getInt(::appBarVerticalOffset.name)
-        binding.appBar.setExpanded(appBarVerticalOffset == 0)
+
+        with(binding) {
+            // appBar.setExpanded(appBarVerticalOffset == 0)
+            appBar.post {
+                val params = appBar.layoutParams as CoordinatorLayout.LayoutParams
+                val behavior = params.behavior as AppBarLayout.Behavior
+                behavior.topAndBottomOffset = appBarVerticalOffset
+                appBar.requestLayout()
+            }
+        }
     }
 
     /**
@@ -132,7 +143,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
                 appBarVerticalOffset = verticalOffset
                 val totalScrollRange = appBarLayout.totalScrollRange
-                val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.5f)
+                val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.3f)
 
                 toolbar.navigationIcon = when (caffeinateApplication.lastStatusUpdate) {
                     is ServiceStatus.Stopped -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_off)

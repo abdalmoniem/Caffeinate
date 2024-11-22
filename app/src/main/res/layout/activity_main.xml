@@ -4,26 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".ui.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:liftOnScrollColor="?android:colorBackground">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:fitsSystemWindows="true"
-                app:collapsedTitleTextAppearance="@style/TextAppearance.MaterialComponents.Headline4"
-                app:expandedTitleMarginBottom="20dp"
+                android:layout_height="165dp"
+                app:collapsedTitleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:expandedTitleMarginBottom="30dp"
                 app:expandedTitleTextAppearance="@style/TextAppearance.MaterialComponents.Headline2"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap|snapMargins|enterAlwaysCollapsed"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|enterAlwaysCollapsed"
                 app:title="@string/app_name"
                 app:titleCollapseMode="scale">
 
