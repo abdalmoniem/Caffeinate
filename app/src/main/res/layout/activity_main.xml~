@@ -23,7 +23,6 @@
                 android:layout_height="130dp"
                 app:collapsedTitleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                 app:expandedTitleMarginBottom="25dp"
-                app:maxLines="2"
                 app:expandedTitleTextAppearance="@style/TextAppearance.MaterialComponents.Headline2"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|enterAlwaysCollapsed"
                 app:title="@string/app_name"
