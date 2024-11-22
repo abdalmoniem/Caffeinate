@@ -211,7 +211,9 @@ class Widget : AppWidgetProvider() {
                 setViewVisibility(R.id.widgetIconFill, iconFillVisibility)
                 setImageViewBitmap(R.id.widgetIconFill, widgetIconFill)
                 setImageViewBitmap(R.id.widgetBorder, widgetBorder)
+                setImageViewBitmap(R.id.widgetBorderShadow, widgetBorder)
                 setImageViewBitmap(R.id.widgetIcon, widgetIcon)
+                setImageViewBitmap(R.id.widgetIconShadow, widgetIcon)
                 setTextViewText(R.id.widgetLabel, getString(R.string.app_name))
 
                 if (isClickable) setClickListeners(applicationContext)

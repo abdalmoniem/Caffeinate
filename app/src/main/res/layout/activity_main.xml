@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,574 +11,583 @@
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:fitsSystemWindows="true">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsingToolbar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:gravity="center"
-            app:contentInsetEnd="15dp"
-            app:contentInsetLeft="15dp"
-            app:contentInsetStart="15dp"
-            app:logo="@drawable/coffee_icon_on"
+            android:layout_height="120dp"
+            android:fitsSystemWindows="true"
+            app:collapsedTitleTextAppearance="@style/TextAppearance.MaterialComponents.Headline4"
+            app:expandedTitleMarginBottom="20dp"
+            app:expandedTitleTextAppearance="@style/TextAppearance.MaterialComponents.Headline2"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap|snapMargins|enterAlwaysCollapsed"
             app:title="@string/app_name"
-            app:titleMarginStart="30dp" />
+            app:titleCollapseMode="scale">
 
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/toolbar_icon_off"
+                app:navigationIconTint="?colorPrimary" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBar">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/appIcon"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="30dp"
-                android:contentDescription="@string/app_icon"
-                android:src="@drawable/coffee_icon_off"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="?colorPrimary" />
-
-            <TextView
-                android:id="@+id/appNameTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-
-                android:text="@string/app_name"
-                android:textSize="50sp"
-                app:layout_constraintBottom_toBottomOf="@+id/appIcon"
-                app:layout_constraintStart_toEndOf="@+id/appIcon"
-                app:layout_constraintTop_toTopOf="@+id/appIcon" />
-
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/batteryOptimizationCard"
+                android:id="@+id/permissionsCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="30dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginBottom="10dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp"
-                app:cardCornerRadius="10dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="10dp"
+                app:contentPadding="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/appNameTextView">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
+                    android:layout_height="match_parent">
 
-                    <TextView
-                        android:id="@+id/batteryOptimizationTextView"
-                        android:layout_width="0dp"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/batteryOptimizationCard"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/battery_optimization_not_granted"
-                        android:textSize="@dimen/permissionsTextSize"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/batteryOptimizationImageView"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/batteryOptimizationImageView"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:contentDescription="@string/battery_optimization_not_granted"
-                        android:src="@drawable/nok_icon_circle"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginVertical="5dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:minHeight="48dp"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="3dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/batteryOptimizationTextView"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:tint="#ffff0000" />
+                        app:strokeWidth="0dp">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="10dp">
+
+                            <TextView
+                                android:id="@+id/batteryOptimizationTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/battery_optimization_not_granted"
+                                android:textSize="@dimen/permissionsTextSize"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/batteryOptimizationImageView"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <ImageView
+                                android:id="@+id/batteryOptimizationImageView"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:contentDescription="@string/battery_optimization_not_granted"
+                                android:src="@drawable/nok_icon_circle"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toEndOf="@+id/batteryOptimizationTextView"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:tint="#ffff0000" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/backgroundOptimizationCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="5dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:minHeight="48dp"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="3dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/batteryOptimizationCard"
+                        app:strokeWidth="0dp">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="10dp">
+
+                            <TextView
+                                android:id="@+id/backgroundOptimizationTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/background_optimization_not_granted"
+                                android:textSize="@dimen/permissionsTextSize"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/backgroundOptimizationImageView"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <ImageView
+                                android:id="@+id/backgroundOptimizationImageView"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:contentDescription="@string/background_optimization_not_granted"
+                                android:src="@drawable/nok_icon_circle"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toEndOf="@+id/backgroundOptimizationTextView"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:tint="#ffff0000" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/notificationPermissionCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="5dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:minHeight="48dp"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="3dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/backgroundOptimizationCard"
+                        app:strokeWidth="0dp">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="10dp">
+
+                            <TextView
+                                android:id="@+id/notificationPermissionTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/notifications_permission_not_granted"
+                                android:textSize="@dimen/permissionsTextSize"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/notificationPermissionImageView"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <ImageView
+                                android:id="@+id/notificationPermissionImageView"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:contentDescription="@string/notifications_permission_not_granted"
+                                android:src="@drawable/nok_icon_circle"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toEndOf="@+id/notificationPermissionTextView"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:tint="#ffff0000" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/overlayPermissionCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="5dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:minHeight="48dp"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="3dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/notificationPermissionCard"
+                        app:strokeWidth="0dp">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="10dp">
+
+                            <TextView
+                                android:id="@+id/overlayPermissionTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/overlay_permission_not_granted"
+                                android:textSize="@dimen/permissionsTextSize"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/overlayPermissionImageView"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <ImageView
+                                android:id="@+id/overlayPermissionImageView"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:contentDescription="@string/notifications_permission_not_granted"
+                                android:src="@drawable/nok_icon_circle"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toEndOf="@+id/overlayPermissionTextView"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:tint="#ffff0000" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.card.MaterialCardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/backgroundOptimizationCard"
+                android:id="@+id/settingsCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp"
-                app:cardCornerRadius="10dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="10dp"
+                app:contentPadding="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/batteryOptimizationCard">
+                app:layout_constraintTop_toBottomOf="@+id/permissionsCard">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
+                    android:layout_height="match_parent">
 
-                    <TextView
-                        android:id="@+id/backgroundOptimizationTextView"
-                        android:layout_width="0dp"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/appThemeCard"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/background_optimization_not_granted"
-                        android:textSize="@dimen/permissionsTextSize"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/backgroundOptimizationImageView"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/backgroundOptimizationImageView"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:contentDescription="@string/background_optimization_not_granted"
-                        android:src="@drawable/nok_icon_circle"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginVertical="5dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="3dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/backgroundOptimizationTextView"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:tint="#ffff0000" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        app:strokeWidth="0dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/notificationPermissionCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp"
-                app:cardCornerRadius="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/backgroundOptimizationCard">
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="10dp">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
+                            <TextView
+                                android:id="@+id/appThemeTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/app_theme_pref"
+                                android:textSize="@dimen/prefTextSize"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
-                        android:id="@+id/notificationPermissionTextView"
-                        android:layout_width="0dp"
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/appThemeButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/app_theme_system_default"
+                                android:textSize="@dimen/appThemeButtonTextSize"
+                                app:cornerRadius="20dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/materialYouCard"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/notifications_permission_not_granted"
-                        android:textSize="@dimen/permissionsTextSize"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/notificationPermissionImageView"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/notificationPermissionImageView"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:contentDescription="@string/notifications_permission_not_granted"
-                        android:src="@drawable/nok_icon_circle"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginVertical="5dp"
+                        android:clickable="true"
+                        android:enabled="false"
+                        android:focusable="true"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="3dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/notificationPermissionTextView"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="#ffff0000" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/overlayPermissionCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp"
-                app:cardCornerRadius="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/notificationPermissionCard">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:id="@+id/overlayPermissionTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/overlay_permission_not_granted"
-                        android:textSize="@dimen/permissionsTextSize"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/overlayPermissionImageView"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toBottomOf="@+id/appThemeCard"
+                        app:strokeWidth="0dp">
 
-                    <ImageView
-                        android:id="@+id/overlayPermissionImageView"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:contentDescription="@string/notifications_permission_not_granted"
-                        android:src="@drawable/nok_icon_circle"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="10dp">
+
+                            <TextView
+                                android:id="@+id/materialYouTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:text="@string/material_you_pref"
+                                android:textSize="@dimen/prefTextSize"
+                                app:layout_constraintBottom_toTopOf="@+id/materialYouSubTextTextView"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/materialYouSubTextTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:text="@string/material_you_pref_description"
+                                android:textSize="@dimen/prefsDescriptionTextSize"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/materialYouSwitch"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/materialYouTextView" />
+
+                            <com.google.android.material.materialswitch.MaterialSwitch
+                                android:id="@+id/materialYouSwitch"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="false"
+                                android:enabled="false"
+                                android:textOff="@string/material_you_off"
+                                android:textOn="@string/material_you_on"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:thumbIcon="@drawable/switch_thumb_icon" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/overlayCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="5dp"
+                        android:clickable="true"
+                        android:enabled="false"
+                        android:focusable="true"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="3dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/overlayPermissionTextView"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="#ffff0000" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/appThemeCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardCornerRadius="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/overlayPermissionCard">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:id="@+id/appThemeTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/app_theme_pref"
-                        android:textSize="@dimen/prefTextSize"
-                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toBottomOf="@+id/materialYouCard"
+                        app:strokeWidth="0dp">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/appThemeButton"
-                        android:layout_width="wrap_content"
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="10dp">
+
+                            <TextView
+                                android:id="@+id/overlayTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:text="@string/show_overlay_pref"
+                                android:textSize="@dimen/prefTextSize"
+                                app:layout_constraintBottom_toTopOf="@+id/overlaySubTextTextView"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/overlaySubTextTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:text="@string/show_overlay_pref_description"
+                                android:textSize="@dimen/prefsDescriptionTextSize"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/overlaySwitch"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/overlayTextView"
+                                tools:ignore="VisualLintLongText" />
+
+                            <com.google.android.material.materialswitch.MaterialSwitch
+                                android:id="@+id/overlaySwitch"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="false"
+                                android:enabled="false"
+                                android:textOff="@string/show_overlay_off"
+                                android:textOn="@string/show_overlay_on"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:thumbIcon="@drawable/switch_thumb_icon" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/allowDimmingCard"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/app_theme_system_default"
-                        android:textSize="@dimen/appThemeButtonTextSize"
-                        app:cornerRadius="20dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginVertical="5dp"
+                        android:clickable="true"
+                        android:enabled="false"
+                        android:focusable="true"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="3dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/materialYouCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:enabled="false"
-                android:focusable="true"
-                app:cardCornerRadius="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/appThemeCard">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:id="@+id/materialYouTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:text="@string/material_you_pref"
-                        android:textSize="@dimen/prefTextSize"
-                        app:layout_constraintBottom_toTopOf="@+id/materialYouSubTextTextView"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toBottomOf="@+id/overlayCard"
+                        app:strokeWidth="0dp">
 
-                    <TextView
-                        android:id="@+id/materialYouSubTextTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:text="@string/material_you_pref_description"
-                        android:textSize="@dimen/prefsDescriptionTextSize"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/materialYouSwitch"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/materialYouTextView" />
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="10dp">
 
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/materialYouSwitch"
-                        android:layout_width="wrap_content"
+                            <TextView
+                                android:id="@+id/allowDimmingTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:text="@string/allow_dimming_pref"
+                                android:textSize="@dimen/prefTextSize"
+                                app:layout_constraintBottom_toTopOf="@+id/allowDimmingSubTextTextView"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/allowDimmingSubTextTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/allow_dimming_pref_description"
+                                android:textSize="@dimen/prefsDescriptionTextSize"
+                                android:visibility="gone"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/allowDimmingSwitch"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/allowDimmingTextView" />
+
+                            <com.google.android.material.materialswitch.MaterialSwitch
+                                android:id="@+id/allowDimmingSwitch"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="false"
+                                android:enabled="false"
+                                android:textOff="@string/allow_dimming_off"
+                                android:textOn="@string/allow_dimming_on"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:thumbIcon="@drawable/switch_thumb_icon" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/allowWhileLockedCard"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:checked="false"
+                        android:layout_marginVertical="5dp"
+                        android:clickable="true"
                         android:enabled="false"
-                        android:textOff="@string/material_you_off"
-                        android:textOn="@string/material_you_on"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:focusable="true"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="3dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:thumbIcon="@drawable/switch_thumb_icon" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/overlayCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:enabled="false"
-                android:focusable="true"
-                app:cardCornerRadius="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/materialYouCard">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:id="@+id/overlayTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:text="@string/show_overlay_pref"
-                        android:textSize="@dimen/prefTextSize"
-                        app:layout_constraintBottom_toTopOf="@+id/overlaySubTextTextView"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toBottomOf="@+id/allowDimmingCard"
+                        app:strokeWidth="0dp">
 
-                    <TextView
-                        android:id="@+id/overlaySubTextTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:text="@string/show_overlay_pref_description"
-                        android:textSize="@dimen/prefsDescriptionTextSize"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/overlaySwitch"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/overlayTextView"
-                        tools:ignore="VisualLintLongText" />
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="10dp">
 
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/overlaySwitch"
-                        android:layout_width="wrap_content"
+                            <TextView
+                                android:id="@+id/allowWhileLockedTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:text="@string/allow_while_locked_pref"
+                                android:textSize="@dimen/prefTextSize"
+                                app:layout_constraintBottom_toTopOf="@+id/allowWhileLockedSubTextTextView"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/allowWhileLockedSubTextTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/allow_while_locked_pref_description"
+                                android:textSize="@dimen/prefsDescriptionTextSize"
+                                android:visibility="gone"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/allowWhileLockedSwitch"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/allowWhileLockedTextView" />
+
+                            <com.google.android.material.materialswitch.MaterialSwitch
+                                android:id="@+id/allowWhileLockedSwitch"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="false"
+                                android:enabled="false"
+                                android:textOff="@string/allow_while_locked_off"
+                                android:textOn="@string/allow_while_locked_on"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:thumbIcon="@drawable/switch_thumb_icon" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/timeoutChoiceCard"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:checked="false"
-                        android:enabled="false"
-                        android:textOff="@string/show_overlay_off"
-                        android:textOn="@string/show_overlay_on"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginVertical="5dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="3dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:thumbIcon="@drawable/switch_thumb_icon" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/allowDimmingCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:enabled="false"
-                android:focusable="true"
-                app:cardCornerRadius="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/overlayCard">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:id="@+id/allowDimmingTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:text="@string/allow_dimming_pref"
-                        android:textSize="@dimen/prefTextSize"
-                        app:layout_constraintBottom_toTopOf="@+id/allowDimmingSubTextTextView"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toBottomOf="@+id/allowWhileLockedCard"
+                        app:strokeWidth="0dp">
 
-                    <TextView
-                        android:id="@+id/allowDimmingSubTextTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/allow_dimming_pref_description"
-                        android:textSize="@dimen/prefsDescriptionTextSize"
-                        android:visibility="gone"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/allowDimmingSwitch"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/allowDimmingTextView" />
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="10dp">
 
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/allowDimmingSwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="false"
-                        android:enabled="false"
-                        android:textOff="@string/allow_dimming_off"
-                        android:textOn="@string/allow_dimming_on"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:thumbIcon="@drawable/switch_thumb_icon" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
+                            <TextView
+                                android:id="@+id/timeoutChoiceTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:text="@string/timeouts_pref"
+                                android:textSize="@dimen/prefTextSize"
+                                app:layout_constraintBottom_toTopOf="@+id/timeoutChoiceSubTextTextView"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/allowWhileLockedCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:enabled="false"
-                android:focusable="true"
-                app:cardCornerRadius="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/allowDimmingCard">
+                            <TextView
+                                android:id="@+id/timeoutChoiceSubTextTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:textSize="@dimen/prefsDescriptionTextSize"
+                                android:visibility="gone"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@+id/timeoutChoiceButton"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@+id/timeoutChoiceTextView" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:id="@+id/allowWhileLockedTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:text="@string/allow_while_locked_pref"
-                        android:textSize="@dimen/prefTextSize"
-                        app:layout_constraintBottom_toTopOf="@+id/allowWhileLockedSubTextTextView"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/allowWhileLockedSubTextTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/allow_while_locked_pref_description"
-                        android:textSize="@dimen/prefsDescriptionTextSize"
-                        android:visibility="gone"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/allowWhileLockedSwitch"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/allowWhileLockedTextView" />
-
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/allowWhileLockedSwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="false"
-                        android:enabled="false"
-                        android:textOff="@string/allow_while_locked_off"
-                        android:textOn="@string/allow_while_locked_on"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:thumbIcon="@drawable/switch_thumb_icon" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/timeoutChoiceCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardCornerRadius="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/allowWhileLockedCard">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:id="@+id/timeoutChoiceTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:text="@string/timeouts_pref"
-                        android:textSize="@dimen/prefTextSize"
-                        app:layout_constraintBottom_toTopOf="@+id/timeoutChoiceSubTextTextView"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/timeoutChoiceSubTextTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:textSize="@dimen/prefsDescriptionTextSize"
-                        android:visibility="gone"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/timeoutChoiceButton"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/timeoutChoiceTextView" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/timeoutChoiceButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:text="@string/timeouts_change"
-                        android:textSize="@dimen/timeoutsButtonTextSize"
-                        app:cornerRadius="20dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/timeoutChoiceButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:text="@string/timeouts_change"
+                                android:textSize="@dimen/timeoutsButtonTextSize"
+                                app:cornerRadius="20dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.card.MaterialCardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -595,7 +604,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/restartButton"
                 app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/timeoutChoiceCard"
+                app:layout_constraintTop_toBottomOf="@+id/settingsCard"
                 app:layout_constraintVertical_bias="0.494" />
 
             <com.google.android.material.button.MaterialButton
@@ -620,4 +629,4 @@
                 tools:ignore="SpeakableTextPresentCheck" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

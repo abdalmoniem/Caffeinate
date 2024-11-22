@@ -45,10 +45,12 @@ object ActivityExtensionFunctions {
 
             "nightMode must be one of the following: $supportedNightModes"
         }
+        val themeResId = when {
+            DynamicColors.isDynamicColorAvailable() && isMaterialYouEnabled -> R.style.AppTheme_Dynamic
+            else                                                            -> R.style.AppTheme
+        }
 
         setDefaultNightMode(nightMode)
-        if (DynamicColors.isDynamicColorAvailable() && isMaterialYouEnabled) {
-            DynamicColors.applyToActivityIfAvailable(this)
-        } else setTheme(R.style.AppTheme)
+        setTheme(themeResId)
     }
 }

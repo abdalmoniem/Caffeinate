@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <!-- Material 3 Light Theme Standard Contrast -->
     <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/md_theme_primary</item>
         <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
@@ -49,7 +50,9 @@
         <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest</item>
     </style>
 
-    <style name="WidgetTheme" parent="Theme.Material3.DynamicColors.DayNight" />
+    <!-- Widget Theme -->
+    <style name="WidgetTheme" parent="AppTheme" />
 
-    <style name="OverlayTheme" parent="Theme.Material3.DynamicColors.DayNight" />
+    <!-- Overlay Theme -->
+    <style name="OverlayTheme" parent="AppTheme" />
 </resources>

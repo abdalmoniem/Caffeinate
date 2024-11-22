@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Standard Contrast Colors -->
     <color name="md_theme_primary">#97D945</color>
     <color name="md_theme_onPrimary">#1F3700</color>
     <color name="md_theme_primaryContainer">#4F8200</color>
@@ -46,6 +48,8 @@
     <color name="md_theme_surfaceContainer">#1D2117</color>
     <color name="md_theme_surfaceContainerHigh">#272B21</color>
     <color name="md_theme_surfaceContainerHighest">#32362B</color>
+
+    <!-- Medium Contrast Colors -->
     <color name="md_theme_primary_mediumContrast">#9BDD49</color>
     <color name="md_theme_onPrimary_mediumContrast">#0C1A00</color>
     <color name="md_theme_primaryContainer_mediumContrast">#64A104</color>
@@ -93,6 +97,8 @@
     <color name="md_theme_surfaceContainer_mediumContrast">#1D2117</color>
     <color name="md_theme_surfaceContainerHigh_mediumContrast">#272B21</color>
     <color name="md_theme_surfaceContainerHighest_mediumContrast">#32362B</color>
+
+    <!-- High Contrast Colors -->
     <color name="md_theme_primary_highContrast">#F4FFDF</color>
     <color name="md_theme_onPrimary_highContrast">#000000</color>
     <color name="md_theme_primaryContainer_highContrast">#9BDD49</color>

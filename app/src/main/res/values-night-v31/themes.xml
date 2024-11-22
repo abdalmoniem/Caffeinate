@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Dark Theme Standard Contrast -->
+    <style name="AppTheme.Dynamic" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/md_theme_primary_dynamic</item>
+        <item name="colorOnPrimary">@color/md_theme_onPrimary_dynamic</item>
+        <item name="colorPrimaryContainer">@color/md_theme_primaryContainer_dynamic</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_onPrimaryContainer_dynamic</item>
+        <item name="colorSecondary">@color/md_theme_secondary_dynamic</item>
+        <item name="colorOnSecondary">@color/md_theme_onSecondary_dynamic</item>
+        <item name="colorSecondaryContainer">@color/md_theme_secondaryContainer_dynamic</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_onSecondaryContainer_dynamic</item>
+        <item name="colorTertiary">@color/md_theme_tertiary_dynamic</item>
+        <item name="colorOnTertiary">@color/md_theme_onTertiary_dynamic</item>
+        <item name="colorTertiaryContainer">@color/md_theme_tertiaryContainer_dynamic</item>
+        <item name="colorOnTertiaryContainer">@color/md_theme_onTertiaryContainer_dynamic</item>
+        <item name="colorError">@color/md_theme_error_dynamic</item>
+        <item name="colorOnError">@color/md_theme_onError_dynamic</item>
+        <item name="colorErrorContainer">@color/md_theme_errorContainer_dynamic</item>
+        <item name="colorOnErrorContainer">@color/md_theme_onErrorContainer_dynamic</item>
+        <item name="android:colorBackground">@color/md_theme_background_dynamic</item>
+        <item name="colorOnBackground">@color/md_theme_onBackground_dynamic</item>
+        <item name="colorSurface">@color/md_theme_surface_dynamic</item>
+        <item name="colorOnSurface">@color/md_theme_onSurface_dynamic</item>
+        <item name="colorSurfaceVariant">@color/md_theme_surfaceVariant_dynamic</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_onSurfaceVariant_dynamic</item>
+        <item name="colorOutline">@color/md_theme_outline_dynamic</item>
+        <item name="colorOutlineVariant">@color/md_theme_outlineVariant_dynamic</item>
+        <item name="colorSurfaceInverse">@color/md_theme_inverseSurface_dynamic</item>
+        <item name="colorOnSurfaceInverse">@color/md_theme_inverseOnSurface_dynamic</item>
+        <item name="colorPrimaryInverse">@color/md_theme_inversePrimary_dynamic</item>
+        <item name="colorPrimaryFixed">@color/md_theme_primaryFixed_dynamic</item>
+        <item name="colorOnPrimaryFixed">@color/md_theme_onPrimaryFixed_dynamic</item>
+        <item name="colorPrimaryFixedDim">@color/md_theme_primaryFixedDim_dynamic</item>
+        <item name="colorOnPrimaryFixedVariant">@color/md_theme_onPrimaryFixedVariant_dynamic</item>
+        <item name="colorSecondaryFixed">@color/md_theme_secondaryFixed_dynamic</item>
+        <item name="colorOnSecondaryFixed">@color/md_theme_onSecondaryFixed_dynamic</item>
+        <item name="colorSecondaryFixedDim">@color/md_theme_secondaryFixedDim_dynamic</item>
+        <item name="colorOnSecondaryFixedVariant">@color/md_theme_onSecondaryFixedVariant_dynamic</item>
+        <item name="colorTertiaryFixed">@color/md_theme_tertiaryFixed_dynamic</item>
+        <item name="colorOnTertiaryFixed">@color/md_theme_onTertiaryFixed_dynamic</item>
+        <item name="colorTertiaryFixedDim">@color/md_theme_tertiaryFixedDim_dynamic</item>
+        <item name="colorOnTertiaryFixedVariant">@color/md_theme_onTertiaryFixedVariant_dynamic</item>
+        <item name="colorSurfaceDim">@color/md_theme_surfaceDim_dynamic</item>
+        <item name="colorSurfaceBright">@color/md_theme_surfaceBright_dynamic</item>
+        <item name="colorSurfaceContainerLowest">@color/md_theme_surfaceContainerLowest_dynamic</item>
+        <item name="colorSurfaceContainerLow">@color/md_theme_surfaceContainerLow_dynamic</item>
+        <item name="colorSurfaceContainer">@color/md_theme_surfaceContainer_dynamic</item>
+        <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh_dynamic</item>
+        <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest_dynamic</item>
+    </style>
+</resources>

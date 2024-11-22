@@ -27,6 +27,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.animation.addListener
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.stephenvinouze.materialnumberpickercore.MaterialNumberPicker
 import com.google.android.material.button.MaterialButton
@@ -97,15 +99,24 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
         enableEdgeToEdge()
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
 
         with(binding) {
+            appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+                val totalScrollRange = appBarLayout.totalScrollRange
+                val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.5f)
+
+                toolbar.navigationIcon = when (caffeinateApplication.lastStatusUpdate) {
+                    is ServiceStatus.Stopped -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_off)
+                    is ServiceStatus.Running -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_on)
+                }?.run {
+                    val bitmap = toBitmap((intrinsicWidth * collapseFactor).toInt(), (intrinsicHeight * collapseFactor).toInt())
+                    bitmap.toDrawable(resources)
+                }
+            }
             val themeClickListener = View.OnClickListener {
                 it.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 showChooseThemeDialog()
             }
-
-            appIcon.setImageResource(R.drawable.coffee_icon_off)
 
             appThemeCard.setOnClickListener(themeClickListener)
             appThemeButton.setOnClickListener(themeClickListener)
@@ -273,7 +284,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     restartButton.animateVisibility = false
 
                     caffeineButton.text = getString(R.string.caffeinate_button_off)
-                    appIcon.setImageResource(R.drawable.coffee_icon_off)
                 }
 
                 is ServiceStatus.Running -> {
@@ -284,7 +294,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     }
 
                     caffeineButton.text = status.remaining.toLocalizedFormattedTime(root.context)
-                    appIcon.setImageResource(R.drawable.coffee_icon_on)
                 }
             }
         }

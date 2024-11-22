@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widgetRoot"
@@ -21,15 +22,37 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/widgetBorder"
-        android:layout_centerHorizontal="true"
-        android:padding="3dp"
-        android:shadowColor="?colorOnSurfaceInverse"
-        android:shadowDx="3"
-        android:shadowDy="3"
-        android:shadowRadius="3"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginHorizontal="5dp"
+        android:layout_marginBottom="3dp"
+        android:autoSizeMaxTextSize="30sp"
+        android:autoSizeMinTextSize="3sp"
+        android:autoSizeStepGranularity="1sp"
+        android:autoSizeTextType="uniform"
+        android:shadowColor="@color/black"
+        android:shadowDx="4"
+        android:shadowDy="4"
+        android:shadowRadius="1"
         android:text="@string/caffeinate_button_off"
+        android:textAlignment="center"
         android:textColor="?colorOnSurface"
-        android:textSize="15sp" />
+        android:textSize="30sp"
+        tools:ignore="UnusedAttribute" />
+
+    <ImageView
+        android:id="@+id/widgetBorderShadow"
+        android:layout_width="@dimen/widgetIconSize"
+        android:layout_height="@dimen/widgetIconSize"
+        android:layout_alignStart="@id/widgetBorder"
+        android:layout_alignTop="@id/widgetBorder"
+        android:layout_alignEnd="@id/widgetBorder"
+        android:layout_alignBottom="@id/widgetBorder"
+        android:layout_marginEnd="-1dp"
+        android:layout_marginBottom="-1dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/widget_border_on"
+        android:tint="@color/black" />
 
     <ImageView
         android:id="@+id/widgetIconFill"
@@ -52,6 +75,21 @@
         android:tint="?colorOnPrimaryContainer" />
 
     <ImageView
+        android:id="@+id/widgetIconShadow"
+        android:layout_width="@dimen/widgetIconSize"
+        android:layout_height="@dimen/widgetIconSize"
+        android:layout_alignStart="@id/widgetIcon"
+        android:layout_alignTop="@id/widgetIcon"
+        android:layout_alignEnd="@id/widgetIcon"
+        android:layout_alignBottom="@id/widgetIcon"
+        android:layout_marginEnd="-1.5dp"
+        android:layout_marginBottom="-1.5dp"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:src="@drawable/coffee_icon_off"
+        android:tint="@color/black" />
+
+    <ImageView
         android:id="@+id/widgetIcon"
         android:layout_width="@dimen/widgetIconSize"
         android:layout_height="@dimen/widgetIconSize"
@@ -59,7 +97,7 @@
         android:layout_centerVertical="true"
         android:importantForAccessibility="no"
         android:scaleType="fitXY"
-        android:src="@drawable/widget_icon_off"
+        android:src="@drawable/coffee_icon_off"
         android:tint="?colorOnPrimaryContainer" />
 
     <TextView
@@ -67,16 +105,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/widgetBorder"
-        android:layout_centerHorizontal="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginHorizontal="5dp"
+        android:autoSizeMaxTextSize="30sp"
+        android:autoSizeMinTextSize="3sp"
+        android:autoSizeStepGranularity="1sp"
+        android:autoSizeTextType="uniform"
         android:ellipsize="end"
         android:maxLines="2"
-        android:padding="3dp"
-        android:shadowColor="?colorOnSurfaceInverse"
-        android:shadowDx="3"
-        android:shadowDy="3"
-        android:shadowRadius="3"
+        android:shadowColor="@color/black"
+        android:shadowDx="4"
+        android:shadowDy="4"
+        android:shadowRadius="1"
         android:text="@string/app_name"
         android:textAlignment="center"
         android:textColor="?colorOnSurface"
-        android:textSize="15sp" />
+        android:textSize="30sp"
+        tools:ignore="UnusedAttribute" />
 </RelativeLayout>
