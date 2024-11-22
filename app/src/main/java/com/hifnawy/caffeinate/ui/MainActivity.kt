@@ -134,7 +134,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sharedPreferences.run { setActivityTheme(theme.mode, isMaterialYouEnabled) }
+        sharedPreferences.run {
+            setActivityTheme(contrastLevel, theme.mode, isMaterialYouEnabled)
+        }
 
         enableEdgeToEdge()
         setContentView(binding.root)
@@ -157,24 +159,54 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             appThemeSelectionView.run {
                 appThemeToggleGroup.run {
                     when (sharedPreferences.theme.mode) {
-                        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> check(R.id.appThemeSystemDefaultButton)
-                        AppCompatDelegate.MODE_NIGHT_NO            -> check(R.id.appThemeSystemLightButton)
-                        AppCompatDelegate.MODE_NIGHT_YES           -> check(R.id.appThemeSystemDarkButton)
+                        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> check(appThemeSystemDefaultButton.id)
+                        AppCompatDelegate.MODE_NIGHT_NO            -> check(appThemeSystemLightButton.id)
+                        AppCompatDelegate.MODE_NIGHT_YES           -> check(appThemeSystemDarkButton.id)
                     }
 
                     addOnButtonCheckedListener { group, checkedId, isChecked ->
                         if (isChecked) {
                             group.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                             val newTheme = when (checkedId) {
-                                R.id.appThemeSystemDefaultButton -> SharedPrefsManager.Theme.SYSTEM_DEFAULT
-                                R.id.appThemeSystemLightButton   -> SharedPrefsManager.Theme.LIGHT
-                                R.id.appThemeSystemDarkButton    -> SharedPrefsManager.Theme.DARK
-                                else                             -> sharedPreferences.theme // Fallback to the current theme
+                                appThemeSystemDefaultButton.id -> SharedPrefsManager.Theme.SYSTEM_DEFAULT
+                                appThemeSystemLightButton.id   -> SharedPrefsManager.Theme.LIGHT
+                                appThemeSystemDarkButton.id    -> SharedPrefsManager.Theme.DARK
+                                else                           -> sharedPreferences.theme // Fallback to the current theme
                             }
 
                             if (newTheme != sharedPreferences.theme) {
                                 sharedPreferences.theme = newTheme
                                 AppCompatDelegate.setDefaultNightMode(newTheme.mode)
+
+                                recreate()
+                            }
+                        }
+                    }
+                }
+            }
+
+            appContrastSelectionView.run {
+                appContrastToggleGroup.run {
+                    when (sharedPreferences.contrastLevel) {
+                        SharedPrefsManager.ContrastLevel.STANDARD -> check(appContrastStandardButton.id)
+                        SharedPrefsManager.ContrastLevel.MEDIUM   -> check(appContrastMediumButton.id)
+                        SharedPrefsManager.ContrastLevel.HIGH     -> check(appContrastHighButton.id)
+                    }
+
+                    addOnButtonCheckedListener { group, checkedId, isChecked ->
+                        if (isChecked) {
+                            group.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                            val newContrastLevel = when (checkedId) {
+                                appContrastStandardButton.id -> SharedPrefsManager.ContrastLevel.STANDARD
+                                appContrastMediumButton.id   -> SharedPrefsManager.ContrastLevel.MEDIUM
+                                appContrastHighButton.id     -> SharedPrefsManager.ContrastLevel.HIGH
+                                else                         -> sharedPreferences.contrastLevel // Fallback to the current contrast level
+                            }
+
+                            if (newContrastLevel != sharedPreferences.contrastLevel) {
+                                sharedPreferences.contrastLevel = newContrastLevel
+                                materialYouSwitch.isChecked =
+                                        newContrastLevel == SharedPrefsManager.ContrastLevel.STANDARD && sharedPreferences.isMaterialYouEnabled
 
                                 recreate()
                             }
@@ -377,7 +409,13 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             materialYouCard.setOnClickListener { materialYouSwitch.isChecked = !sharedPreferences.isMaterialYouEnabled }
             materialYouSwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
                 sharedPreferences.isMaterialYouEnabled = isChecked
+                if (isChecked) {
+                    sharedPreferences.contrastLevel = SharedPrefsManager.ContrastLevel.STANDARD
+                    appContrastSelectionView.appContrastToggleGroup.check(appContrastSelectionView.appContrastStandardButton.id)
+                }
+
                 recreate()
             }
         }

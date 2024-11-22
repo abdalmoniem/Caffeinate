@@ -13,19 +13,6 @@ import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSeria
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableMap
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableList
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableMap
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ALL_PERMISSIONS_GRANTED
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_DIMMING
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_MATERIAL_YOU
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_OVERLAY
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_WHILE_LOCKED
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.IS_SERVICE_RUNNING
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.LAST_REMAINING_TIMEOUT
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.THEME
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.TIMEOUT_CHECK_BOXES
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.WIDGET_CONFIGURATION
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.Theme.DARK
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.Theme.LIGHT
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.Theme.SYSTEM_DEFAULT
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -72,6 +59,11 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
          * A [Theme] value indicating the current theme of the application.
          */
         THEME,
+
+        /**
+         * A [ContrastLevel] value indicating the current contrast level of the application.
+         */
+        CONTRAST_LEVEL,
 
         /**
          * A [Boolean] value indicating whether the screen should be dimmed while the service is running.
@@ -122,6 +114,32 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
          * A [WidgetConfiguration] value indicating the widget configuration.
          */
         WIDGET_CONFIGURATION
+    }
+
+    /**
+     * An enumeration of the contrast level options that are available to the user.
+     *
+     * Contrast levels control the overall visual contrast of the application. The contrast level can be set to one of the following values:
+     * @property STANDARD The standard contrast level.
+     * @property MEDIUM A medium contrast level.
+     * @property HIGH A high contrast level.
+     */
+    enum class ContrastLevel {
+
+        /**
+         * The standard contrast level.
+         */
+        STANDARD,
+
+        /**
+         * A medium contrast level.
+         */
+        MEDIUM,
+
+        /**
+         * A high contrast level.
+         */
+        HIGH
     }
 
     /**
@@ -191,9 +209,9 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [Boolean] `true` if all necessary permissions are granted, `false` otherwise.
      */
     var isAllPermissionsGranted: Boolean
-        get() = sharedPreferences.getBoolean(ALL_PERMISSIONS_GRANTED.name, false)
+        get() = sharedPreferences.getBoolean(SharedPrefsKeys.ALL_PERMISSIONS_GRANTED.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(ALL_PERMISSIONS_GRANTED.name, value).apply()
+            sharedPreferences.edit().putBoolean(SharedPrefsKeys.ALL_PERMISSIONS_GRANTED.name, value).apply()
             notifySharedPrefsObservers { observer -> observer.onIsAllPermissionsGrantedUpdated(value) }
         }
 
@@ -208,8 +226,24 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @see SharedPrefsManager.Theme
      */
     var theme: Theme
-        get() = Theme.valueOf(sharedPreferences.getString(THEME.name, SYSTEM_DEFAULT.name) ?: SYSTEM_DEFAULT.name)
-        set(value) = sharedPreferences.edit().putString(THEME.name, value.name).apply()
+        get() = Theme.valueOf(sharedPreferences.getString(SharedPrefsKeys.THEME.name, Theme.SYSTEM_DEFAULT.name) ?: Theme.SYSTEM_DEFAULT.name)
+        set(value) = sharedPreferences.edit().putString(SharedPrefsKeys.THEME.name, value.name).apply()
+
+    /**
+     * Retrieves or sets the contrast level of the application.
+     *
+     * This property is used to get or update the contrast level preference stored in shared preferences.
+     * It allows the application to persist the user's contrast level choice across sessions.
+     *
+     * @return [ContrastLevel] The current contrast level set in the application.
+     *
+     * @see SharedPrefsManager.ContrastLevel
+     */
+    var contrastLevel: ContrastLevel
+        get() = ContrastLevel.valueOf(
+                sharedPreferences.getString(SharedPrefsKeys.CONTRAST_LEVEL.name, ContrastLevel.STANDARD.name) ?: ContrastLevel.STANDARD.name
+        )
+        set(value) = sharedPreferences.edit().putString(SharedPrefsKeys.CONTRAST_LEVEL.name, value.name).apply()
 
     /**
      * Retrieves or sets whether the "Material You" feature is enabled.
@@ -220,8 +254,8 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [Boolean] `true` if the "Material You" feature is enabled, `false` otherwise.
      */
     var isMaterialYouEnabled: Boolean
-        get() = sharedPreferences.getBoolean(ENABLE_MATERIAL_YOU.name, false)
-        set(value) = sharedPreferences.edit().putBoolean(ENABLE_MATERIAL_YOU.name, value).apply()
+        get() = sharedPreferences.getBoolean(SharedPrefsKeys.ENABLE_MATERIAL_YOU.name, false)
+        set(value) = sharedPreferences.edit().putBoolean(SharedPrefsKeys.ENABLE_MATERIAL_YOU.name, value).apply()
 
     /**
      * Retrieves or sets whether the screen overlay should be shown while it is being kept awake.
@@ -232,9 +266,9 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [Boolean] `true` if the screen overlay should be shown, `false` otherwise.
      */
     var isOverlayEnabled: Boolean
-        get() = sharedPreferences.getBoolean(ENABLE_OVERLAY.name, false)
+        get() = sharedPreferences.getBoolean(SharedPrefsKeys.ENABLE_OVERLAY.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(ENABLE_OVERLAY.name, value).apply()
+            sharedPreferences.edit().putBoolean(SharedPrefsKeys.ENABLE_OVERLAY.name, value).apply()
             notifySharedPrefsObservers { observer -> observer.onIsOverlayEnabledUpdated(value) }
         }
 
@@ -247,9 +281,9 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [Boolean] `true` if the screen should be dimmed while it is being kept awake, `false` otherwise.
      */
     var isDimmingEnabled: Boolean
-        get() = sharedPreferences.getBoolean(ENABLE_DIMMING.name, false)
+        get() = sharedPreferences.getBoolean(SharedPrefsKeys.ENABLE_DIMMING.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(ENABLE_DIMMING.name, value).apply()
+            sharedPreferences.edit().putBoolean(SharedPrefsKeys.ENABLE_DIMMING.name, value).apply()
             notifySharedPrefsObservers { observer -> observer.onIsDimmingEnabledUpdated(value) }
         }
 
@@ -263,9 +297,9 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [Boolean] `true` if the "While Locked" feature is enabled, `false` otherwise.
      */
     var isWhileLockedEnabled: Boolean
-        get() = sharedPreferences.getBoolean(ENABLE_WHILE_LOCKED.name, false)
+        get() = sharedPreferences.getBoolean(SharedPrefsKeys.ENABLE_WHILE_LOCKED.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(ENABLE_WHILE_LOCKED.name, value).apply()
+            sharedPreferences.edit().putBoolean(SharedPrefsKeys.ENABLE_WHILE_LOCKED.name, value).apply()
             notifySharedPrefsObservers { observer -> observer.onIsWhileLockedEnabledUpdated(value) }
         }
 
@@ -279,17 +313,16 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      */
     var timeoutCheckBoxes: MutableList<CheckBoxItem>
         get() = when {
-            sharedPreferences.contains(TIMEOUT_CHECK_BOXES.name) -> sharedPreferences.getSerializableList<MutableList<CheckBoxItem>>(
-                    TIMEOUT_CHECK_BOXES.name
-            )
+            sharedPreferences.contains(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name) ->
+                sharedPreferences.getSerializableList<MutableList<CheckBoxItem>>(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name)
 
-            else                                                 -> timeouts.map { timeout ->
+            else                                                                 -> timeouts.map { timeout ->
                 CheckBoxItem(text = timeout.toFormattedTime(), isChecked = true, isEnabled = true, duration = timeout)
             }
         }.map { checkBoxItem ->
             checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext))
         }.toMutableList()
-        set(value) = sharedPreferences.edit().putSerializableList(TIMEOUT_CHECK_BOXES.name, value.map { checkBoxItem ->
+        set(value) = sharedPreferences.edit().putSerializableList(SharedPrefsKeys.TIMEOUT_CHECK_BOXES.name, value.map { checkBoxItem ->
             checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext))
         }).apply()
 
@@ -302,8 +335,8 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [MutableMap] A map of widget IDs to their [WidgetConfiguration].
      */
     var widgetsConfiguration: MutableMap<Int, WidgetConfiguration>
-        get() = sharedPreferences.getSerializableMap<MutableMap<Int, WidgetConfiguration>>(WIDGET_CONFIGURATION.name)
-        set(value) = sharedPreferences.edit().putSerializableMap(WIDGET_CONFIGURATION.name, value).apply()
+        get() = sharedPreferences.getSerializableMap<MutableMap<Int, WidgetConfiguration>>(SharedPrefsKeys.WIDGET_CONFIGURATION.name)
+        set(value) = sharedPreferences.edit().putSerializableMap(SharedPrefsKeys.WIDGET_CONFIGURATION.name, value).apply()
 
     /**
      * Retrieves or sets whether the service is running.
@@ -319,15 +352,15 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @return [Boolean] `true` if the service is running, `false` otherwise.
      */
     var isServiceRunning: Boolean
-        get() = sharedPreferences.getBoolean(IS_SERVICE_RUNNING.name, false)
+        get() = sharedPreferences.getBoolean(SharedPrefsKeys.IS_SERVICE_RUNNING.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(IS_SERVICE_RUNNING.name, value).apply()
+            sharedPreferences.edit().putBoolean(SharedPrefsKeys.IS_SERVICE_RUNNING.name, value).apply()
             val timeout = when (value) {
                 true  -> (caffeinateApplication.lastStatusUpdate as ServiceStatus.Running).remaining.inWholeSeconds
                 false -> -1L
             }
 
-            sharedPreferences.edit().putLong(LAST_REMAINING_TIMEOUT.name, timeout).apply()
+            sharedPreferences.edit().putLong(SharedPrefsKeys.LAST_REMAINING_TIMEOUT.name, timeout).apply()
         }
 
     /**
@@ -348,7 +381,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      *         or the last remaining timeout has not been stored.
      */
     val lastRemainingTimeout: Long
-        get() = sharedPreferences.getLong(LAST_REMAINING_TIMEOUT.name, -1)
+        get() = sharedPreferences.getLong(SharedPrefsKeys.LAST_REMAINING_TIMEOUT.name, -1)
 
     /**
      * Notifies all registered observers of a change in the shared preferences.

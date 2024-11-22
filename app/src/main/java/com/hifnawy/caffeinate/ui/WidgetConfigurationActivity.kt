@@ -89,7 +89,7 @@ class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sharedPreferences.run { setActivityTheme(theme.mode, isMaterialYouEnabled) }
+        sharedPreferences.run { setActivityTheme(contrastLevel, theme.mode, isMaterialYouEnabled) }
 
         enableEdgeToEdge()
         setContentView(binding.root)

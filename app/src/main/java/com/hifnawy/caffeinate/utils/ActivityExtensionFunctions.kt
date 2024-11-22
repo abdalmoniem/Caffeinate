@@ -29,13 +29,18 @@ object ActivityExtensionFunctions {
      * If [isMaterialYouEnabled] is `false`, the activity will use the baseline theme. This theme is used
      * when the Material You theme is not available.
      *
+     * @param contrastLevel [SharedPrefsManager.ContrastLevel] the contrast level to use.
      * @param nightMode [Int] the night mode to use. Can be one of
      * - [MODE_NIGHT_FOLLOW_SYSTEM]
      * - [MODE_NIGHT_NO]
      * - [MODE_NIGHT_YES].
      * @param isMaterialYouEnabled [Boolean] `true` if the Material You theme should be enabled, `false` otherwise.
      */
-    fun AppCompatActivity.setActivityTheme(nightMode: Int = MODE_NIGHT_FOLLOW_SYSTEM, isMaterialYouEnabled: Boolean = false) {
+    fun AppCompatActivity.setActivityTheme(
+            contrastLevel: SharedPrefsManager.ContrastLevel = SharedPrefsManager.ContrastLevel.STANDARD,
+            nightMode: Int = MODE_NIGHT_FOLLOW_SYSTEM,
+            isMaterialYouEnabled: Boolean = false
+    ) {
         require(nightMode in listOf(MODE_NIGHT_FOLLOW_SYSTEM, MODE_NIGHT_NO, MODE_NIGHT_YES)) {
             val supportedNightModes = listOf(
                     "${::MODE_NIGHT_FOLLOW_SYSTEM.name} ($MODE_NIGHT_FOLLOW_SYSTEM)",
@@ -46,8 +51,11 @@ object ActivityExtensionFunctions {
             "nightMode must be one of the following: $supportedNightModes"
         }
         val themeResId = when {
-            DynamicColors.isDynamicColorAvailable() && isMaterialYouEnabled -> R.style.AppTheme_Dynamic
-            else                                                            -> R.style.AppTheme
+            contrastLevel == SharedPrefsManager.ContrastLevel.STANDARD && !isMaterialYouEnabled -> R.style.AppTheme
+            contrastLevel == SharedPrefsManager.ContrastLevel.MEDIUM && !isMaterialYouEnabled   -> R.style.ThemeOverlay_AppTheme_MediumContrast
+            contrastLevel == SharedPrefsManager.ContrastLevel.HIGH && !isMaterialYouEnabled     -> R.style.ThemeOverlay_AppTheme_HighContrast
+            DynamicColors.isDynamicColorAvailable() && isMaterialYouEnabled                     -> R.style.AppTheme_Dynamic
+            else                                                                                -> R.style.AppTheme
         }
 
         setDefaultNightMode(nightMode)

@@ -285,18 +285,46 @@
                                     android:layout_height="wrap_content"
                                     android:text="@string/app_theme_pref"
                                     android:textSize="@dimen/prefTextSize"
-                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintBottom_toBottomOf="@+id/appThemeSelectionView"
                                     app:layout_constraintStart_toStartOf="parent"
-                                    app:layout_constraintTop_toTopOf="parent" />
+                                    app:layout_constraintTop_toTopOf="@+id/appThemeSelectionView" />
 
                                 <include
                                     android:id="@+id/appThemeSelectionView"
                                     layout="@layout/theme_button_group"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintBottom_toTopOf="@+id/appThemeDivider"
                                     app:layout_constraintEnd_toEndOf="parent"
                                     app:layout_constraintTop_toTopOf="parent" />
+
+                                <com.google.android.material.divider.MaterialDivider
+                                    android:id="@+id/appThemeDivider"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginVertical="5dp"
+                                    app:layout_constraintBottom_toTopOf="@+id/appContrastSelectionView"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toBottomOf="@+id/appThemeSelectionView" />
+
+                                <TextView
+                                    android:id="@+id/appContrastTextView"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/contrast"
+                                    android:textSize="@dimen/prefTextSize"
+                                    app:layout_constraintBottom_toBottomOf="@+id/appContrastSelectionView"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="@+id/appContrastSelectionView" />
+
+                                <include
+                                    android:id="@+id/appContrastSelectionView"
+                                    layout="@layout/contrast_button_group"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toBottomOf="@+id/appThemeDivider" />
                             </androidx.constraintlayout.widget.ConstraintLayout>
                         </com.google.android.material.card.MaterialCardView>
 

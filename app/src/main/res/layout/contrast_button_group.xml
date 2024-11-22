@@ -2,44 +2,44 @@
 <com.google.android.material.button.MaterialButtonToggleGroup xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/appThemeToggleGroup"
+    android:id="@+id/appContrastToggleGroup"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    app:checkedButton="@+id/appThemeSystemDefaultButton"
+    app:checkedButton="@+id/appContrastStandardButton"
     app:selectionRequired="true"
     app:singleSelection="true"
     tools:ignore="UnusedAttribute">
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/appThemeSystemDefaultButton"
+        android:id="@+id/appContrastStandardButton"
         style="@style/Widget.Material3.Button.IconButton.Outlined"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:insetLeft="0dp"
         android:insetRight="0dp"
-        android:tooltipText="@string/app_theme_system_default"
-        app:icon="@drawable/theme_system_default_icon"
+        android:tooltipText="@string/app_contrast_standard"
+        app:icon="@drawable/contrast_standard_icon"
         app:iconSize="30dp" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/appThemeSystemLightButton"
+        android:id="@+id/appContrastMediumButton"
         style="@style/Widget.Material3.Button.IconButton.Outlined"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:insetLeft="0dp"
         android:insetRight="0dp"
-        android:tooltipText="@string/app_theme_system_light"
-        app:icon="@drawable/theme_system_light_icon"
+        android:tooltipText="@string/app_contrast_medium"
+        app:icon="@drawable/contrast_medium_icon"
         app:iconSize="30dp" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/appThemeSystemDarkButton"
+        android:id="@+id/appContrastHighButton"
         style="@style/Widget.Material3.Button.IconButton.Outlined"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:insetLeft="0dp"
         android:insetRight="0dp"
-        android:tooltipText="@string/app_theme_system_dark"
-        app:icon="@drawable/theme_system_dark_icon"
+        android:tooltipText="@string/app_contrast_high"
+        app:icon="@drawable/contrast_high_icon"
         app:iconSize="30dp" />
 </com.google.android.material.button.MaterialButtonToggleGroup>
