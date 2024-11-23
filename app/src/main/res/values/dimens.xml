@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="permissionsTextSize">15sp</dimen>
-    <dimen name="prefsDescriptionTextSize">15sp</dimen>
     <dimen name="prefTextSize">20sp</dimen>
+    <dimen name="prefsDescriptionTextSize">15sp</dimen>
     <dimen name="caffeinateButtonTextSize">35sp</dimen>
     <dimen name="appThemeButtonTextSize">20sp</dimen>
     <dimen name="timeoutsButtonTextSize">20sp</dimen>

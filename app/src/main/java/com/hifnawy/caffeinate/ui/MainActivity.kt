@@ -402,7 +402,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             materialYouCard.isEnabled = true
             materialYouTextView.isEnabled = true
-            materialYouSubTextTextView.visibility = View.GONE
+            materialYouSubTextTextView.visibility = if (sharedPreferences.isMaterialYouEnabled) View.VISIBLE else View.GONE
+            materialYouSubTextTextView.isEnabled = true
+            materialYouSubTextTextView.text = getString(R.string.material_you_pref_description)
             materialYouSwitch.isEnabled = true
             materialYouSwitch.isChecked = sharedPreferences.isMaterialYouEnabled
 
@@ -410,6 +412,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             materialYouSwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
+                materialYouSubTextTextView.visibility = if (isChecked) View.VISIBLE else View.GONE
                 sharedPreferences.isMaterialYouEnabled = isChecked
                 if (isChecked) {
                     sharedPreferences.contrastLevel = SharedPrefsManager.ContrastLevel.STANDARD
@@ -433,7 +436,35 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             overlayCard.setOnClickListener { overlaySwitch.isChecked = !sharedPreferences.isOverlayEnabled }
             overlaySwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+                overlaySubTextTextView.visibility = if (isChecked) View.VISIBLE else View.GONE
                 sharedPreferences.isOverlayEnabled = isChecked
+            }
+        }
+    }
+
+    /**
+     * Enable or disable the [allowDimmingCard][com.google.android.material.card.MaterialCardView], [allowDimmingTextView][android.widget.TextView],
+     * [allowDimmingSubTextTextView][android.widget.TextView], and [allowDimmingSwitch][com.google.android.material.materialswitch.MaterialSwitch]
+     * based on whether the user has granted all necessary permissions.
+     *
+     * @param isEnabled [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
+     */
+    private fun changeAllowDimmingPreferences(isEnabled: Boolean) {
+        with(binding) {
+            allowDimmingCard.isEnabled = isEnabled
+            allowDimmingTextView.isEnabled = isEnabled
+            allowDimmingSubTextTextView.isEnabled = isEnabled
+            allowDimmingSubTextTextView.visibility = if (isEnabled) View.VISIBLE else View.GONE
+            allowDimmingSwitch.isEnabled = isEnabled
+            allowDimmingSwitch.isChecked = sharedPreferences.isDimmingEnabled
+
+            allowDimmingCard.setOnClickListener { allowDimmingSwitch.isChecked = !sharedPreferences.isDimmingEnabled }
+            allowDimmingSwitch.setOnCheckedChangeListener { switch, isChecked ->
+                switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+                allowDimmingSubTextTextView.visibility = if (isChecked) View.VISIBLE else View.GONE
+                sharedPreferences.isDimmingEnabled = isChecked
             }
         }
     }
@@ -444,43 +475,23 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      * and [allowWhileLockedSwitch][com.google.android.material.materialswitch.MaterialSwitch] based on whether the user has granted all necessary
      * permissions.
      *
-     * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
+     * @param isEnabled [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
      */
-    private fun changeAllowWhileLockedPreferences(isAllPermissionsGranted: Boolean) {
+    private fun changeAllowWhileLockedPreferences(isEnabled: Boolean) {
         with(binding) {
-            allowWhileLockedCard.isEnabled = isAllPermissionsGranted
-            allowWhileLockedTextView.isEnabled = isAllPermissionsGranted
-            allowWhileLockedSubTextTextView.visibility = if (isAllPermissionsGranted) View.VISIBLE else View.GONE
-            allowWhileLockedSwitch.isEnabled = isAllPermissionsGranted
+            allowWhileLockedCard.isEnabled = isEnabled
+            allowWhileLockedTextView.isEnabled = isEnabled
+            allowWhileLockedSubTextTextView.isEnabled = isEnabled
+            allowWhileLockedSubTextTextView.visibility = if (isEnabled) View.VISIBLE else View.GONE
+            allowWhileLockedSwitch.isEnabled = isEnabled
             allowWhileLockedSwitch.isChecked = sharedPreferences.isWhileLockedEnabled
 
             allowWhileLockedCard.setOnClickListener { allowWhileLockedSwitch.isChecked = !sharedPreferences.isWhileLockedEnabled }
             allowWhileLockedSwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+                allowWhileLockedSubTextTextView.visibility = if (isChecked) View.VISIBLE else View.GONE
                 sharedPreferences.isWhileLockedEnabled = isChecked
-            }
-        }
-    }
-
-    /**
-     * Enable or disable the [allowDimmingCard][com.google.android.material.card.MaterialCardView], [allowDimmingTextView][android.widget.TextView],
-     * [allowDimmingSubTextTextView][android.widget.TextView], and [allowDimmingSwitch][com.google.android.material.materialswitch.MaterialSwitch]
-     * based on whether the user has granted all necessary permissions.
-     *
-     * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
-     */
-    private fun changeAllowDimmingPreferences(isAllPermissionsGranted: Boolean) {
-        with(binding) {
-            allowDimmingCard.isEnabled = isAllPermissionsGranted
-            allowDimmingTextView.isEnabled = isAllPermissionsGranted
-            allowDimmingSubTextTextView.visibility = if (isAllPermissionsGranted) View.VISIBLE else View.GONE
-            allowDimmingSwitch.isEnabled = isAllPermissionsGranted
-            allowDimmingSwitch.isChecked = sharedPreferences.isDimmingEnabled
-
-            allowDimmingCard.setOnClickListener { allowDimmingSwitch.isChecked = !sharedPreferences.isDimmingEnabled }
-            allowDimmingSwitch.setOnCheckedChangeListener { switch, isChecked ->
-                switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                sharedPreferences.isDimmingEnabled = isChecked
             }
         }
     }
