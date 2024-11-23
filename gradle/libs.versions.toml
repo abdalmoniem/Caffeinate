@@ -1,30 +1,32 @@
 [versions]
-androidApplicationVersion = "8.7.2"
-androidxJunitVersion = "1.2.1"
+coreKtxVersion = "1.15.0"
 appCompatVersion = "1.7.0"
 constraintLayoutVersion = "2.2.0"
-coreKtxVersion = "1.15.0"
-espressoCoreVersion = "3.6.1"
-gsonVersion = "2.11.0"
-junitVersion = "4.13.2"
-kotlinVersion = "1.9.22"
-materialNumberPickerVersion = "1.0.5"
+activityVersion = "1.9.3"
 materialVersion = "1.12.0"
 timberVersion = "5.0.1"
-activityVersion = "1.9.3"
+assentVersion = "3.0.2"
+gsonVersion = "2.11.0"
+materialNumberPickerVersion = "1.0.5"
+junitVersion = "4.13.2"
+androidxJunitVersion = "1.2.1"
+espressoCoreVersion = "3.6.1"
+androidApplicationVersion = "8.7.2"
+kotlinVersion = "1.9.22"
 
 [libraries]
+androidxCoreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtxVersion" }
 androidxAppCompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appCompatVersion" }
 androidxConstraintLayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintLayoutVersion" }
-androidxCoreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtxVersion" }
-androidxEspressoCore = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCoreVersion" }
-androidxJunit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunitVersion" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
-junit = { group = "junit", name = "junit", version.ref = "junitVersion" }
-material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
-materialNumberPicker = { module = "com.github.StephenVinouze:MaterialNumberPicker", version.ref = "materialNumberPickerVersion" }
-timber = { module = "com.jakewharton.timber:timber", version.ref = "timberVersion" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activityVersion" }
+material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timberVersion" }
+assent = { module = "com.afollestad.assent:core", version.ref = "assentVersion" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
+materialNumberPicker = { module = "com.github.StephenVinouze:MaterialNumberPicker", version.ref = "materialNumberPickerVersion" }
+junit = { group = "junit", name = "junit", version.ref = "junitVersion" }
+androidxJunit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunitVersion" }
+androidxEspressoCore = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCoreVersion" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "androidApplicationVersion" }
