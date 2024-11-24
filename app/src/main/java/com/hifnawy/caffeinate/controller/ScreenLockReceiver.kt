@@ -1,11 +1,11 @@
-package com.hifnawy.caffeinate.services
+package com.hifnawy.caffeinate.controller
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import com.hifnawy.caffeinate.CaffeinateApplication
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState
 import timber.log.Timber as Log
 
 /**

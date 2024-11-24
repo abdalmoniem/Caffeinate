@@ -1,4 +1,4 @@
-package com.hifnawy.caffeinate.ui
+package com.hifnawy.caffeinate.view
 
 import android.Manifest
 import android.animation.Animator
@@ -20,6 +20,7 @@ import android.widget.NumberPicker
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
@@ -38,19 +39,21 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
+import com.hifnawy.caffeinate.controller.KeepAwakeService
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState
+import com.hifnawy.caffeinate.controller.ServiceStatus
+import com.hifnawy.caffeinate.controller.ServiceStatusObserver
+import com.hifnawy.caffeinate.controller.SharedPrefsManager
+import com.hifnawy.caffeinate.controller.SharedPrefsObserver
 import com.hifnawy.caffeinate.databinding.ActivityMainBinding
 import com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding
 import com.hifnawy.caffeinate.databinding.DialogSetCustomTimeoutBinding
-import com.hifnawy.caffeinate.services.KeepAwakeService
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
-import com.hifnawy.caffeinate.services.ServiceStatus
-import com.hifnawy.caffeinate.services.ServiceStatusObserver
 import com.hifnawy.caffeinate.utils.ActivityExtensionFunctions.setActivityTheme
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
-import com.hifnawy.caffeinate.utils.SharedPrefsManager
-import com.hifnawy.caffeinate.utils.SharedPrefsObserver
+import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.isVisible
+import com.hifnawy.caffeinate.viewModel.MainActivityViewModel
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.time.Duration
@@ -70,6 +73,16 @@ import timber.log.Timber as Log
  * @see SharedPrefsManager
  */
 class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObserver {
+
+    /**
+     * Lazily retrieves the instance of [MainActivityViewModel] associated with this activity.
+     *
+     * This property uses the [viewModels] delegate to create and store an instance of
+     * [MainActivityViewModel] that is associated with this activity and its lifecycle.
+     *
+     * @return [MainActivityViewModel] the instance of the view model associated with this activity.
+     */
+    private val viewModel: MainActivityViewModel by viewModels()
 
     /**
      * Lazily initializes the binding for the activity's layout using [ActivityMainBinding].
@@ -152,14 +165,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private lateinit var overlayPermissionLauncher: ActivityResultLauncher<Intent>
 
     /**
-     * The vertical offset of the app bar.
-     *
-     * This field is used to store the vertical offset of the app bar. It is used to adjust the
-     * padding of the scroll view based on the position of the app bar.
-     */
-    private var appBarVerticalOffset = 0
-
-    /**
      * An extension property on [Iterable] to get the enabled durations.
      *
      * This property is an extension on [Iterable] to get the enabled durations. It is used to get
@@ -199,91 +204,41 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      * @see MaterialButton.getScaleY
      */
     private var MaterialButton.animateVisibility: Boolean
-        get() = visibility == View.VISIBLE
+        get() = isVisible
         set(value) {
-            val animationDuration = 100L
+            if (value && viewModel.isRestartButtonAnimationStarted) return
+            val animationDuration = 500L
+            val rotationFrom = if (value) -360f else 0f
+            val rotationTo = if (value) 0f else -360f
+            val scaleFrom = if (value) 0f else 1f
+            val scaleTo = if (value) 1f else 0f
+            val animationEndAction = Runnable {
+                isEnabled = value
+                isVisible = value
 
-            when (value) {
-                true -> {
-                    isEnabled = true
-                    visibility = View.VISIBLE
-
-                    if (!hasOnClickListeners()) {
-                        scaleX = 0f
-                        scaleY = 0f
-                        animate()
-                            .scaleX(1f)
-                            .scaleY(1f)
-                            .setDuration(animationDuration)
-                            .start()
-
-                        setOnClickListener { buttonView ->
-                            buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-
-                            KeepAwakeService.restart(caffeinateApplication)
-                        }
-                    }
-                }
-
-                else -> {
-                    if (hasOnClickListeners()) {
-                        scaleX = 1f
-                        scaleY = 1f
-                        animate()
-                            .scaleX(0f)
-                            .scaleY(0f)
-                            .setDuration(animationDuration)
-                            .withEndAction {
-                                isEnabled = false
-                                visibility = View.GONE
-
-                                setOnClickListener(null)
-                            }
-                            .start()
-                    } else {
-                        isEnabled = false
-                        visibility = View.GONE
-                    }
-                }
+                viewModel.isRestartButtonAnimationStarted = value
             }
+
+            isEnabled = value || viewModel.isRestartButtonAnimationStarted
+            isVisible = value || viewModel.isRestartButtonAnimationStarted
+
+            rotation = rotationFrom
+            scaleX = scaleFrom
+            scaleY = scaleFrom
+            alpha = scaleFrom
+
+            animate()
+                .rotation(rotationTo)
+                .scaleX(scaleTo)
+                .scaleY(scaleTo)
+                .alpha(scaleTo)
+                .setDuration(animationDuration)
+                .withEndAction(animationEndAction)
+                .start()
+
+
+            viewModel.isRestartButtonAnimationStarted = value
         }
-
-    /**
-     * Called to retrieve per-instance state from an activity before being
-     * killed so that the state can be restored in [onRestoreInstanceState]
-     * or [onCreate] (the [Parcelable][android.os.Parcelable] returned here
-     * will be available in the Bundle returned to you in the aforementioned methods).
-     *
-     * @param outState [Bundle] a bundle to save the per-instance state of the activity
-     */
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        outState.putInt(::appBarVerticalOffset.name, appBarVerticalOffset)
-    }
-
-    /**
-     * Restores the state of the activity from a [Bundle] containing the information
-     * previously saved by [onSaveInstanceState].
-     *
-     * @param savedInstanceState [Bundle] a bundle to restore the per-instance state
-     * of the activity
-     */
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-
-        appBarVerticalOffset = savedInstanceState.getInt(::appBarVerticalOffset.name)
-
-        with(binding) {
-            // appBar.setExpanded(appBarVerticalOffset == 0)
-            appBar.post {
-                val params = appBar.layoutParams as CoordinatorLayout.LayoutParams
-                val behavior = params.behavior as AppBarLayout.Behavior
-                behavior.topAndBottomOffset = appBarVerticalOffset
-                appBar.requestLayout()
-            }
-        }
-    }
 
     /**
      * Called when the activity is starting.
@@ -305,18 +260,28 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
         overlayPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
-        with(binding) {
-            appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
-                appBarVerticalOffset = verticalOffset
-                val totalScrollRange = appBarLayout.totalScrollRange
-                val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.3f)
 
-                toolbar.navigationIcon = when (caffeinateApplication.lastStatusUpdate) {
-                    is ServiceStatus.Stopped -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_off)
-                    is ServiceStatus.Running -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_on)
-                }?.run {
-                    val bitmap = toBitmap((intrinsicWidth * collapseFactor).toInt(), (intrinsicHeight * collapseFactor).toInt())
-                    bitmap.toDrawable(resources)
+        with(binding) {
+            appBar.run {
+                post {
+                    val params = layoutParams as CoordinatorLayout.LayoutParams
+                    val behavior = params.behavior as AppBarLayout.Behavior
+                    behavior.topAndBottomOffset = viewModel.appBarVerticalOffset
+                    requestLayout()
+                }
+
+                addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+                    viewModel.appBarVerticalOffset = verticalOffset
+                    val totalScrollRange = appBarLayout.totalScrollRange
+                    val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.5f)
+
+                    toolbar.navigationIcon = when (caffeinateApplication.lastStatusUpdate) {
+                        is ServiceStatus.Stopped -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_off)
+                        is ServiceStatus.Running -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_on)
+                    }?.run {
+                        val bitmap = toBitmap((intrinsicWidth * collapseFactor).toInt(), (intrinsicHeight * collapseFactor).toInt())
+                        bitmap.toDrawable(resources)
+                    }
                 }
             }
         }
@@ -409,6 +374,13 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     return@setOnLongClickListener true
                 }
             }
+
+            restartButton.setOnClickListener { buttonView ->
+                if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
+
+                buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                KeepAwakeService.restart(caffeinateApplication)
+            }
         }
 
         caffeinateApplication.run {
@@ -491,22 +463,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             Log.d("Status Changed: $status")
 
-            when (status) {
-                is ServiceStatus.Stopped -> {
-                    restartButton.animateVisibility = false
-
-                    toggleButton.text = getString(R.string.caffeinate_button_off)
-                }
-
-                is ServiceStatus.Running -> {
-                    when {
-                        status.isRestarted -> Unit
-                        status.isCountingDown -> restartButton.animateVisibility = true
-                        else -> restartButton.animateVisibility = false
-                    }
-
-                    toggleButton.text = status.remaining.toLocalizedFormattedTime(root.context)
-                }
+            restartButton.animateVisibility = status.run { this is ServiceStatus.Running && isCountingDown && !isRestarted }
+            toggleButton.text = when (status) {
+                is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
+                is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(root.context)
             }
         }
     }
@@ -773,11 +733,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             materialYouCard.isEnabled = isEnabled
             materialYouTextView.isEnabled = isEnabled
-
-            materialYouSubTextTextView.visibility = when {
-                !isEnabled || sharedPreferences.isMaterialYouEnabled -> View.VISIBLE
-                else                                                 -> View.GONE
-            }
+            materialYouSubTextTextView.isVisible = !isEnabled || sharedPreferences.isMaterialYouEnabled
             materialYouSubTextTextView.isEnabled = isEnabled
             materialYouSubTextTextView.text = when {
                 isEnabled -> getString(R.string.material_you_pref_description)
@@ -813,7 +769,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             overlayCard.isEnabled = isEnabled
             overlayTextView.isEnabled = isEnabled
             overlaySubTextTextView.isEnabled = isEnabled
-            overlaySubTextTextView.visibility = if (isEnabled) View.VISIBLE else View.GONE
+            overlaySubTextTextView.isVisible = isEnabled
             overlaySwitch.isEnabled = isEnabled
             overlaySwitch.isChecked = sharedPreferences.isOverlayEnabled
 
@@ -821,7 +777,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             overlaySwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
-                overlaySubTextTextView.visibility = if (isChecked) View.VISIBLE else View.GONE
+                overlaySubTextTextView.isVisible = isChecked
                 sharedPreferences.isOverlayEnabled = isChecked
             }
         }
@@ -845,7 +801,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             allowDimmingCard.isEnabled = isEnabled
             allowDimmingTextView.isEnabled = isEnabled
             allowDimmingSubTextTextView.isEnabled = isEnabled
-            allowDimmingSubTextTextView.visibility = if (isEnabled) View.VISIBLE else View.GONE
+            allowDimmingSubTextTextView.isVisible = isEnabled
             allowDimmingSwitch.isEnabled = isEnabled
             allowDimmingSwitch.isChecked = sharedPreferences.isDimmingEnabled
 
@@ -853,7 +809,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             allowDimmingSwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
-                allowDimmingSubTextTextView.visibility = if (isChecked) View.VISIBLE else View.GONE
+                allowDimmingSubTextTextView.isVisible = isChecked
                 sharedPreferences.isDimmingEnabled = isChecked
             }
         }
@@ -877,7 +833,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             allowWhileLockedCard.isEnabled = isEnabled
             allowWhileLockedTextView.isEnabled = isEnabled
             allowWhileLockedSubTextTextView.isEnabled = isEnabled
-            allowWhileLockedSubTextTextView.visibility = if (isEnabled) View.VISIBLE else View.GONE
+            allowWhileLockedSubTextTextView.isVisible = isEnabled
             allowWhileLockedSwitch.isEnabled = isEnabled
             allowWhileLockedSwitch.isChecked = sharedPreferences.isWhileLockedEnabled
 
@@ -885,7 +841,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             allowWhileLockedSwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
-                allowWhileLockedSubTextTextView.visibility = if (isChecked) View.VISIBLE else View.GONE
+                allowWhileLockedSubTextTextView.isVisible = isChecked
                 sharedPreferences.isWhileLockedEnabled = isChecked
             }
         }
@@ -914,7 +870,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             timeoutChoiceCard.isEnabled = isAllPermissionsGranted
             timeoutChoiceTextView.isEnabled = isAllPermissionsGranted
             timeoutChoiceSubTextTextView.isEnabled = true
-            timeoutChoiceSubTextTextView.visibility = if (isAllPermissionsGranted) View.VISIBLE else View.GONE
+            timeoutChoiceSubTextTextView.isVisible = isAllPermissionsGranted
             timeoutChoiceSubTextTextView.text = sharedPreferences.timeoutCheckBoxes.enabledDurations
             timeoutChoiceButton.isEnabled = isAllPermissionsGranted
 
@@ -930,7 +886,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      * is stored in the app's SharedPreferences.
      *
      * When the dialog is shown, the currently selected timeout duration is checked in the list. When the user selects a new timeout duration, the app
-     * will start a new [TimeoutJob][com.hifnawy.caffeinate.services.TimeoutJob] with the selected duration.
+     * will start a new [TimeoutJob][com.hifnawy.caffeinate.controller.TimeoutJob] with the selected duration.
      *
      * If the user has not selected any timeout durations before, the dialog will be empty and the user will be prompted to select at least one
      * duration.

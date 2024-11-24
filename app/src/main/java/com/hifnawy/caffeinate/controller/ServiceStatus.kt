@@ -1,8 +1,8 @@
-package com.hifnawy.caffeinate.services
+package com.hifnawy.caffeinate.controller
 
-import com.hifnawy.caffeinate.services.ServiceStatus.Running
-import com.hifnawy.caffeinate.services.ServiceStatus.Running.RemainingValueObserver
-import com.hifnawy.caffeinate.services.ServiceStatus.Stopped
+import com.hifnawy.caffeinate.controller.ServiceStatus.Running
+import com.hifnawy.caffeinate.controller.ServiceStatus.Running.RemainingValueObserver
+import com.hifnawy.caffeinate.controller.ServiceStatus.Stopped
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -143,7 +143,7 @@ sealed class ServiceStatus {
  *
  * @see Observer
  * @see ServiceStatus
- * @see com.hifnawy.caffeinate.utils.SharedPrefsObserver
+ * @see com.hifnawy.caffeinate.controller.SharedPrefsObserver
  */
 fun interface ServiceStatusObserver : Observer {
 

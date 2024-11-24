@@ -1,4 +1,4 @@
-package com.hifnawy.caffeinate.ui
+package com.hifnawy.caffeinate.view
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
@@ -13,13 +13,12 @@ import com.google.android.material.card.MaterialCardView
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.ActivityWidgetConfigurationBinding
-import com.hifnawy.caffeinate.services.ServiceStatus
-import com.hifnawy.caffeinate.services.ServiceStatusObserver
+import com.hifnawy.caffeinate.controller.ServiceStatus
+import com.hifnawy.caffeinate.controller.ServiceStatusObserver
 import com.hifnawy.caffeinate.utils.ActivityExtensionFunctions.setActivityTheme
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
-import com.hifnawy.caffeinate.utils.SharedPrefsManager
-import com.hifnawy.caffeinate.widgets.Widget
+import com.hifnawy.caffeinate.controller.SharedPrefsManager
 import java.io.Serializable
 import timber.log.Timber as Log
 

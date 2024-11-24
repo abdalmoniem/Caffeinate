@@ -1,6 +1,6 @@
 package com.hifnawy.caffeinate.utils
 
-import com.hifnawy.caffeinate.services.Observer
+import com.hifnawy.caffeinate.controller.Observer
 import kotlin.reflect.KClass
 import timber.log.Timber as Log
 

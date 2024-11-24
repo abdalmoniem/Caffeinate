@@ -1,4 +1,4 @@
-package com.hifnawy.caffeinate.ui
+package com.hifnawy.caffeinate.view
 
 import android.content.Context
 import android.content.Intent
@@ -15,7 +15,7 @@ import com.google.android.material.color.MaterialColors
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.OverlayBinding
-import com.hifnawy.caffeinate.services.LocaleChangeReceiver
+import com.hifnawy.caffeinate.controller.LocaleChangeReceiver
 import timber.log.Timber as Log
 
 /**

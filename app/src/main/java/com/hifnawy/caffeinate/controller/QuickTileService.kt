@@ -1,4 +1,4 @@
-package com.hifnawy.caffeinate.services
+package com.hifnawy.caffeinate.controller
 
 import android.app.PendingIntent
 import android.content.ComponentName
@@ -10,13 +10,12 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.services.QuickTileService.Companion.requestTileStateUpdate
-import com.hifnawy.caffeinate.ui.MainActivity
+import com.hifnawy.caffeinate.controller.QuickTileService.Companion.requestTileStateUpdate
+import com.hifnawy.caffeinate.view.MainActivity
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.itemClasses
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
-import com.hifnawy.caffeinate.utils.SharedPrefsManager
 import timber.log.Timber as Log
 
 /**

@@ -1,4 +1,4 @@
-package com.hifnawy.caffeinate.widgets
+package com.hifnawy.caffeinate.view
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -12,13 +12,12 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.services.KeepAwakeService
-import com.hifnawy.caffeinate.services.ServiceStatus
-import com.hifnawy.caffeinate.ui.MainActivity
+import com.hifnawy.caffeinate.controller.KeepAwakeService
+import com.hifnawy.caffeinate.controller.ServiceStatus
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
-import com.hifnawy.caffeinate.utils.SharedPrefsManager
-import com.hifnawy.caffeinate.widgets.Widget.Companion.caffeinateApplication
+import com.hifnawy.caffeinate.controller.SharedPrefsManager
+import com.hifnawy.caffeinate.view.Widget.Companion.caffeinateApplication
 import timber.log.Timber as Log
 
 /**

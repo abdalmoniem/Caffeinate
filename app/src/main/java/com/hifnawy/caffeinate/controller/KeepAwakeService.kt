@@ -1,4 +1,4 @@
-package com.hifnawy.caffeinate.services
+package com.hifnawy.caffeinate.controller
 
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -14,26 +14,24 @@ import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_CHANGE_DIMMING_ENABLED
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_CHANGE_TIMEOUT
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_RESTART
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_START
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_STOP
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_START
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_STOP
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_TOGGLE
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.NotificationActionRequestCode.REQUEST_CODE_NEXT_TIMEOUT
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.NotificationActionRequestCode.REQUEST_CODE_RESTART_TIMEOUT
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.NotificationActionRequestCode.REQUEST_CODE_TOGGLE_DIMMING
-import com.hifnawy.caffeinate.ui.OverlayHandler
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_CHANGE_DIMMING_ENABLED
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_CHANGE_TIMEOUT
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_RESTART
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_START
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_STOP
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_START
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_STOP
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_TOGGLE
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.NotificationActionRequestCode.REQUEST_CODE_NEXT_TIMEOUT
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.NotificationActionRequestCode.REQUEST_CODE_RESTART_TIMEOUT
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.NotificationActionRequestCode.REQUEST_CODE_TOGGLE_DIMMING
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.NotificationUtils
-import com.hifnawy.caffeinate.utils.SharedPrefsManager
-import com.hifnawy.caffeinate.utils.SharedPrefsObserver
 import com.hifnawy.caffeinate.utils.WakeLockExtensionFunctions.releaseSafely
+import com.hifnawy.caffeinate.view.OverlayHandler
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import timber.log.Timber as Log

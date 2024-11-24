@@ -1,35 +1,33 @@
-package com.hifnawy.caffeinate.utils
+package com.hifnawy.caffeinate.controller
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.hifnawy.caffeinate.CaffeinateApplication
-import com.hifnawy.caffeinate.services.Observer
-import com.hifnawy.caffeinate.services.ServiceStatus
-import com.hifnawy.caffeinate.ui.CheckBoxItem
-import com.hifnawy.caffeinate.ui.WidgetConfiguration
+import com.hifnawy.caffeinate.view.CheckBoxItem
+import com.hifnawy.caffeinate.view.WidgetConfiguration
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableList
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableMap
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableList
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableMap
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.ContrastLevel.HIGH
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.ContrastLevel.MEDIUM
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.ContrastLevel.STANDARD
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ALL_PERMISSIONS_GRANTED
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.CONTRAST_LEVEL
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_DIMMING
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_MATERIAL_YOU
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_OVERLAY
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.ENABLE_WHILE_LOCKED
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.IS_SERVICE_RUNNING
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.LAST_REMAINING_TIMEOUT
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.THEME
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.TIMEOUT_CHECK_BOXES
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.SharedPrefsKeys.WIDGET_CONFIGURATION
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.Theme.DARK
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.Theme.LIGHT
-import com.hifnawy.caffeinate.utils.SharedPrefsManager.Theme.SYSTEM_DEFAULT
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.ContrastLevel.HIGH
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.ContrastLevel.MEDIUM
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.ContrastLevel.STANDARD
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ALL_PERMISSIONS_GRANTED
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.CONTRAST_LEVEL
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_DIMMING
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_MATERIAL_YOU
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_OVERLAY
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_WHILE_LOCKED
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.IS_SERVICE_RUNNING
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.LAST_REMAINING_TIMEOUT
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.THEME
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.TIMEOUT_CHECK_BOXES
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.WIDGET_CONFIGURATION
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.Theme.DARK
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.Theme.LIGHT
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.Theme.SYSTEM_DEFAULT
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -441,7 +439,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
  *
  * @see Observer
  * @see SharedPrefsManager
- * @see com.hifnawy.caffeinate.services.ServiceStatusObserver
+ * @see com.hifnawy.caffeinate.controller.ServiceStatusObserver
  */
 interface SharedPrefsObserver : Observer {
 

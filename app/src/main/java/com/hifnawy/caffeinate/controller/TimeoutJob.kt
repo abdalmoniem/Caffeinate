@@ -1,7 +1,7 @@
-package com.hifnawy.caffeinate.services
+package com.hifnawy.caffeinate.controller
 
 import com.hifnawy.caffeinate.CaffeinateApplication
-import com.hifnawy.caffeinate.services.KeepAwakeService.Companion.KeepAwakeServiceState
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

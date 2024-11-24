@@ -3,7 +3,7 @@ package com.hifnawy.caffeinate.utils
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.hifnawy.caffeinate.ui.WidgetConfiguration
+import com.hifnawy.caffeinate.view.WidgetConfiguration
 import java.io.Serializable
 
 /**

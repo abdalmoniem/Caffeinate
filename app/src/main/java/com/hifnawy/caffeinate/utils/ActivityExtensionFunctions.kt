@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode
 import com.google.android.material.color.DynamicColors
 import com.hifnawy.caffeinate.R
+import com.hifnawy.caffeinate.controller.SharedPrefsManager
 
 /**
  * Utility functions for working with [AppCompatActivity].

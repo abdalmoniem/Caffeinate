@@ -5,14 +5,14 @@ import android.content.Context
 import android.os.Build
 import android.util.LayoutDirection
 import androidx.core.text.layoutDirection
-import com.hifnawy.caffeinate.services.QuickTileService
-import com.hifnawy.caffeinate.services.ServiceStatus
-import com.hifnawy.caffeinate.services.ServiceStatusObserver
-import com.hifnawy.caffeinate.ui.CheckBoxItem
+import com.hifnawy.caffeinate.controller.QuickTileService
+import com.hifnawy.caffeinate.controller.ServiceStatus
+import com.hifnawy.caffeinate.controller.ServiceStatusObserver
+import com.hifnawy.caffeinate.view.CheckBoxItem
 import com.hifnawy.caffeinate.utils.LogDebugTree
-import com.hifnawy.caffeinate.utils.SharedPrefsManager
-import com.hifnawy.caffeinate.utils.SharedPrefsObserver
-import com.hifnawy.caffeinate.widgets.Widget
+import com.hifnawy.caffeinate.controller.SharedPrefsManager
+import com.hifnawy.caffeinate.controller.SharedPrefsObserver
+import com.hifnawy.caffeinate.view.Widget
 import java.util.Locale
 import kotlin.time.Duration
 import timber.log.Timber as Log
@@ -56,7 +56,7 @@ class CaffeinateApplication : Application() {
      * The first timeout duration that was selected by the user.
      *
      * This is the first timeout duration that was selected by the user in the list of available timeout durations. When the user selects a new
-     * timeout duration, the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] will use this timeout duration as the new timeout
+     * timeout duration, the [KeepAwakeService][com.hifnawy.caffeinate.controller.KeepAwakeService] will use this timeout duration as the new timeout
      * duration.
      *
      * @return [Duration] the first timeout duration that was selected by the user, or [Duration.INFINITE] if no timeout duration was selected.
@@ -68,7 +68,7 @@ class CaffeinateApplication : Application() {
      * The last timeout duration that was selected by the user.
      *
      * This is the timeout duration that was selected by the user in the list of available timeout durations. When the user selects a new timeout
-     * duration, the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] will use this timeout duration as the new timeout duration.
+     * duration, the [KeepAwakeService][com.hifnawy.caffeinate.controller.KeepAwakeService] will use this timeout duration as the new timeout duration.
      *
      * @return [Duration] the last timeout duration that was selected by the user.
      */
@@ -79,7 +79,7 @@ class CaffeinateApplication : Application() {
      * The previously selected timeout duration.
      *
      * This is the duration that was previously selected in the list of available timeout durations. When the current timeout duration is finished,
-     * the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] will use this timeout duration as the new timeout duration.
+     * the [KeepAwakeService][com.hifnawy.caffeinate.controller.KeepAwakeService] will use this timeout duration as the new timeout duration.
      *
      * @return [Duration] the previously selected timeout duration.
      */
@@ -117,12 +117,12 @@ class CaffeinateApplication : Application() {
     /**
      * The currently selected timeout duration.
      *
-     * This is the duration that the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] is currently running for. When the service
+     * This is the duration that the [KeepAwakeService][com.hifnawy.caffeinate.controller.KeepAwakeService] is currently running for. When the service
      * is running, this value is updated to reflect the remaining duration for which the service is running.
      *
      * When the service is not running, this value is the first timeout duration that is selected in the list of available timeout durations.
      *
-     * @see com.hifnawy.caffeinate.services.KeepAwakeService
+     * @see com.hifnawy.caffeinate.controller.KeepAwakeService
      * @see SharedPrefsManager.timeouts
      */
     var timeout: Duration = sharedPreferences.timeouts.first()
@@ -151,16 +151,16 @@ class CaffeinateApplication : Application() {
     var sharedPrefsObservers = mutableListOf<SharedPrefsObserver>()
 
     /**
-     * The last status update received from the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService].
+     * The last status update received from the [KeepAwakeService][com.hifnawy.caffeinate.controller.KeepAwakeService].
      *
-     * This value is updated whenever the [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] sends a status update to the
+     * This value is updated whenever the [KeepAwakeService][com.hifnawy.caffeinate.controller.KeepAwakeService] sends a status update to the
      * [CaffeinateApplication].
      *
-     * The [KeepAwakeService][com.hifnawy.caffeinate.services.KeepAwakeService] sends a status update whenever its status changes, such as when it is
+     * The [KeepAwakeService][com.hifnawy.caffeinate.controller.KeepAwakeService] sends a status update whenever its status changes, such as when it is
      * started or stopped, or when its timeout duration changes.
      *
      * @see ServiceStatus
-     * @see com.hifnawy.caffeinate.services.KeepAwakeService
+     * @see com.hifnawy.caffeinate.controller.KeepAwakeService
      * @see notifyKeepAwakeServiceObservers
      */
     var lastStatusUpdate: ServiceStatus = ServiceStatus.Stopped

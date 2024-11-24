@@ -1,4 +1,4 @@
-package com.hifnawy.caffeinate.services
+package com.hifnawy.caffeinate.controller
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver

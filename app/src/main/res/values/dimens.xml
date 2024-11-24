@@ -4,7 +4,6 @@
     <dimen name="prefTextSize">20sp</dimen>
     <dimen name="prefsDescriptionTextSize">15sp</dimen>
     <dimen name="caffeinateButtonTextSize">35sp</dimen>
-    <dimen name="appThemeButtonTextSize">20sp</dimen>
     <dimen name="timeoutsButtonTextSize">20sp</dimen>
     <dimen name="overlayTextSizeLTR">20sp</dimen>
     <dimen name="overlayTextSizeRTL">30sp</dimen>

@@ -1,4 +1,4 @@
-package com.hifnawy.caffeinate.services
+package com.hifnawy.caffeinate.controller
 
 import android.content.BroadcastReceiver
 import android.content.Context

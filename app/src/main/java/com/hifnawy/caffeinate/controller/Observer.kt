@@ -1,4 +1,4 @@
-package com.hifnawy.caffeinate.services
+package com.hifnawy.caffeinate.controller
 
 /**
  * A general-purpose interface for objects that can be registered to observe specific
@@ -9,6 +9,6 @@ package com.hifnawy.caffeinate.services
  * @author AbdAlMoniem AlHifnawy
  *
  * @see ServiceStatusObserver
- * @see com.hifnawy.caffeinate.utils.SharedPrefsObserver
+ * @see com.hifnawy.caffeinate.controller.SharedPrefsObserver
  */
 interface Observer

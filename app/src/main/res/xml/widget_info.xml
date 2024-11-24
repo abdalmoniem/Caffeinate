@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:configure="com.hifnawy.caffeinate.ui.WidgetConfigurationActivity"
+    android:configure="com.hifnawy.caffeinate.view.WidgetConfigurationActivity"
     android:description="@string/app_name"
     android:initialKeyguardLayout="@layout/widget"
     android:initialLayout="@layout/widget"

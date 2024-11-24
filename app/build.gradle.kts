@@ -59,6 +59,10 @@ android {
         project.logger.warn("WARNING: local.properties not found, add local.properties in root directory to enable signing.")
     }
 
+    sourceSets.forEach { sourceSet ->
+        sourceSet.java.srcDir("src/$sourceSet.name")
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -172,6 +176,7 @@ dependencies {
     implementation(libs.assent)
     implementation(libs.gson)
     implementation(libs.materialNumberPicker)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidxJunit)
     androidTestImplementation(libs.androidxEspressoCore)

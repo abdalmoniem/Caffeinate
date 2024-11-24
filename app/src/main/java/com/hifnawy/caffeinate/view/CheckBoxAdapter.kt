@@ -1,4 +1,4 @@
-package com.hifnawy.caffeinate.ui
+package com.hifnawy.caffeinate.view
 
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
@@ -8,7 +8,7 @@ import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.TimeoutCheckboxItemBinding
-import com.hifnawy.caffeinate.ui.CheckBoxAdapter.OnItemsChangedListener
+import com.hifnawy.caffeinate.view.CheckBoxAdapter.OnItemsChangedListener
 import java.io.Serializable
 import kotlin.time.Duration
 
