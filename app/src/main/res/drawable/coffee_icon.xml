@@ -20,6 +20,7 @@
             android:scaleX="0.55"
             android:scaleY="0.55">
 
+            <!-- pathData truncation regex: ((?:[\w\s.\-_+]+),){6}, replace with $0\n -->
             <path
                 android:fillColor="#cb7333"
                 android:fillType="evenOdd"

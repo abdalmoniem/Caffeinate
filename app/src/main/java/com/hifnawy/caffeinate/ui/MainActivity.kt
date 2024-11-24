@@ -144,16 +144,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private val notGrantedDrawableTint by lazy { MaterialColors.getColor(binding.root, materialR.attr.colorError) }
 
     /**
-     * The intent used to request the overlay permission.
-     *
-     * This intent is used to request the overlay permission when the user clicks on the overlay
-     * permission card. The intent is created with the action
-     * [Settings.ACTION_MANAGE_OVERLAY_PERMISSION] and the package name of the application.
-     */
-    private val overlayPermissionIntent =
-            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${packageName}"))
-
-    /**
      * The [ActivityResultLauncher] used to launch the overlay permission intent.
      *
      * This launcher is used to launch the overlay permission intent when the user clicks on the
@@ -306,7 +296,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sharedPreferences.run { setActivityTheme(contrastLevel, theme.mode, isMaterialYouEnabled) }
+        sharedPreferences.run {
+            setActivityTheme(contrastLevel, theme.mode, isMaterialYouEnabled)
+        }
 
         enableEdgeToEdge()
         setContentView(binding.root)
@@ -398,22 +390,24 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 }
             }
 
-            caffeineButton.setOnClickListener { buttonView ->
-                if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
+            toggleButton.run {
+                setOnClickListener { buttonView ->
+                    if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
 
-                buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                KeepAwakeService.startNextTimeout(caffeinateApplication)
-            }
-
-            caffeineButton.setOnLongClickListener {
-                if (!sharedPreferences.isAllPermissionsGranted) return@setOnLongClickListener false
-
-                when (caffeinateApplication.lastStatusUpdate) {
-                    is ServiceStatus.Stopped -> KeepAwakeService.startIndefinitely(caffeinateApplication)
-                    is ServiceStatus.Running -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    KeepAwakeService.startNextTimeout(caffeinateApplication)
                 }
 
-                return@setOnLongClickListener true
+                setOnLongClickListener {
+                    if (!sharedPreferences.isAllPermissionsGranted) return@setOnLongClickListener false
+
+                    when (caffeinateApplication.lastStatusUpdate) {
+                        is ServiceStatus.Stopped -> KeepAwakeService.startIndefinitely(caffeinateApplication)
+                        is ServiceStatus.Running -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
+                    }
+
+                    return@setOnLongClickListener true
+                }
             }
         }
 
@@ -454,7 +448,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
      */
     override fun onIsAllPermissionsGrantedUpdated(isAllPermissionsGranted: Boolean) {
-        binding.caffeineButton.isEnabled = isAllPermissionsGranted
+        binding.toggleButton.isEnabled = isAllPermissionsGranted
 
         changeAllowDimmingPreferences(isAllPermissionsGranted)
         changeAllowWhileLockedPreferences(isAllPermissionsGranted)
@@ -501,7 +495,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 is ServiceStatus.Stopped -> {
                     restartButton.animateVisibility = false
 
-                    caffeineButton.text = getString(R.string.caffeinate_button_off)
+                    toggleButton.text = getString(R.string.caffeinate_button_off)
                 }
 
                 is ServiceStatus.Running -> {
@@ -511,7 +505,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                         else -> restartButton.animateVisibility = false
                     }
 
-                    caffeineButton.text = status.remaining.toLocalizedFormattedTime(root.context)
+                    toggleButton.text = status.remaining.toLocalizedFormattedTime(root.context)
                 }
             }
         }
@@ -650,7 +644,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         val isGranted = Settings.canDrawOverlays(this)
         val permissionCardClickListener = when {
             isGranted -> null
-            else      -> View.OnClickListener { overlayPermissionLauncher.launch(overlayPermissionIntent) }
+            else      -> View.OnClickListener {
+                overlayPermissionLauncher.launch(
+                        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${packageName}"))
+                )
+            }
         }
         val permissionCardText = when {
             isGranted -> getString(R.string.overlay_permission_granted)
@@ -735,18 +733,27 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             selectedContrastLevel: SharedPrefsManager.ContrastLevel,
             selectedIsMaterialYouEnabled: Boolean
     ) = sharedPreferences.run {
+        val isToRecreate = theme == selectedTheme
+        val newContrastLevel =
+                ((selectedContrastLevel.isNotStandard && !selectedIsMaterialYouEnabled) ||
+                 (selectedContrastLevel.isNotStandard && contrastLevel.isStandard && isMaterialYouEnabled)).let { isNotStandard ->
+                    when {
+                        isNotStandard -> selectedContrastLevel
+                        else          -> SharedPrefsManager.ContrastLevel.STANDARD
+                    }
+                }
+        val newIsMaterialYouEnabled =
+                (selectedIsMaterialYouEnabled && selectedContrastLevel.isStandard) ||
+                (selectedIsMaterialYouEnabled && !isMaterialYouEnabled && contrastLevel.isNotStandard)
+
         theme = selectedTheme
+        contrastLevel = newContrastLevel
+        isMaterialYouEnabled = newIsMaterialYouEnabled
 
-        contrastLevel = when {
-            selectedIsMaterialYouEnabled && contrastLevel != SharedPrefsManager.ContrastLevel.STANDARD -> SharedPrefsManager.ContrastLevel.STANDARD
-            else                                                                                       -> selectedContrastLevel
+        when {
+            isToRecreate -> recreate()
+            else         -> delegate.localNightMode = selectedTheme.mode
         }
-
-        isMaterialYouEnabled = contrastLevel == SharedPrefsManager.ContrastLevel.STANDARD && selectedIsMaterialYouEnabled
-
-        delegate.localNightMode = selectedTheme.mode
-
-        recreate()
     }
 
     /**
@@ -766,18 +773,22 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             materialYouCard.isEnabled = isEnabled
             materialYouTextView.isEnabled = isEnabled
-            materialYouSubTextTextView.visibility = if (isEnabled) View.VISIBLE else View.GONE
+
+            materialYouSubTextTextView.visibility = when {
+                !isEnabled || sharedPreferences.isMaterialYouEnabled -> View.VISIBLE
+                else                                                 -> View.GONE
+            }
             materialYouSubTextTextView.isEnabled = isEnabled
-            materialYouSubTextTextView.text = getString(R.string.material_you_pref_description)
+            materialYouSubTextTextView.text = when {
+                isEnabled -> getString(R.string.material_you_pref_description)
+                else      -> getString(R.string.material_you_pref_not_available)
+            }
             materialYouSwitch.isEnabled = isEnabled
-            materialYouSwitch.isChecked =
-                    sharedPreferences.isMaterialYouEnabled && sharedPreferences.contrastLevel == SharedPrefsManager.ContrastLevel.STANDARD
+            materialYouSwitch.isChecked = sharedPreferences.run { isMaterialYouEnabled && contrastLevel.isStandard }
 
             materialYouCard.setOnClickListener { materialYouSwitch.isChecked = !sharedPreferences.isMaterialYouEnabled }
             materialYouSwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-
-                materialYouSubTextTextView.visibility = if (isChecked) View.VISIBLE else View.GONE
 
                 sharedPreferences.run { changeThemeAndContrast(theme, contrastLevel, isChecked) }
             }

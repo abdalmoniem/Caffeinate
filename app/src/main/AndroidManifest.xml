@@ -24,7 +24,6 @@
 
         <activity
             android:name=".ui.MainActivity"
-            android:configChanges="uiMode"
             android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>
@@ -38,7 +37,6 @@
 
         <activity
             android:name=".ui.WidgetConfigurationActivity"
-            android:configChanges="uiMode"
             android:exported="false" />
 
         <service
