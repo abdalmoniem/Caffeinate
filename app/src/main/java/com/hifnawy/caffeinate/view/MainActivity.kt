@@ -206,38 +206,25 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private var MaterialButton.animateVisibility: Boolean
         get() = isVisible
         set(value) {
-            if (value && viewModel.isRestartButtonAnimationStarted) return
-            val animationDuration = 500L
-            val rotationFrom = if (value) -360f else 0f
-            val rotationTo = if (value) 0f else -360f
+            if (value && viewModel.isRestartButtonEnabled.value == true) return
+            val animationDuration = 300L
+            val rotationFrom = if (value) -360f else 360f
+            val rotationTo = if (value) 360f else -360f
             val scaleFrom = if (value) 0f else 1f
             val scaleTo = if (value) 1f else 0f
-            val animationEndAction = Runnable {
-                isEnabled = value
-                isVisible = value
-
-                viewModel.isRestartButtonAnimationStarted = value
-            }
-
-            isEnabled = value || viewModel.isRestartButtonAnimationStarted
-            isVisible = value || viewModel.isRestartButtonAnimationStarted
 
             rotation = rotationFrom
             scaleX = scaleFrom
             scaleY = scaleFrom
-            alpha = scaleFrom
 
             animate()
                 .rotation(rotationTo)
                 .scaleX(scaleTo)
                 .scaleY(scaleTo)
-                .alpha(scaleTo)
                 .setDuration(animationDuration)
-                .withEndAction(animationEndAction)
+                .withStartAction { if (value && !isEnabled) viewModel.isRestartButtonEnabled.value = true }
+                .withEndAction { if (!value && isEnabled) viewModel.isRestartButtonEnabled.value = false }
                 .start()
-
-
-            viewModel.isRestartButtonAnimationStarted = value
         }
 
     /**
@@ -262,26 +249,38 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
 
         with(binding) {
-            appBar.run {
-                post {
-                    val params = layoutParams as CoordinatorLayout.LayoutParams
-                    val behavior = params.behavior as AppBarLayout.Behavior
-                    behavior.topAndBottomOffset = viewModel.appBarVerticalOffset
-                    requestLayout()
-                }
-
-                addOnOffsetChangedListener { appBarLayout, verticalOffset ->
-                    viewModel.appBarVerticalOffset = verticalOffset
-                    val totalScrollRange = appBarLayout.totalScrollRange
-                    val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.5f)
-
-                    toolbar.navigationIcon = when (caffeinateApplication.lastStatusUpdate) {
-                        is ServiceStatus.Stopped -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_off)
-                        is ServiceStatus.Running -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_on)
-                    }?.run {
-                        val bitmap = toBitmap((intrinsicWidth * collapseFactor).toInt(), (intrinsicHeight * collapseFactor).toInt())
-                        bitmap.toDrawable(resources)
+            appBar.post {
+                viewModel.run {
+                    appBarVerticalOffset.observe(this@MainActivity) { verticalOffset ->
+                        with(appBar) {
+                            val params = layoutParams as CoordinatorLayout.LayoutParams
+                            val behavior = params.behavior as AppBarLayout.Behavior
+                            behavior.topAndBottomOffset = verticalOffset
+                            requestLayout()
+                        }
                     }
+
+                    isRestartButtonEnabled.observe(this@MainActivity) { isButtonEnabled ->
+                        Log.d("Restart Button Enabled: $isButtonEnabled")
+                        with(restartButton) {
+                            isEnabled = isButtonEnabled
+                            isVisible = isButtonEnabled
+                        }
+                    }
+                }
+            }
+
+            appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+                viewModel.appBarVerticalOffset.value = verticalOffset
+                val totalScrollRange = appBarLayout.totalScrollRange
+                val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.5f)
+
+                toolbar.navigationIcon = when (caffeinateApplication.lastStatusUpdate) {
+                    is ServiceStatus.Stopped -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_off)
+                    is ServiceStatus.Running -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_on)
+                }?.run {
+                    val bitmap = toBitmap((intrinsicWidth * collapseFactor).toInt(), (intrinsicHeight * collapseFactor).toInt())
+                    bitmap.toDrawable(resources)
                 }
             }
         }
@@ -375,11 +374,16 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 }
             }
 
-            restartButton.setOnClickListener { buttonView ->
-                if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
+            restartButton.run {
+                isVisible = viewModel.isRestartButtonEnabled.value ?: false
+                isEnabled = viewModel.isRestartButtonEnabled.value ?: false
 
-                buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                KeepAwakeService.restart(caffeinateApplication)
+                setOnClickListener { buttonView ->
+                    if (!sharedPreferences.isAllPermissionsGranted) return@setOnClickListener
+
+                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    KeepAwakeService.restart(caffeinateApplication)
+                }
             }
         }
 

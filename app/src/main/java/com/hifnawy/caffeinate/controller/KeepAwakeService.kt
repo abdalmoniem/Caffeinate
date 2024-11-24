@@ -487,21 +487,17 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                 notificationActionNextTimeoutStr,
                 REQUEST_CODE_NEXT_TIMEOUT.ordinal
         )
-        val notificationActionRestartTimeout = when (status) {
-            is ServiceStatus.Running -> when {
-                status.isCountingDown -> NotificationUtils.getNotificationAction(
-                        this,
-                        KeepAwakeService::class.java,
-                        ACTION_RESTART.name,
-                        R.drawable.coffee_icon_on,
-                        getString(R.string.foreground_notification_action_restart_timeout),
-                        REQUEST_CODE_RESTART_TIMEOUT.ordinal
-                )
+        val notificationActionRestartTimeout = when {
+            status.run { this is ServiceStatus.Running && isCountingDown } -> NotificationUtils.getNotificationAction(
+                    this,
+                    KeepAwakeService::class.java,
+                    ACTION_RESTART.name,
+                    R.drawable.coffee_icon_on,
+                    getString(R.string.foreground_notification_action_restart_timeout),
+                    REQUEST_CODE_RESTART_TIMEOUT.ordinal
+            )
 
-                else                  -> null
-            }
-
-            else                     -> null
+            else                                                                     -> null
         }
         val notificationActionToggleDimming = NotificationUtils.getNotificationAction(
                 this,
