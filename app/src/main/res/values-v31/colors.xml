@@ -48,4 +48,7 @@
     <color name="md_theme_surfaceContainer_dynamic">@color/m3_ref_palette_dynamic_neutral94</color>
     <color name="md_theme_surfaceContainerHigh_dynamic">@color/m3_ref_palette_dynamic_neutral92</color>
     <color name="md_theme_surfaceContainerHighest_dynamic">@color/m3_ref_palette_dynamic_neutral90</color>
+
+    <color name="app_icon_background">@color/md_theme_primary_dynamic</color>
+    <color name="menu_icons">@color/md_theme_primary_dynamic</color>
 </resources>

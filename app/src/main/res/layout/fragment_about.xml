@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="bottom"
+    android:clipToPadding="false"
+    android:padding="30dp"
+    app:layout_behavior="@string/bottom_sheet_behavior"
+    tools:context=".view.AboutBottomSheetFragment">
+
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:id="@+id/dragHandle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/contentCard"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:cardElevation="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dragHandle"
+        app:strokeWidth="0dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="30dp">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/icon"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="?colorTertiaryContainer"
+                android:elevation="5dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/coffee_icon_monochrome"
+                app:contentPadding="10dp"
+                app:layout_constraintEnd_toStartOf="@+id/title"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:shapeAppearanceOverlay="@style/ShapeableImageViewAppearance"
+                app:tint="?colorPrimary" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:text="@string/app_name"
+                android:textAlignment="center"
+                android:textColor="?colorPrimary"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_weight="1.5"
+                app:layout_constraintStart_toEndOf="@+id/icon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/versionCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/about_version_code"
+                android:textAlignment="center"
+                android:textColor="?colorSecondary"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/icon"
+                app:layout_constraintTop_toBottomOf="@+id/title" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/versionName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:text="@string/about_version_name"
+                android:textAlignment="center"
+                android:textColor="?colorSecondary"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/icon"
+                app:layout_constraintTop_toBottomOf="@+id/versionCode" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/githubButton"
+                style="@style/Widget.Material3.Button.IconButton.Filled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:backgroundTint="?colorTertiary"
+                android:elevation="5dp"
+                android:tag="https://github.com/abdalmoniem/Caffeinate"
+                app:cornerRadius="20dp"
+                app:icon="@drawable/github_icon"
+                app:iconSize="32dp"
+                app:iconTint="?colorOnTertiary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/crowdinButton"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/versionName"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/crowdinButton"
+                style="@style/Widget.Material3.Button.IconButton.Filled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="?colorTertiary"
+                android:elevation="5dp"
+                android:tag="https://crowdin.com/project/caffeinate"
+                app:cornerRadius="20dp"
+                app:icon="@drawable/crowdin_icon"
+                app:iconSize="32dp"
+                app:iconTint="?colorOnTertiary"
+                app:layout_constraintBottom_toBottomOf="@+id/githubButton"
+                app:layout_constraintEnd_toStartOf="@+id/fdroidButton"
+                app:layout_constraintStart_toEndOf="@+id/githubButton"
+                app:layout_constraintTop_toTopOf="@+id/githubButton"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fdroidButton"
+                style="@style/Widget.Material3.Button.IconButton.Filled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="?colorTertiary"
+                android:elevation="5dp"
+                android:tag="https://f-droid.org/packages/com.hifnawy.caffeinate"
+                app:cornerRadius="20dp"
+                app:icon="@drawable/fdroid_icon"
+                app:iconSize="32dp"
+                app:iconTint="?colorOnTertiary"
+                app:layout_constraintBottom_toBottomOf="@+id/githubButton"
+                app:layout_constraintEnd_toStartOf="@+id/izzyOnDroidButton"
+                app:layout_constraintStart_toEndOf="@+id/crowdinButton"
+                app:layout_constraintTop_toTopOf="@+id/githubButton"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/izzyOnDroidButton"
+                style="@style/Widget.Material3.Button.IconButton.Filled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="?colorTertiary"
+                android:elevation="5dp"
+                android:tag="https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate"
+                app:cornerRadius="20dp"
+                app:icon="@drawable/izzyondroid_icon"
+                app:iconSize="32dp"
+                app:iconTint="?colorOnTertiary"
+                app:layout_constraintBottom_toBottomOf="@+id/githubButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/fdroidButton"
+                app:layout_constraintTop_toTopOf="@+id/githubButton"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

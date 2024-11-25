@@ -63,4 +63,7 @@
     <string name="time_format_hour_letter">h</string>
     <string name="time_format_minute_letter">m</string>
     <string name="time_format_second_letter">s</string>
+    <string name="about">about</string>
+    <string name="about_version_code">Version Code: %s</string>
+    <string name="about_version_name">Version Name: %s</string>
 </resources>

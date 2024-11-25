@@ -55,4 +55,8 @@
 
     <!-- Overlay Theme -->
     <style name="OverlayTheme" parent="AppTheme" />
+
+    <style name="ShapeableImageViewAppearance" parent="">
+        <item name="cornerSize">30%</item>
+    </style>
 </resources>

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     tools:context=".view.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -80,14 +81,14 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:animateLayoutChanges="true">
+                        android:animateLayoutChanges="true"
+                        android:clipToPadding="false"
+                        android:padding="10dp">
 
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/batteryOptimizationCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
-                            android:layout_marginVertical="10dp"
                             android:clickable="true"
                             android:focusable="true"
                             android:minHeight="48dp"
@@ -101,6 +102,7 @@
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:padding="10dp">
 
                                 <ImageView
@@ -145,7 +147,6 @@
                             android:id="@+id/backgroundOptimizationCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
                             android:layout_marginVertical="5dp"
                             android:clickable="true"
                             android:focusable="true"
@@ -160,6 +161,7 @@
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:padding="10dp">
 
                                 <ImageView
@@ -204,7 +206,6 @@
                             android:id="@+id/notificationPermissionCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
                             android:layout_marginVertical="5dp"
                             android:clickable="true"
                             android:focusable="true"
@@ -219,6 +220,7 @@
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:padding="10dp">
 
                                 <ImageView
@@ -263,9 +265,7 @@
                             android:id="@+id/overlayPermissionCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
                             android:layout_marginTop="5dp"
-                            android:layout_marginBottom="10dp"
                             android:clickable="true"
                             android:focusable="true"
                             android:minHeight="48dp"
@@ -280,6 +280,7 @@
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:padding="10dp">
 
                                 <ImageView
@@ -347,14 +348,15 @@
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="match_parent"
+                        android:animateLayoutChanges="true"
+                        android:clipToPadding="false"
+                        android:padding="10dp">
 
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/appThemeCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
-                            android:layout_marginVertical="10dp"
                             android:clickable="true"
                             android:focusable="true"
                             app:cardCornerRadius="10dp"
@@ -367,6 +369,7 @@
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:padding="10dp">
 
                                 <ImageView
@@ -453,7 +456,6 @@
                             android:id="@+id/materialYouCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
                             android:layout_marginVertical="5dp"
                             android:clickable="true"
                             android:enabled="false"
@@ -466,8 +468,10 @@
                             app:strokeWidth="0dp">
 
                             <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/materialYouLayout"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:padding="10dp">
 
                                 <ImageView
@@ -527,7 +531,6 @@
                             android:id="@+id/overlayCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
                             android:layout_marginVertical="5dp"
                             android:clickable="true"
                             android:enabled="false"
@@ -542,6 +545,7 @@
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:padding="10dp">
 
                                 <ImageView
@@ -602,7 +606,6 @@
                             android:id="@+id/allowDimmingCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
                             android:layout_marginVertical="5dp"
                             android:clickable="true"
                             android:enabled="false"
@@ -617,6 +620,7 @@
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:padding="10dp">
 
                                 <ImageView
@@ -676,7 +680,6 @@
                             android:id="@+id/allowWhileLockedCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
                             android:layout_marginVertical="5dp"
                             android:clickable="true"
                             android:enabled="false"
@@ -691,6 +694,7 @@
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:padding="10dp">
 
                                 <ImageView
@@ -750,9 +754,7 @@
                             android:id="@+id/timeoutChoiceCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="10dp"
                             android:layout_marginTop="5dp"
-                            android:layout_marginBottom="10dp"
                             android:clickable="true"
                             android:focusable="true"
                             app:cardCornerRadius="10dp"
@@ -766,6 +768,7 @@
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:padding="10dp">
 
                                 <ImageView

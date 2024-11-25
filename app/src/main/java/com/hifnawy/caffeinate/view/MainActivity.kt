@@ -14,6 +14,8 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.NumberPicker
@@ -28,6 +30,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.animation.addListener
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.afollestad.assent.Permission
 import com.afollestad.assent.askForPermissions
@@ -54,6 +57,8 @@ import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.isVisible
 import com.hifnawy.caffeinate.viewModel.MainActivityViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.time.Duration
@@ -244,6 +249,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
         enableEdgeToEdge()
         setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
 
         overlayPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
@@ -261,7 +267,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     }
 
                     isRestartButtonEnabled.observe(this@MainActivity) { isButtonEnabled ->
-                        Log.d("Restart Button Enabled: $isButtonEnabled")
                         with(restartButton) {
                             isEnabled = isButtonEnabled
                             isVisible = isButtonEnabled
@@ -419,6 +424,39 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     }
 
     /**
+     * Initializes the contents of the Activity's options menu.
+     *
+     * This method is called once when the menu is first created. It inflates the menu resource
+     * and adds items to the menu. The menu will be displayed when the user presses the menu button.
+     *
+     * @param menu [Menu] The options menu in which items are placed.
+     * @return `true` if the menu is to be displayed; `false` otherwise.
+     */
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    /**
+     * Called when an item in the options menu is selected.
+     *
+     * This is called when an item in the options menu is selected. It is called after the menu is shown, but before the menu is hidden.
+     *
+     * @param item [MenuItem] The menu item that was selected.
+     * @return `true` if the menu item was successfully handled, `false` otherwise.
+     */
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.about -> AboutBottomSheetFragment.newInstance.show(supportFragmentManager, "about")
+        }
+
+        return when (item.itemId) {
+            in listOf(R.id.about) -> true
+            else                  -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    /**
      * Called when there is a change in the permission state indicating whether all necessary permissions have been granted.
      *
      * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
@@ -426,6 +464,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     override fun onIsAllPermissionsGrantedUpdated(isAllPermissionsGranted: Boolean) {
         binding.toggleButton.isEnabled = isAllPermissionsGranted
 
+        changeShowOverlayPreferences(isAllPermissionsGranted && checkOverlayPermission())
         changeAllowDimmingPreferences(isAllPermissionsGranted)
         changeAllowWhileLockedPreferences(isAllPermissionsGranted)
         changeTimeoutsPreferences(isAllPermissionsGranted)
@@ -485,8 +524,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             checkBackgroundOptimization(),
             checkNotificationPermission(),
     ).all { it }.let { isGranted ->
-        changeShowOverlayPreferences(checkOverlayPermission())
-
         callback?.invoke(isGranted)
         sharedPreferences.isAllPermissionsGranted = isGranted
     }
@@ -749,8 +786,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             materialYouCard.setOnClickListener { materialYouSwitch.isChecked = !sharedPreferences.isMaterialYouEnabled }
             materialYouSwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                lifecycleScope.launch {
+                    materialYouSubTextTextView.isEnabled = isChecked
+                    materialYouSubTextTextView.isVisible = isChecked
 
-                sharedPreferences.run { changeThemeAndContrast(theme, contrastLevel, isChecked) }
+                    delay(300)
+
+                    sharedPreferences.run { changeThemeAndContrast(theme, contrastLevel, isChecked) }
+                }
             }
         }
     }
@@ -772,8 +815,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             overlayCard.isEnabled = isEnabled
             overlayTextView.isEnabled = isEnabled
-            overlaySubTextTextView.isEnabled = sharedPreferences.isOverlayEnabled
-            overlaySubTextTextView.isVisible = sharedPreferences.isOverlayEnabled
+            overlaySubTextTextView.isEnabled = isEnabled && sharedPreferences.isOverlayEnabled
+            overlaySubTextTextView.isVisible = isEnabled && sharedPreferences.isOverlayEnabled
             overlaySwitch.isEnabled = isEnabled
             overlaySwitch.isChecked = sharedPreferences.isOverlayEnabled
 
@@ -805,8 +848,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             allowDimmingCard.isEnabled = isEnabled
             allowDimmingTextView.isEnabled = isEnabled
-            allowDimmingSubTextTextView.isEnabled = sharedPreferences.isDimmingEnabled
-            allowDimmingSubTextTextView.isVisible = sharedPreferences.isDimmingEnabled
+            allowDimmingSubTextTextView.isEnabled = isEnabled && sharedPreferences.isDimmingEnabled
+            allowDimmingSubTextTextView.isVisible = isEnabled && sharedPreferences.isDimmingEnabled
             allowDimmingSwitch.isEnabled = isEnabled
             allowDimmingSwitch.isChecked = sharedPreferences.isDimmingEnabled
 
@@ -838,8 +881,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             allowWhileLockedCard.isEnabled = isEnabled
             allowWhileLockedTextView.isEnabled = isEnabled
-            allowWhileLockedSubTextTextView.isEnabled = sharedPreferences.isWhileLockedEnabled
-            allowWhileLockedSubTextTextView.isVisible = sharedPreferences.isWhileLockedEnabled
+            allowWhileLockedSubTextTextView.isEnabled = isEnabled && sharedPreferences.isWhileLockedEnabled
+            allowWhileLockedSubTextTextView.isVisible = isEnabled && sharedPreferences.isWhileLockedEnabled
             allowWhileLockedSwitch.isEnabled = isEnabled
             allowWhileLockedSwitch.isChecked = sharedPreferences.isWhileLockedEnabled
 
@@ -865,21 +908,21 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      *
      * The timeout preferences are enabled when the user has granted the [SYSTEM_ALERT_WINDOW][Manifest.permission.SYSTEM_ALERT_WINDOW] permission.
      *
-     * @param isAllPermissionsGranted [Boolean] `true` if all required permissions are granted, `false` otherwise.
+     * @param isEnabled [Boolean] `true` if all required permissions are granted, `false` otherwise.
      */
-    private fun changeTimeoutsPreferences(isAllPermissionsGranted: Boolean) {
+    private fun changeTimeoutsPreferences(isEnabled: Boolean) {
         with(binding) {
             val timeoutChoiceClickListener = View.OnClickListener {
                 it.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                 showChooseTimeoutDialog()
             }
 
-            timeoutChoiceCard.isEnabled = isAllPermissionsGranted
-            timeoutChoiceTextView.isEnabled = isAllPermissionsGranted
-            timeoutChoiceSubTextTextView.isEnabled = true
-            timeoutChoiceSubTextTextView.isVisible = isAllPermissionsGranted
+            timeoutChoiceCard.isEnabled = isEnabled
+            timeoutChoiceTextView.isEnabled = isEnabled
+            timeoutChoiceSubTextTextView.isEnabled = isEnabled
+            timeoutChoiceSubTextTextView.isVisible = isEnabled
             timeoutChoiceSubTextTextView.text = sharedPreferences.timeoutCheckBoxes.enabledDurations
-            timeoutChoiceButton.isEnabled = isAllPermissionsGranted
+            timeoutChoiceButton.isEnabled = isEnabled
 
             timeoutChoiceCard.setOnClickListener(timeoutChoiceClickListener)
             timeoutChoiceButton.setOnClickListener(timeoutChoiceClickListener)
