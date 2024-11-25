@@ -206,7 +206,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private var MaterialButton.animateVisibility: Boolean
         get() = isVisible
         set(value) {
-            if (value && viewModel.isRestartButtonEnabled.value == true) return
+            if (value && isEnabled) return
             val animationDuration = 300L
             val rotationFrom = if (value) -360f else 360f
             val rotationTo = if (value) 360f else -360f
@@ -737,8 +737,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             materialYouCard.isEnabled = isEnabled
             materialYouTextView.isEnabled = isEnabled
-            materialYouSubTextTextView.isVisible = !isEnabled || sharedPreferences.isMaterialYouEnabled
             materialYouSubTextTextView.isEnabled = isEnabled
+            materialYouSubTextTextView.isVisible = !isEnabled || sharedPreferences.isMaterialYouEnabled
             materialYouSubTextTextView.text = when {
                 isEnabled -> getString(R.string.material_you_pref_description)
                 else      -> getString(R.string.material_you_pref_not_available)
@@ -772,8 +772,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             overlayCard.isEnabled = isEnabled
             overlayTextView.isEnabled = isEnabled
-            overlaySubTextTextView.isEnabled = isEnabled
-            overlaySubTextTextView.isVisible = isEnabled
+            overlaySubTextTextView.isEnabled = sharedPreferences.isOverlayEnabled
+            overlaySubTextTextView.isVisible = sharedPreferences.isOverlayEnabled
             overlaySwitch.isEnabled = isEnabled
             overlaySwitch.isChecked = sharedPreferences.isOverlayEnabled
 
@@ -781,6 +781,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             overlaySwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
+                overlaySubTextTextView.isEnabled = isChecked
                 overlaySubTextTextView.isVisible = isChecked
                 sharedPreferences.isOverlayEnabled = isChecked
             }
@@ -804,8 +805,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             allowDimmingCard.isEnabled = isEnabled
             allowDimmingTextView.isEnabled = isEnabled
-            allowDimmingSubTextTextView.isEnabled = isEnabled
-            allowDimmingSubTextTextView.isVisible = isEnabled
+            allowDimmingSubTextTextView.isEnabled = sharedPreferences.isDimmingEnabled
+            allowDimmingSubTextTextView.isVisible = sharedPreferences.isDimmingEnabled
             allowDimmingSwitch.isEnabled = isEnabled
             allowDimmingSwitch.isChecked = sharedPreferences.isDimmingEnabled
 
@@ -813,6 +814,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             allowDimmingSwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
+                allowDimmingSubTextTextView.isEnabled = isChecked
                 allowDimmingSubTextTextView.isVisible = isChecked
                 sharedPreferences.isDimmingEnabled = isChecked
             }
@@ -836,8 +838,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             allowWhileLockedCard.isEnabled = isEnabled
             allowWhileLockedTextView.isEnabled = isEnabled
-            allowWhileLockedSubTextTextView.isEnabled = isEnabled
-            allowWhileLockedSubTextTextView.isVisible = isEnabled
+            allowWhileLockedSubTextTextView.isEnabled = sharedPreferences.isWhileLockedEnabled
+            allowWhileLockedSubTextTextView.isVisible = sharedPreferences.isWhileLockedEnabled
             allowWhileLockedSwitch.isEnabled = isEnabled
             allowWhileLockedSwitch.isChecked = sharedPreferences.isWhileLockedEnabled
 
@@ -845,6 +847,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             allowWhileLockedSwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
+                allowWhileLockedSubTextTextView.isEnabled = isChecked
                 allowWhileLockedSubTextTextView.isVisible = isChecked
                 sharedPreferences.isWhileLockedEnabled = isChecked
             }

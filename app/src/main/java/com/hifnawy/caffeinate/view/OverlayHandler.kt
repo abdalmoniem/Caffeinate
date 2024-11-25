@@ -14,6 +14,7 @@ import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.MaterialColors
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
+import com.google.android.material.R as materialR
 import com.hifnawy.caffeinate.databinding.OverlayBinding
 import com.hifnawy.caffeinate.controller.LocaleChangeReceiver
 import timber.log.Timber as Log
@@ -150,12 +151,12 @@ class OverlayHandler(private val context: Context) {
      * The resource ID of the color attribute is used to get the color from the theme. The color is used
      * to color the text of the overlay such that it is visible and readable on the screen.
      *
-     * The default value of this property is [com.google.android.material.R.attr.colorPrimary].
+     * The default value of this property is [materialR.attr.colorPrimary].
      *
      * @return [Int] The current resource ID of the color attribute used to color the overlay's text.
      */
     @setparam:AttrRes
-    private var textColorAttr: Int = com.google.android.material.R.attr.colorPrimary
+    private var textColorAttr: Int = materialR.attr.colorPrimary
         set(resId) {
             field = resId
             val dynamicColorContext = DynamicColors.wrapContextIfAvailable(overlayBinding.root.context)
@@ -196,7 +197,7 @@ class OverlayHandler(private val context: Context) {
             Log.d("Setting overlay text to $value, isRTL: ${CaffeinateApplication.isRTL}...")
 
             overlayBinding.remaining.text = value
-            overlayTextColorAttr = com.google.android.material.R.attr.colorPrimary
+            overlayTextColorAttr = materialR.attr.colorPrimary
         }
 
     /**
@@ -244,7 +245,7 @@ class OverlayHandler(private val context: Context) {
                 CaffeinateApplication.isRTL -> context.resources.getDimension(R.dimen.overlayTextSizeRTL)
                 else                        -> context.resources.getDimension(R.dimen.overlayTextSizeLTR)
             }
-            overlayTextColorAttr = com.google.android.material.R.attr.colorPrimary
+            overlayTextColorAttr = materialR.attr.colorPrimary
 
 
             windowManager.addView(overlayBinding.root, layoutParams)
