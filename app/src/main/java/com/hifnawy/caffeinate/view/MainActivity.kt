@@ -36,7 +36,6 @@ import com.afollestad.assent.Permission
 import com.afollestad.assent.askForPermissions
 import com.github.stephenvinouze.materialnumberpickercore.MaterialNumberPicker
 import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -187,52 +186,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         ) { checkBoxItem -> checkBoxItem.duration.toLocalizedFormattedTime(binding.root.context) }
 
     /**
-     * An extension property for [MaterialButton] that is used to set the visibility of the button.
-     *
-     * Sets the visibility of the receiver [MaterialButton] and animates it in/out by scaling it.
-     *
-     * - When the visibility is set to `true`, the button will be enabled and its visibility will be set to [View.VISIBLE].
-     * - When the visibility is set to `false`, the button will be disabled and its visibility will be set to [View.GONE].
-     *
-     * The animation duration is set to 100 milliseconds.
-     *
-     * @receiver [MaterialButton] The button to set the visibility of.
-     *
-     * @see MaterialButton
-     * @see MaterialButton.isEnabled
-     * @see MaterialButton.getVisibility
-     * @see MaterialButton.setVisibility
-     * @see MaterialButton.animate
-     * @see MaterialButton.setScaleX
-     * @see MaterialButton.setScaleY
-     * @see MaterialButton.getScaleX
-     * @see MaterialButton.getScaleY
-     */
-    private var MaterialButton.animateVisibility: Boolean
-        get() = isVisible
-        set(value) {
-            if (value && isEnabled) return
-            val animationDuration = 300L
-            val rotationFrom = if (value) -360f else 360f
-            val rotationTo = if (value) 360f else -360f
-            val scaleFrom = if (value) 0f else 1f
-            val scaleTo = if (value) 1f else 0f
-
-            rotation = rotationFrom
-            scaleX = scaleFrom
-            scaleY = scaleFrom
-
-            animate()
-                .rotation(rotationTo)
-                .scaleX(scaleTo)
-                .scaleY(scaleTo)
-                .setDuration(animationDuration)
-                .withStartAction { if (value && !isEnabled) viewModel.isRestartButtonEnabled.value = true }
-                .withEndAction { if (!value && isEnabled) viewModel.isRestartButtonEnabled.value = false }
-                .start()
-        }
-
-    /**
      * Called when the activity is starting.
      *
      * @param savedInstanceState [Bundle] If the activity is being re-initialized after
@@ -257,35 +210,61 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             appBar.post {
                 viewModel.run {
-                    appBarVerticalOffset.observe(this@MainActivity) { verticalOffset ->
-                        with(appBar) {
+                    with(appBar) {
+                        appBarVerticalOffset.observe(this@MainActivity) { verticalOffset ->
                             val params = layoutParams as CoordinatorLayout.LayoutParams
                             val behavior = params.behavior as AppBarLayout.Behavior
                             behavior.topAndBottomOffset = verticalOffset
                             requestLayout()
                         }
-                    }
 
-                    isRestartButtonEnabled.observe(this@MainActivity) { isButtonEnabled ->
-                        with(restartButton) {
-                            isEnabled = isButtonEnabled
-                            isVisible = isButtonEnabled
+                        addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+                            viewModel.appBarVerticalOffset.value = verticalOffset
+                            val totalScrollRange = appBarLayout.totalScrollRange
+                            val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.5f)
+
+                            toolbar.navigationIcon = when (caffeinateApplication.lastStatusUpdate) {
+                                is ServiceStatus.Stopped -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_off)
+                                is ServiceStatus.Running -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_on)
+                            }?.run {
+                                val bitmap = toBitmap((intrinsicWidth * collapseFactor).toInt(), (intrinsicHeight * collapseFactor).toInt())
+                                bitmap.toDrawable(resources)
+                            }
                         }
                     }
-                }
-            }
 
-            appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
-                viewModel.appBarVerticalOffset.value = verticalOffset
-                val totalScrollRange = appBarLayout.totalScrollRange
-                val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.5f)
+                    with(restartButton) {
+                        isRestartButtonEnabled.observe(this@MainActivity) { isButtonEnabled ->
+                            if (isButtonEnabled && isEnabled) return@observe
+                            val animationDuration = 300L
+                            val rotationFrom = if (isButtonEnabled) -360f else 360f
+                            val rotationTo = if (isButtonEnabled) 360f else -360f
+                            val scaleFrom = if (isButtonEnabled) 0f else 1f
+                            val scaleTo = if (isButtonEnabled) 1f else 0f
 
-                toolbar.navigationIcon = when (caffeinateApplication.lastStatusUpdate) {
-                    is ServiceStatus.Stopped -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_off)
-                    is ServiceStatus.Running -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_on)
-                }?.run {
-                    val bitmap = toBitmap((intrinsicWidth * collapseFactor).toInt(), (intrinsicHeight * collapseFactor).toInt())
-                    bitmap.toDrawable(resources)
+                            rotation = rotationFrom
+                            scaleX = scaleFrom
+                            scaleY = scaleFrom
+
+                            animate()
+                                .rotation(rotationTo)
+                                .scaleX(scaleTo)
+                                .scaleY(scaleTo)
+                                .setDuration(animationDuration)
+                                .withStartAction {
+                                    if (isButtonEnabled && !isEnabled) {
+                                        isEnabled = true
+                                        isVisible = true
+                                    }
+                                }.withEndAction {
+                                    if (!isButtonEnabled && isEnabled) {
+                                        isEnabled = false
+                                        isVisible = false
+                                    }
+                                }
+                                .start()
+                        }
+                    }
                 }
             }
         }
@@ -446,6 +425,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      * @return `true` if the menu item was successfully handled, `false` otherwise.
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        binding.root.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
         when (item.itemId) {
             R.id.about -> AboutBottomSheetFragment.newInstance.show(supportFragmentManager, "about")
         }
@@ -506,7 +487,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             Log.d("Status Changed: $status")
 
-            restartButton.animateVisibility = status.run { this is ServiceStatus.Running && isCountingDown && !isRestarted }
+            viewModel.isRestartButtonEnabled.value = (status as? ServiceStatus.Running)?.run {
+                !isRestarted && isCountingDown || restartButton.isEnabled && (isCountingDown || isRestarted)
+            } ?: false
+
             toggleButton.text = when (status) {
                 is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
                 is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(root.context)

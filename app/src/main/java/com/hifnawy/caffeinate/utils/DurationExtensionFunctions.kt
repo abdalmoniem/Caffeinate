@@ -23,8 +23,8 @@ object DurationExtensionFunctions {
      * @return [String] the formatted string.
      */
     fun Duration.toFormattedTime(hideLegend: Boolean = false): String = toComponents { hours, minutes, seconds, _ ->
-        when (this) {
-            Duration.INFINITE -> "∞"
+        when {
+            isInfinite() -> "Ꝏ"
             else              -> {
                 val format = when {
                     hideLegend || CaffeinateApplication.isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
@@ -55,8 +55,8 @@ object DurationExtensionFunctions {
         val minuteLetter = context.getString(R.string.time_format_minute_letter)
         val secondLetter = context.getString(R.string.time_format_second_letter)
 
-        when (this) {
-            Duration.INFINITE -> "∞"
+        when {
+            isInfinite() -> "Ꝏ"
             else              -> {
                 val format = when {
                     hideLegend || CaffeinateApplication.isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"

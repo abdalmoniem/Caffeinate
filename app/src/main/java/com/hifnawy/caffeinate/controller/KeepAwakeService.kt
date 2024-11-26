@@ -401,9 +401,10 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * @param status [ServiceStatus] the new status of the service
      */
     override fun onServiceStatusUpdated(status: ServiceStatus) {
+        Log.d("Status Changed: $status")
+
         when (status) {
             is ServiceStatus.Running -> {
-                Log.d("duration: ${status.remaining.toFormattedTime()}, status: $status, isIndefinite: ${status.remaining == Duration.INFINITE}")
                 notificationManager.notify(NOTIFICATION_ID, buildForegroundNotification(status))
                 if (isOverlayEnabled) overlayHandler.overlayText =
                         status.remaining.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext)
@@ -431,23 +432,26 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      */
     private fun prepareService() = caffeinateApplication.run {
         Log.d("starting ${this@KeepAwakeService::class.simpleName} service...")
-
-
-        lastStatusUpdate = ServiceStatus.Running(timeout).also { status ->
-            Log.d("status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
-
-            Log.d("sending foreground notification...")
-            startForeground(NOTIFICATION_ID, buildForegroundNotification(status))
-            Log.d("foreground notification sent!")
-
-            keepAwakeServiceObservers.addObserver(this@KeepAwakeService)
-            sharedPrefsObservers.addObserver(this@KeepAwakeService)
-
-            localeChangeReceiver.isRegistered = true
-            onIsWhileLockedEnabledUpdated(isWhileLockedEnabled)
-
-            startCaffeine(status.remaining)
+        val status = when (val status = lastStatusUpdate) {
+            is ServiceStatus.Running -> status.apply { remaining = timeout }
+            is ServiceStatus.Stopped -> ServiceStatus.Running(timeout)
         }
+
+        lastStatusUpdate = status
+
+        Log.d("status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
+
+        Log.d("sending foreground notification...")
+        startForeground(NOTIFICATION_ID, buildForegroundNotification(status))
+        Log.d("foreground notification sent!")
+
+        keepAwakeServiceObservers.addObserver(this@KeepAwakeService)
+        sharedPrefsObservers.addObserver(this@KeepAwakeService)
+
+        localeChangeReceiver.isRegistered = true
+        onIsWhileLockedEnabledUpdated(isWhileLockedEnabled)
+
+        startCaffeine(status.remaining)
 
         Log.d("${this@KeepAwakeService::class.simpleName} service started!")
     }
@@ -488,7 +492,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                 REQUEST_CODE_NEXT_TIMEOUT.ordinal
         )
         val notificationActionRestartTimeout = when {
-            status.run { this is ServiceStatus.Running && isCountingDown } -> NotificationUtils.getNotificationAction(
+            status.run { this is ServiceStatus.Running && !isIndefinite } -> NotificationUtils.getNotificationAction(
                     this,
                     KeepAwakeService::class.java,
                     ACTION_RESTART.name,
@@ -497,7 +501,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                     REQUEST_CODE_RESTART_TIMEOUT.ordinal
             )
 
-            else                                                                     -> null
+            else                                                           -> null
         }
         val notificationActionToggleDimming = NotificationUtils.getNotificationAction(
                 this,
@@ -584,8 +588,8 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
         ).apply {
             Log.d("acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingEnabled: $isDimmingEnabled...")
             when {
-                duration == Duration.INFINITE -> acquire()
-                else                          -> acquire(duration.inWholeMilliseconds)
+                duration.isInfinite() -> acquire()
+                else                  -> acquire(duration.inWholeMilliseconds)
             }
             Log.d("${this@KeepAwakeService::wakeLock.name} acquired, isDimmingEnabled: $isDimmingEnabled!")
         }
@@ -602,8 +606,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * @param duration [Duration] the duration of the wake lock.
      */
     private fun startCaffeine(duration: Duration) = caffeinateApplication.run {
-        val isIndefinite = duration == Duration.INFINITE
-        Log.d("starting ${localizedApplicationContext.getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
+        Log.d("starting ${localizedApplicationContext.getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: ${duration.isInfinite()}")
 
         acquireWakeLock(duration)
 
@@ -624,6 +627,8 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
         Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} started!")
 
         Log.d("${localizedApplicationContext.getString(R.string.app_name)} started!")
+
+        sharedPreferences.isServiceRunning = true
     }
 
     /**
@@ -664,6 +669,8 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
         Log.d("${localizedApplicationContext.getString(R.string.app_name)} stopped!")
 
         if (isOverlayEnabled) overlayHandler.hideOverlay()
+
+        sharedPreferences.isServiceRunning = false
 
         stopSelf()
     }

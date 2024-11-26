@@ -3,14 +3,6 @@ package com.hifnawy.caffeinate.controller
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.hifnawy.caffeinate.CaffeinateApplication
-import com.hifnawy.caffeinate.view.CheckBoxItem
-import com.hifnawy.caffeinate.view.WidgetConfiguration
-import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
-import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
-import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableList
-import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableMap
-import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableList
-import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableMap
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.ContrastLevel.HIGH
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.ContrastLevel.MEDIUM
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.ContrastLevel.STANDARD
@@ -28,6 +20,14 @@ import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.WIDG
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.Theme.DARK
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.Theme.LIGHT
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.Theme.SYSTEM_DEFAULT
+import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
+import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
+import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableList
+import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableMap
+import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableList
+import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableMap
+import com.hifnawy.caffeinate.view.CheckBoxItem
+import com.hifnawy.caffeinate.view.WidgetConfiguration
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -387,12 +387,13 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
     var isServiceRunning: Boolean
         get() = sharedPreferences.getBoolean(IS_SERVICE_RUNNING.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(IS_SERVICE_RUNNING.name, value).apply()
-            val timeout = when (value) {
-                true  -> (caffeinateApplication.lastStatusUpdate as ServiceStatus.Running).remaining.inWholeSeconds
-                false -> -1L
+            val status = caffeinateApplication.lastStatusUpdate
+            val timeout = when {
+                status is ServiceStatus.Running && value -> status.remaining.inWholeSeconds
+                else                                     -> -1L
             }
 
+            sharedPreferences.edit().putBoolean(IS_SERVICE_RUNNING.name, value).apply()
             sharedPreferences.edit().putLong(LAST_REMAINING_TIMEOUT.name, timeout).apply()
         }
 

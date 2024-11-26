@@ -92,15 +92,9 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      * @return [Job] the [Job] that is running the timeout loop.
      */
     fun start(duration: Duration) = launch {
-        val isIndefinite = duration == Duration.INFINITE
+        Log.d("timeout initialized with duration: ${duration.toFormattedTime()}, isIndefinite: ${duration.isInfinite()}")
 
-        Log.d("timeout initialized with duration: ${duration.toFormattedTime()}, isIndefinite: $isIndefinite")
-        val durationSequence = when {
-            isIndefinite -> generateSequence(Duration.INFINITE) { it - 1.seconds }
-            else         -> generateSequence(duration) { it - 1.seconds }
-        }
-
-        durationSequence.forEach { duration ->
+        generateSequence(duration) { it - 1.seconds }.forEach { duration ->
             update(duration)
 
             delay(1.seconds)
@@ -116,24 +110,21 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      *
      * If the timeout job was already running, it will be stopped and restarted with the new duration.
      *
-     * @param remaining [Duration] the remaining duration for which the service is running.
+     * @param newRemaining [Duration] the new remaining duration for which the service is running.
      */
-    private suspend fun update(remaining: Duration) = caffeinateApplication.run {
-        val isIndefinite = remaining == Duration.INFINITE
-
-        withContext(Dispatchers.Main) {
-            when (lastStatusUpdate) {
-                is ServiceStatus.Running -> {
-                    when (remaining) {
-                        0.seconds -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
-                        else      -> (lastStatusUpdate as? ServiceStatus.Running)?.remaining = remaining
-                    }
+    private suspend fun update(newRemaining: Duration) = withContext(Dispatchers.Main) {
+        val status = caffeinateApplication.lastStatusUpdate
+        when (status) {
+            is ServiceStatus.Running -> {
+                when (newRemaining) {
+                    0.seconds -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
+                    else      -> status.run { if (newRemaining < remaining || !isRestarted) remaining = newRemaining }
                 }
-
-                is ServiceStatus.Stopped -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_START)
             }
+
+            is ServiceStatus.Stopped -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_START)
         }
 
-        Log.d("${currentTime}: duration: ${remaining.toFormattedTime()}, status: $lastStatusUpdate, isIndefinite: $isIndefinite")
+        Log.d("${currentTime}: duration: ${newRemaining.toFormattedTime()}, status: $status, isIndefinite: ${newRemaining.isInfinite()}")
     }
 }

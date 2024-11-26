@@ -34,7 +34,7 @@ to change the device settings. It can be toggled at various places:
 * Switch timeouts from the `quick settings tile` or the `button` in the app. clicking them, selects the
   next timeout and after `1 second` the timeout will start, if the `quick settings tile` or the `button`
   are clicked after starting, the timeout will stop.
-* Available timeouts are `[30 seconds, 05 minutes, 10 minutes, 15 minutes, 30 minutes, 60 minutes, ∞]`
+* Available timeouts are `[30 seconds, 05 minutes, 10 minutes, 15 minutes, 30 minutes, 60 minutes, Ꝏ]`
 * An option to enable the screen to dim while the `WakeLock` is acquired
 * An option to enable holding the `WakeLock` if the screen is locked, so that the screen will keep on
   after unlocking, default behaviour is that the `WakeLock` is released when the screen is locked

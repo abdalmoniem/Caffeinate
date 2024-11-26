@@ -5,7 +5,6 @@ import com.hifnawy.caffeinate.controller.ServiceStatus.Running.RemainingValueObs
 import com.hifnawy.caffeinate.controller.ServiceStatus.Stopped
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Represents the status of the Caffeinate service.
@@ -35,7 +34,7 @@ sealed class ServiceStatus {
      *
      * @author AbdAlMoniem AlHifnawy
      */
-    data class Running(private val startTimeout: Duration) : ServiceStatus() {
+    data class Running(private var startTimeout: Duration) : ServiceStatus() {
 
         /**
          * Interface for observing changes to the remaining timeout duration while the service is running.
@@ -63,6 +62,17 @@ sealed class ServiceStatus {
         }
 
         /**
+         * Indicates whether the service is running indefinitely.
+         *
+         * This property returns `true` if the remaining duration is infinite,
+         * which indicates that the service is running indefinitely without a timeout.
+         *
+         * @return [Boolean] `true` if the service is running indefinitely, `false` otherwise.
+         */
+        val isIndefinite: Boolean
+            get() = remaining.isInfinite()
+
+        /**
          * Indicates whether the service is currently counting down or not.
          *
          * If the service is currently running and the remaining duration is less than the
@@ -73,8 +83,9 @@ sealed class ServiceStatus {
          * @see ServiceStatus.Running.remaining
          * @see ServiceStatus.Running.startTimeout
          */
-        val isCountingDown: Boolean
-            get() = 0.seconds <= remaining && remaining <= startTimeout && startTimeout != Duration.INFINITE
+        var isCountingDown = false
+            get() = remaining < prevRemaining && remaining in Duration.ZERO..startTimeout && startTimeout.isFinite()
+            private set
 
         /**
          * Indicates whether the service is currently restarted or not.
@@ -87,8 +98,29 @@ sealed class ServiceStatus {
          * @see ServiceStatus.Running.remaining
          * @see ServiceStatus.Running.startTimeout
          */
-        val isRestarted: Boolean
-            get() = remaining == startTimeout && startTimeout != Duration.INFINITE
+        var isRestarted = false
+            get() = remaining > prevRemaining && remaining == startTimeout && startTimeout.isFinite()
+            private set
+
+        /**
+         * The remaining timeout duration.
+         *
+         * This property is updated whenever the service is running and the remaining timeout duration
+         * changes. The property is also settable, and setting it will trigger the
+         * [onRemainingUpdated] callback.
+         *
+         * @see onRemainingUpdated
+         */
+        var remaining = startTimeout
+            set(value) {
+                prevRemaining = field
+                field = value
+
+                onRemainingUpdated?.onRemainingUpdated()
+
+                if (prevRemaining != field) return
+                startTimeout = field
+            }
 
         /**
          * A callback that is called when the remaining timeout duration is updated.
@@ -101,30 +133,29 @@ sealed class ServiceStatus {
         var onRemainingUpdated: RemainingValueObserver? = null
 
         /**
-         * The remaining timeout duration.
+         * The previous remaining timeout duration.
          *
          * This property is updated whenever the service is running and the remaining timeout duration
-         * changes. The property is also settable, and setting it will trigger the
-         * [onRemainingUpdated] callback.
+         * changes. It is used to determine whether the service is currently counting down or
+         * restarted.
          *
-         * @see onRemainingUpdated
+         * @see isCountingDown
+         * @see isRestarted
          */
-        var remaining: Duration = startTimeout
-            set(value) {
-                field = value
-
-                onRemainingUpdated?.onRemainingUpdated()
-            }
+        private var prevRemaining = Duration.INFINITE
 
         /**
          * Returns a string in the format
-         * "Running([Duration.toFormattedTime][com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime])".
+         * "Running([remaining].[toFormattedTime]
+         * , isRestarted: [isRestarted], isCountingDown: [isCountingDown], isIndefinite: [isIndefinite])".
          *
          * @return [String] a string representation of the object.
          */
-        override fun toString() =
-                "${Running::class.java.simpleName}(${::remaining.name}: ${remaining.toFormattedTime()}, " +
-                "isIndefinite: ${remaining == Duration.INFINITE})"
+        override fun toString() = Running::class.java.simpleName +
+                                  "(${::remaining.name}: ${remaining.toFormattedTime()}, " +
+                                  "${::isRestarted.name}: $isRestarted, " +
+                                  "${::isCountingDown.name}: $isCountingDown, " +
+                                  "${::isIndefinite.name}: $isIndefinite)"
     }
 
     /**
