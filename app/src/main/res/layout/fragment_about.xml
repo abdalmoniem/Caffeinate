@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:layout_gravity="bottom"
     android:clipToPadding="false"
-    android:padding="30dp"
     app:layout_behavior="@string/bottom_sheet_behavior"
     tools:context=".view.AboutBottomSheetFragment">
 
@@ -18,11 +17,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/contentCard"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginHorizontal="30dp"
         app:cardElevation="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -105,7 +104,7 @@
                 android:layout_marginTop="30dp"
                 android:backgroundTint="?colorTertiary"
                 android:elevation="5dp"
-                android:tag="https://github.com/abdalmoniem/Caffeinate"
+                android:tag="@string/github_link"
                 app:cornerRadius="20dp"
                 app:icon="@drawable/github_icon"
                 app:iconSize="32dp"
@@ -124,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:backgroundTint="?colorTertiary"
                 android:elevation="5dp"
-                android:tag="https://crowdin.com/project/caffeinate"
+                android:tag="@string/crowdin_link"
                 app:cornerRadius="20dp"
                 app:icon="@drawable/crowdin_icon"
                 app:iconSize="32dp"
@@ -142,7 +141,7 @@
                 android:layout_height="wrap_content"
                 android:backgroundTint="?colorTertiary"
                 android:elevation="5dp"
-                android:tag="https://f-droid.org/packages/com.hifnawy.caffeinate"
+                android:tag="@string/f_droid_link"
                 app:cornerRadius="20dp"
                 app:icon="@drawable/fdroid_icon"
                 app:iconSize="32dp"
@@ -160,7 +159,7 @@
                 android:layout_height="wrap_content"
                 android:backgroundTint="?colorTertiary"
                 android:elevation="5dp"
-                android:tag="https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate"
+                android:tag="@string/izzy_on_droid_link"
                 app:cornerRadius="20dp"
                 app:icon="@drawable/izzyondroid_icon"
                 app:iconSize="32dp"

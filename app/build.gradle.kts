@@ -1,6 +1,71 @@
+import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import java.io.FileInputStream
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Properties
+
+/**
+ * The package name of the application.
+ *
+ * This constant holds the package name used throughout the application.
+ * It is primarily used for identifying the application's namespace in
+ * Android and is essential for intents, broadcasting, and other system
+ * interactions.
+ */
+private val packageName = "com.hifnawy.caffeinate"
+
+/**
+ * A DateTimeFormatter for formatting the current date and time.
+ *
+ * This formatter is used to generate a string representation of the current date and time
+ * in the format "dd/MMM/yyyy_hh:mm:ss.S a". This format is used to log the start of the build
+ * process.
+ *
+ * @see LocalDateTime
+ * @see DateTimeFormatter
+ */
+private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy_hh:mm:ss.S a")
+
+/**
+ * The current date and time at the start of the build process.
+ *
+ * This field is used to generate a string representation of the current date and time
+ * in the format "dd/MMM/yyyy_hh:mm:ss.S a". This format is used to log the start of the build
+ * process.
+ *
+ * @see LocalDateTime
+ * @see DateTimeFormatter
+ */
+private val buildDateAndTime = LocalDateTime.now()
+
+/**
+ * The file object representing the local.properties file in the root project directory.
+ *
+ * This file is used to store custom configuration properties for the project, such as
+ * signing configurations, debugging options, and other local settings. The properties
+ * are loaded during the build process to configure the build environment.
+ *
+ * @see Properties
+ * @see FileInputStream
+ */
+private val localPropertiesFile = rootProject.file("local.properties")
+
+/**
+ * A flag indicating whether debugging is enabled in the release variant.
+ *
+ * @see ApplicationBuildType.isDebuggable
+ */
+private var isDebuggingEnabled = false
+
+/**
+ * A flag indicating whether signing is enabled in the release variant.
+ *
+ * @see ApplicationBuildType.signingConfig
+ */
+private var isSigningConfigEnabled = false
+
+project.logger.lifecycle("INFO: Build Started at: ${buildDateAndTime.format(dateTimeFormatter)}")
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -8,22 +73,6 @@ plugins {
 }
 
 android {
-    namespace = "com.hifnawy.caffeinate"
-    compileSdk = 35
-
-    defaultConfig {
-        applicationId = "com.hifnawy.caffeinate"
-        minSdk = 24
-        targetSdk = 35
-        versionCode = 30
-        versionName = "1.8.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-    val localPropertiesFile = rootProject.file("local.properties")
-    var isDebuggingEnabled = false
-    var isSigningConfigEnabled = false
-
     if (localPropertiesFile.exists()) {
         val keystoreProperties = Properties().apply { load(FileInputStream(localPropertiesFile)) }
         val signingProperties = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
@@ -57,6 +106,21 @@ android {
                 keystoreProperties.getProperty("isDebuggingEnabled")?.toBoolean() ?: false
     } else {
         project.logger.warn("WARNING: local.properties not found, add local.properties in root directory to enable signing.")
+    }
+
+    defaultConfig {
+        namespace = packageName
+        applicationId = namespace
+
+        minSdk = 24
+        compileSdk = 35
+        targetSdk = 35
+        versionCode = 30
+        versionName = "1.8.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "BUILD_DATE_AND_TIME", "\"${buildDateAndTime.format(dateTimeFormatter)}\"")
     }
 
     sourceSets.forEach { sourceSet ->

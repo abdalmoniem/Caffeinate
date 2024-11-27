@@ -1,8 +1,6 @@
 package com.hifnawy.caffeinate.view
 
 import android.Manifest
-import android.animation.Animator
-import android.animation.ValueAnimator
 import android.app.ActivityManager
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,28 +11,21 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.HapticFeedbackConstants
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
-import android.widget.NumberPicker
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.animation.addListener
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.afollestad.assent.Permission
 import com.afollestad.assent.askForPermissions
-import com.github.stephenvinouze.materialnumberpickercore.MaterialNumberPicker
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.MaterialColors
@@ -48,8 +39,6 @@ import com.hifnawy.caffeinate.controller.ServiceStatusObserver
 import com.hifnawy.caffeinate.controller.SharedPrefsManager
 import com.hifnawy.caffeinate.controller.SharedPrefsObserver
 import com.hifnawy.caffeinate.databinding.ActivityMainBinding
-import com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding
-import com.hifnawy.caffeinate.databinding.DialogSetCustomTimeoutBinding
 import com.hifnawy.caffeinate.utils.ActivityExtensionFunctions.setActivityTheme
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
@@ -59,11 +48,6 @@ import com.hifnawy.caffeinate.viewModel.MainActivityViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
-import kotlin.random.Random
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 import com.google.android.material.R as materialR
 import timber.log.Timber as Log
 
@@ -487,9 +471,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             Log.d("Status Changed: $status")
 
-            viewModel.isRestartButtonEnabled.value = (status as? ServiceStatus.Running)?.run {
-                !isRestarted && isCountingDown || restartButton.isEnabled && (isCountingDown || isRestarted)
-            } ?: false
+            viewModel.isRestartButtonEnabled.value =
+                    (status as? ServiceStatus.Running)?.run { (!isRestarted && isCountingDown) || isRestarted } ?: false
 
             toggleButton.text = when (status) {
                 is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
@@ -896,9 +879,30 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      */
     private fun changeTimeoutsPreferences(isEnabled: Boolean) {
         with(binding) {
-            val timeoutChoiceClickListener = View.OnClickListener {
-                it.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                showChooseTimeoutDialog()
+            val timeoutChoiceClickListener = View.OnClickListener { view ->
+                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+                TimeoutsSelectionFragment.getInstance(caffeinateApplication) { checkBoxItems ->
+                    caffeinateApplication.run {
+                        timeoutCheckBoxes.clear()
+
+                        checkBoxItems.forEach { checkBoxItem -> timeoutCheckBoxes.add(checkBoxItem.copy()) }
+
+                        timeoutChoiceSubTextTextView.text = timeoutCheckBoxes.enabledDurations
+
+                        checkBoxItems.find { checkBoxItem -> checkBoxItem.duration == timeout && !checkBoxItem.isChecked }?.let {
+                            when (lastStatusUpdate) {
+                                is ServiceStatus.Running -> KeepAwakeService.startNextTimeout(this, debounce = false)
+                                else                     -> timeout = checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+                            }
+                        } ?: when (lastStatusUpdate) {
+                            is ServiceStatus.Stopped -> timeout = checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+                            else                     -> Unit // do nothing if the service is running
+                        }
+
+                        sharedPreferences.timeoutCheckBoxes = timeoutCheckBoxes
+                    }
+                }.show(supportFragmentManager, "about")
             }
 
             timeoutChoiceCard.isEnabled = isEnabled
@@ -910,298 +914,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
             timeoutChoiceCard.setOnClickListener(timeoutChoiceClickListener)
             timeoutChoiceButton.setOnClickListener(timeoutChoiceClickListener)
-        }
-    }
-
-    /**
-     * Shows a dialog to allow the user to choose a timeout duration.
-     *
-     * This dialog will contain a list of checkboxes, each representing a different timeout duration that the user can select. The list of durations
-     * is stored in the app's SharedPreferences.
-     *
-     * When the dialog is shown, the currently selected timeout duration is checked in the list. When the user selects a new timeout duration, the app
-     * will start a new [TimeoutJob][com.hifnawy.caffeinate.controller.TimeoutJob] with the selected duration.
-     *
-     * If the user has not selected any timeout durations before, the dialog will be empty and the user will be prompted to select at least one
-     * duration.
-     *
-     * This method is called when the user clicks the "Choose timeout" button in the app's UI.
-     */
-    private fun showChooseTimeoutDialog() {
-        with(binding) {
-            timeoutChoiceCard.isClickable = false
-            timeoutChoiceButton.isClickable = false
-            val dialogBinding = DialogChooseTimeoutsBinding.inflate(LayoutInflater.from(root.context))
-            val dialog = MaterialAlertDialogBuilder(root.context)
-                .setView(dialogBinding.root)
-                .create()
-                .apply {
-                    setCancelable(false)
-                    window?.setLayout(
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                    )
-                }
-
-            with(dialogBinding) {
-                val checkBoxAdapter = CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes) { checkBoxItems ->
-                    checkBoxItems.isEmpty().let { isEmpty ->
-                        dialogButtonOk.isEnabled = !isEmpty
-                        dialogButtonRemoveTimeout.isEnabled = !isEmpty
-                    }
-                }
-
-                timeoutsRecyclerView.layoutManager = LinearLayoutManager(root.context)
-                timeoutsRecyclerView.adapter = checkBoxAdapter
-
-                dialogButtonRemoveTimeout.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-
-                    checkBoxAdapter.checkBoxItems
-                        .filter { checkBoxItem -> checkBoxItem.isChecked }
-                        .forEach { checkBoxItem -> checkBoxAdapter.removeCheckBox(checkBoxItem) }
-                }
-
-                dialogButtonAddTimeout.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-
-                    showSetCustomTimeoutDialog(
-                            valueSetCallback = { timeout ->
-                                checkBoxAdapter.addCheckBox(
-                                        CheckBoxItem(
-                                                text = timeout.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext),
-                                                isChecked = true,
-                                                isEnabled = true,
-                                                duration = timeout
-                                        )
-                                )
-                            },
-                            onDialogStart = { _, _ -> dialogButtonAddTimeout.isClickable = false },
-                            onDialogDismiss = { _, _ -> dialogButtonAddTimeout.isClickable = true }
-                    )
-                }
-
-                dialogButtonCancel.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                    dialog.dismiss()
-                    timeoutChoiceCard.isClickable = true
-                    timeoutChoiceButton.isClickable = true
-                }
-
-                dialogButtonOk.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-
-                    caffeinateApplication.run {
-                        timeoutCheckBoxes.clear()
-                        checkBoxAdapter.checkBoxItems.forEach { checkBoxItem -> timeoutCheckBoxes.add(checkBoxItem.copy()) }
-
-                        timeoutChoiceSubTextTextView.text = timeoutCheckBoxes.enabledDurations
-
-                        checkBoxAdapter.checkBoxItems
-                            .find { checkBoxItem -> checkBoxItem.duration == timeout && !checkBoxItem.isChecked }
-                            ?.let {
-                                when (lastStatusUpdate) {
-                                    is ServiceStatus.Running -> KeepAwakeService.startNextTimeout(this, debounce = false)
-                                    else                     -> timeout =
-                                            checkBoxAdapter.checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
-                                }
-                            }
-                        ?: when (lastStatusUpdate) {
-                            is ServiceStatus.Stopped -> timeout =
-                                    checkBoxAdapter.checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
-
-                            else                     -> Unit // do nothing if the service is running
-                        }
-
-                        sharedPreferences.timeoutCheckBoxes = timeoutCheckBoxes
-
-                        dialog.dismiss()
-                        timeoutChoiceCard.isClickable = true
-                        timeoutChoiceButton.isClickable = true
-                    }
-                }
-            }
-
-            dialog.show()
-        }
-    }
-
-    /**
-     * Shows a dialog to the user to let them choose a custom timeout.
-     *
-     * @param valueSetCallback [(timeout: Duration) -> Unit][valueSetCallback] a callback that will be called when the user sets a value; the callback
-     * will be passed the number of hours, minutes and
-     * seconds that the user has chosen
-     * @param onDialogStart [(dialog: AlertDialog, dialogBinding: DialogSetCustomTimeoutBinding) -> Unit][onDialogStart] a callback that will be
-     * called when the dialog is shown
-     * @param onDialogDismiss [(dialog: AlertDialog, dialogBinding: DialogSetCustomTimeoutBinding) -> Unit][onDialogDismiss] a callback that will be
-     * called when the dialog is dismissed
-     */
-    private fun showSetCustomTimeoutDialog(
-            valueSetCallback: (timeout: Duration) -> Unit,
-            onDialogStart: ((dialog: AlertDialog, dialogBinding: DialogSetCustomTimeoutBinding) -> Unit)? = null,
-            onDialogDismiss: ((dialog: AlertDialog, dialogBinding: DialogSetCustomTimeoutBinding) -> Unit)? = null,
-    ) {
-        with(binding) {
-            val dialogBinding = DialogSetCustomTimeoutBinding.inflate(LayoutInflater.from(root.context))
-            val dialog = MaterialAlertDialogBuilder(root.context)
-                .setView(dialogBinding.root)
-                .create()
-                .apply {
-                    setCancelable(false)
-                    window?.setLayout(
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                    )
-                }
-
-            onDialogStart?.invoke(dialog, dialogBinding)
-
-            with(dialogBinding) {
-                val onNumberPickerAnimationStart = { _: Animator -> dialogButtonRandomTimeout.isEnabled = false }
-                val onNumberPickerAnimationEnd = { _: Animator -> dialogButtonRandomTimeout.isEnabled = true }
-
-                hoursNumberPicker.setFormatter { value -> "%02d".format(value) }
-                minutesNumberPicker.setFormatter { value -> "%02d".format(value) }
-                secondsNumberPicker.setFormatter { value -> "%02d".format(value) }
-
-                NumberPicker.OnValueChangeListener { numberPicker, _, _ ->
-                    numberPicker.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                }.run {
-                    hoursNumberPicker.setOnValueChangedListener(this)
-                    minutesNumberPicker.setOnValueChangedListener(this)
-                    secondsNumberPicker.setOnValueChangedListener(this)
-                }
-
-                hoursNumberPicker.animateRandom(onAnimationStart = onNumberPickerAnimationStart, onAnimationEnd = onNumberPickerAnimationEnd)
-                minutesNumberPicker.animateRandom(onAnimationStart = onNumberPickerAnimationStart, onAnimationEnd = onNumberPickerAnimationEnd)
-                secondsNumberPicker.animateRandom(onAnimationStart = onNumberPickerAnimationStart, onAnimationEnd = onNumberPickerAnimationEnd)
-
-                dialogButtonRandomTimeout.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-
-                    hoursNumberPicker.animateFrom(
-                            hoursNumberPicker.value,
-                            onAnimationStart = onNumberPickerAnimationStart,
-                            onAnimationEnd = onNumberPickerAnimationEnd
-                    )
-                    minutesNumberPicker.animateFrom(
-                            minutesNumberPicker.value,
-                            onAnimationStart = onNumberPickerAnimationStart,
-                            onAnimationEnd = onNumberPickerAnimationEnd
-                    )
-                    secondsNumberPicker.animateFrom(
-                            secondsNumberPicker.value,
-                            onAnimationStart = onNumberPickerAnimationStart,
-                            onAnimationEnd = onNumberPickerAnimationEnd
-                    )
-                }
-
-                dialogButtonCancel.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-
-                    dialog.dismiss()
-
-                    onDialogDismiss?.invoke(dialog, dialogBinding)
-                }
-
-                dialogButtonOk.setOnClickListener { buttonView ->
-                    buttonView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                    val timeout = when {
-                        hoursNumberPicker.value + minutesNumberPicker.value + secondsNumberPicker.value == 0 -> Duration.INFINITE
-                        else                                                                                 ->
-                            hoursNumberPicker.value.hours + minutesNumberPicker.value.minutes + secondsNumberPicker.value.seconds
-                    }
-
-                    valueSetCallback(timeout)
-
-                    dialog.dismiss()
-
-                    onDialogDismiss?.invoke(dialog, dialogBinding)
-                }
-            }
-
-            dialog.show()
-        }
-    }
-
-    /**
-     * Animates the value of this [MaterialNumberPicker] from the closest boundary (either [maxValue][MaterialNumberPicker.getMaxValue] or
-     * [minValue][MaterialNumberPicker.getMinValue]) to a value chosen randomly between [minValue][MaterialNumberPicker.getMinValue] and
-     * [maxValue][MaterialNumberPicker.getMaxValue]. if it is closer to that boundary.
-     *
-     * @param animationDuration [Long] The duration of the animation in milliseconds. Defaults to `1000L`.
-     * @param onAnimationStart [(animator: Animator) -> Unit][onAnimationStart] A callback that will be called when the animation starts.
-     * Defaults to an empty function.
-     * @param onAnimationEnd [(animator: Animator) -> Unit][onAnimationEnd] A callback that will be called when the animation ends.
-     * Defaults to an empty function.
-     */
-    private fun MaterialNumberPicker.animateRandom(
-            animationDuration: Long = 1000L,
-            onAnimationStart: (animator: Animator) -> Unit = {},
-            onAnimationEnd: (animator: Animator) -> Unit = {},
-    ) {
-        val toValue = Random.nextInt(minValue, maxValue)
-
-        val (startValue, endValue) = when {
-            // fromValue is closer to minValue
-            abs(toValue - minValue) < abs(toValue - maxValue) -> maxValue to toValue
-            // fromValue is closer to maxValue
-            else                                              -> minValue to toValue
-        }
-
-        ValueAnimator.ofInt(startValue, endValue).apply {
-            addUpdateListener { animator ->
-                performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                value = animator.animatedValue as Int
-            }
-
-            addListener(onStart = onAnimationStart, onEnd = onAnimationEnd)
-
-            duration = animationDuration
-
-            start()
-        }
-    }
-
-    /**
-     * Animates the value of this [MaterialNumberPicker] from the given [fromValue] to a random value that's at least at a distance of
-     *  -\+(([minValue][MaterialNumberPicker.getMinValue] + [maxValue][MaterialNumberPicker.getMaxValue]) / 2) from the current
-     * [value][MaterialNumberPicker.getValue].
-     *
-     * @param fromValue [Int] The starting value of the animation.
-     * @param animationDuration [Long] The duration of the animation in milliseconds. Defaults to `1000L`.
-     * @param onAnimationStart [(animator: Animator) -> Unit][onAnimationStart] A callback that will be called when the animation starts.
-     * Defaults to an empty function.
-     * @param onAnimationEnd [(animator: Animator) -> Unit][onAnimationEnd] A callback that will be called when the animation ends.
-     * Defaults to an empty function.
-     */
-    private fun MaterialNumberPicker.animateFrom(
-            fromValue: Int,
-            animationDuration: Long = 1000L,
-            onAnimationStart: (animator: Animator) -> Unit = {},
-            onAnimationEnd: (animator: Animator) -> Unit = {},
-    ) {
-        val minDistance = (minValue + maxValue) / 2
-
-        val (startValue, endValue) = when {
-            // fromValue is closer to minValue
-            abs(value - minValue) < abs(value - maxValue) -> fromValue to Random.nextInt(minDistance, maxValue)
-            // fromValue is closer to maxValue
-            else                                          -> fromValue to Random.nextInt(minValue, minDistance)
-        }
-
-        ValueAnimator.ofInt(startValue, endValue).apply {
-            addUpdateListener { animator ->
-                performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                value = animator.animatedValue as Int
-            }
-
-            addListener(onStart = onAnimationStart, onEnd = onAnimationEnd)
-
-            duration = animationDuration
-
-            start()
         }
     }
 }

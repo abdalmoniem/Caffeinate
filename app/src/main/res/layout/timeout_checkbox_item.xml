@@ -4,8 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="5dp"
+    android:layout_marginVertical="5dp"
     app:cardCornerRadius="10dp"
+    app:strokeWidth="0dp"
+    app:cardElevation="3dp"
     app:contentPadding="10dp">
 
     <com.google.android.material.checkbox.MaterialCheckBox

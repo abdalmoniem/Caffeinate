@@ -829,6 +829,7 @@
                     android:id="@+id/toggleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginVertical="50dp"
                     android:enabled="false"
                     android:minWidth="200dp"
                     android:text="@string/caffeinate_button_off"

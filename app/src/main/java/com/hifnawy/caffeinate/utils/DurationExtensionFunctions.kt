@@ -25,7 +25,7 @@ object DurationExtensionFunctions {
     fun Duration.toFormattedTime(hideLegend: Boolean = false): String = toComponents { hours, minutes, seconds, _ ->
         when {
             isInfinite() -> "Ꝏ"
-            else              -> {
+            else         -> {
                 val format = when {
                     hideLegend || CaffeinateApplication.isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
                     else                                      -> if (hours == 0L) "%02dm %02ds" else "%02dh %02dm %02ds"
@@ -56,8 +56,8 @@ object DurationExtensionFunctions {
         val secondLetter = context.getString(R.string.time_format_second_letter)
 
         when {
-            isInfinite() -> "Ꝏ"
-            else              -> {
+            isInfinite() -> "∞"
+            else         -> {
                 val format = when {
                     hideLegend || CaffeinateApplication.isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
                     else                                      -> if (hours == 0L) "%02d${minuteLetter} %02d${secondLetter}" else "%02d${hourLetter} %02d${minuteLetter} %02d${secondLetter}"

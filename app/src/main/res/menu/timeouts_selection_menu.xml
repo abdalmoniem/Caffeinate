@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="UnusedAttribute">
+
+    <item
+        android:id="@+id/remove_timeouts"
+        android:icon="@drawable/delete_timeout_icon"
+        android:iconTint="?colorOnSurface"
+        android:title="@string/dialog_button_remove_timeout"
+        android:tooltipText="@string/dialog_button_remove_timeout"
+        app:iconTint="?colorOnSurface"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/add_timeout"
+        android:icon="@drawable/add_timeout_icon"
+        android:iconTint="?colorOnSurface"
+        android:title="@string/dialog_button_add_timeout"
+        android:tooltipText="@string/dialog_button_add_timeout"
+        app:iconTint="?colorOnSurface"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/save_selected"
+        android:icon="@drawable/ok_icon"
+        android:iconTint="?colorOnSurface"
+        android:title="@string/dialog_button_ok"
+        android:tooltipText="@string/dialog_button_ok"
+        app:iconTint="?colorOnSurface"
+        app:showAsAction="ifRoom" />
+</menu>

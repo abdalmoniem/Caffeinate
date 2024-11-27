@@ -63,7 +63,7 @@ object MutableListExtensionFunctions {
         when {
             observer in this -> {
                 Log.d("removing ${observer::class.simpleName} from ${this::class.simpleName}<${ObserverType::class.simpleName}>...")
-                // when (removeIf { it == observer }) {
+
                 when (remove(observer)) {
                     true -> Log.d("${observer::class.simpleName} removed from ${this::class.simpleName}<${ObserverType::class.simpleName}>!")
                     else -> Log.d("${observer::class.simpleName} is not present in ${this::class.simpleName}<${ObserverType::class.simpleName}>!")

@@ -5,12 +5,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.transition.Explode
 import android.transition.TransitionManager
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import android.view.animation.AnticipateOvershootInterpolator
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -165,12 +167,12 @@ class AboutBottomSheetFragment : BottomSheetDialogFragment() {
         @SuppressLint("SetTextI18n")
         versionCode.text = getString(R.string.about_version_code, BuildConfig.VERSION_CODE.toString())
         versionName.text = getString(R.string.about_version_name, BuildConfig.VERSION_NAME)
-        content.children.forEach { view ->
-            (view as? MaterialButton)?.apply {
-                setOnClickListener {
-                    performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(tag as? String)))
-                }
+
+        content.children.forEach { childView ->
+            (childView as? MaterialButton)?.setOnClickListener { button ->
+                button.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(button.tag as? String)))
             }
         }
     }
@@ -188,35 +190,43 @@ class AboutBottomSheetFragment : BottomSheetDialogFragment() {
      */
     override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext()).apply {
         setOnShowListener { dialogInterface ->
-            (dialogInterface as BottomSheetDialog)
-                .findViewById<View>(materialR.id.design_bottom_sheet)?.layoutParams?.height = (binding.root.height + binding.root.height * 0.3f).toInt()
-            // (dialogInterface as BottomSheetDialog)
-            //     .findViewById<View>(materialR.id.design_bottom_sheet)?.layoutParams?.height = windowHeight * 3 / 5
+            val dialog = (dialogInterface as BottomSheetDialog).findViewById<View>(materialR.id.design_bottom_sheet)
+            // dialog?.layoutParams?.height = windowHeight * 3 / 5
+            dialog?.layoutParams?.height = (binding.root.height + binding.root.height * 0.3f).toInt()
 
             with(behavior) {
                 skipCollapsed = true
                 isFitToContents = true
                 dismissWithAnimation = true
-                peekHeight = windowHeight * 3 / 5
+                peekHeight = dialog?.layoutParams?.height ?: (windowHeight * 3 / 5)
                 state = BottomSheetBehavior.STATE_EXPANDED
 
                 addBottomSheetCallback(bottomSheetCallback)
             }
 
-            with(binding) {
-                contentCard.isVisible = false
-                content.children.forEach { it.isVisible = false }
+            animateContent()
+        }
+    }
 
-                lifecycleScope.launch {
-                    delay(150)
-                    TransitionManager.beginDelayedTransition(root)
-                    contentCard.isVisible = true
-                    content.children.forEach { childView ->
-                        delay(150)
-                        TransitionManager.beginDelayedTransition(root)
-                        childView.isVisible = true
-                    }
-                }
+    private fun animateContent(animationDuration: Long = 150): Unit = with(binding) {
+        val transition = Explode().apply {
+            duration = animationDuration
+            startDelay = animationDuration / 2
+            interpolator = AnticipateOvershootInterpolator(0.7f)
+        }
+
+        contentCard.isVisible = false
+        content.children.forEach { it.isVisible = false }
+
+        TransitionManager.beginDelayedTransition(root, transition)
+        contentCard.isVisible = true
+
+        lifecycleScope.launch {
+            content.children.forEach { childView ->
+                delay(transition.startDelay)
+
+                TransitionManager.beginDelayedTransition(root, transition)
+                childView.isVisible = true
             }
         }
     }

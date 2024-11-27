@@ -1,14 +1,25 @@
 package com.hifnawy.caffeinate.view
 
+import android.transition.Explode
+import android.transition.TransitionManager
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnticipateOvershootInterpolator
 import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.TimeoutCheckboxItemBinding
+import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_CHANGED_ALL
+import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_CHANGED_SINGLE
+import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_INSERTED
+import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_REMOVED
 import com.hifnawy.caffeinate.view.CheckBoxAdapter.OnItemsChangedListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.Serializable
 import kotlin.time.Duration
 
@@ -56,8 +67,51 @@ data class CheckBoxItem(
  *
  * @author AbdAlMoniem AlHifnawy
  */
-class CheckBoxAdapter(timeoutCheckBoxes: List<CheckBoxItem>, private val onItemsChangedListener: OnItemsChangedListener? = null) :
+class CheckBoxAdapter(
+        timeoutCheckBoxes: List<CheckBoxItem>,
+        private val animationDuration: Long = 300,
+        private val onItemsChangedListener: OnItemsChangedListener? = null
+) :
         RecyclerView.Adapter<CheckBoxAdapter.ViewHolder>() {
+
+    /**
+     * A mutable list of [CheckBoxItem]s that contains the same items as the original list provided in the constructor.
+     *
+     * This list is used to store the items of the adapter and is modified by the adapter's methods.
+     *
+     * @see CheckBoxAdapter
+     */
+    private val timeoutCheckBoxes: MutableList<CheckBoxItem> by lazy { timeoutCheckBoxes.map { it.copy() }.toMutableList() }
+
+    /**
+     * A transition that is used to animate the appearance and disappearance of the [RecyclerView] items.
+     *
+     * This transition is used to animate the appearance and disappearance of the [RecyclerView] items when the
+     * list of [CheckBoxItem]s changes. The transition is an instance of [Explode] which is a built-in transition in the
+     * [androidx.transition] library. The transition is configured with a duration and an interpolator.
+     *
+     * @see Explode
+     * @see RecyclerView
+     * @see TransitionManager
+     */
+    private val transition = Explode().apply {
+        duration = animationDuration
+        interpolator = AnticipateOvershootInterpolator()
+    }
+
+    /**
+     * The RecyclerView instance that this adapter is attached to.
+     *
+     * This variable holds a reference to the RecyclerView that observes this adapter.
+     * It is initialized when the adapter is attached to a RecyclerView.
+     */
+    private lateinit var recyclerView: RecyclerView
+
+    /**
+     * The list of [CheckBoxItem]s to be managed by the adapter.
+     */
+    val checkBoxItems: List<CheckBoxItem>
+        get() = timeoutCheckBoxes
 
     /**
      * Listener interface for observing changes to the list of [CheckBoxItem]s.
@@ -78,14 +132,6 @@ class CheckBoxAdapter(timeoutCheckBoxes: List<CheckBoxItem>, private val onItems
          */
         fun onItemChanged(checkBoxItems: List<CheckBoxItem>)
     }
-
-    private val timeoutCheckBoxes: MutableList<CheckBoxItem> = timeoutCheckBoxes.map { it.copy() }.toMutableList()
-
-    /**
-     * The list of [CheckBoxItem]s to be managed by the adapter.
-     */
-    val checkBoxItems: List<CheckBoxItem>
-        get() = timeoutCheckBoxes
 
     /**
      * A ViewHolder for the adapter's items.
@@ -114,6 +160,19 @@ class CheckBoxAdapter(timeoutCheckBoxes: List<CheckBoxItem>, private val onItems
          * @see CheckBoxItem
          */
         val checkBox: CheckBox = binding.timeoutCheckBox
+    }
+
+    /**
+     * Called by RecyclerView when it starts observing this Adapter.
+     *
+     *
+     * Keep in mind that same adapter may be observed by multiple RecyclerViews.
+     *
+     * @param recyclerView The RecyclerView instance which started observing this adapter.
+     * @see onDetachedFromRecyclerView
+     */
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        this.recyclerView = recyclerView
     }
 
     /**
@@ -178,9 +237,11 @@ class CheckBoxAdapter(timeoutCheckBoxes: List<CheckBoxItem>, private val onItems
         val isInList = timeoutCheckBoxes.firstOrNull { item -> item.duration == checkBoxItem.duration } != null
 
         if (!isInList && timeoutCheckBoxes.add(checkBoxItem)) {
+            notifyAndAnimateItem(ITEM_INSERTED, timeoutCheckBoxes.indexOf(checkBoxItem))
+
             timeoutCheckBoxes.sortBy { checkBox -> checkBox.duration }
 
-            notifyItemRangeChanged(0, timeoutCheckBoxes.size)
+            notifyAndAnimateItem(ITEM_CHANGED_ALL)
 
             timeoutCheckBoxes.updateFirstItem()
 
@@ -201,17 +262,48 @@ class CheckBoxAdapter(timeoutCheckBoxes: List<CheckBoxItem>, private val onItems
      */
     fun removeCheckBox(checkBoxItem: CheckBoxItem) {
         val index = timeoutCheckBoxes.indexOf(checkBoxItem)
+
         if (timeoutCheckBoxes.remove(checkBoxItem)) {
-            notifyItemRemoved(index)
+            notifyAndAnimateItem(ITEM_REMOVED, index)
 
             timeoutCheckBoxes.firstOrNull()?.apply {
                 isChecked = true
                 isEnabled = false
             }
 
-            notifyItemChanged(0)
+            notifyAndAnimateItem(ITEM_CHANGED_SINGLE, 0)
 
             onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
+        }
+    }
+
+    /**
+     * Notifies the [RecyclerView] of the specified modification and animates the change.
+     *
+     * This method is used to notify the [RecyclerView] of the specified modification and to animate the change.
+     * It is called by the [addCheckBox][CheckBoxAdapter.addCheckBox] and [removeCheckBox][CheckBoxAdapter.removeCheckBox] methods.
+     *
+     * @param modificationType [ModificationType] the type of modification that has occurred
+     * @param index [Int] the index of the item that has been modified. It is optional and can be null.
+     */
+    private fun notifyAndAnimateItem(modificationType: ModificationType, index: Int? = null) {
+        TransitionManager.beginDelayedTransition(recyclerView, transition)
+
+        when (modificationType) {
+            ITEM_INSERTED       -> index?.let { notifyItemInserted(it) }
+            ITEM_REMOVED        -> index?.let { notifyItemRemoved(it) }
+            ITEM_CHANGED_SINGLE -> index?.let { notifyItemChanged(it) }
+            ITEM_CHANGED_ALL    -> when {
+                animationDuration > 0 -> CoroutineScope(Dispatchers.Main).launch {
+                    timeoutCheckBoxes.forEachIndexed { itemIndex, _ ->
+                        delay(50)
+                        TransitionManager.beginDelayedTransition(recyclerView, transition)
+                        notifyItemChanged(itemIndex)
+                    }
+                }
+
+                else                  -> notifyItemRangeChanged(0, timeoutCheckBoxes.size)
+            }
         }
     }
 
@@ -227,7 +319,41 @@ class CheckBoxAdapter(timeoutCheckBoxes: List<CheckBoxItem>, private val onItems
             when (size) {
                 1    -> firstOrNull { checkBoxItem -> checkBoxItem.isChecked }?.apply { isEnabled = false }
                 else -> firstOrNull { checkBoxItem -> !checkBoxItem.isEnabled }?.apply { isEnabled = true }
-            }.apply { notifyItemChanged(this@updateFirstItem.indexOf(this)) }
+            }.apply { notifyAndAnimateItem(ITEM_CHANGED_SINGLE, this@updateFirstItem.indexOf(this)) }
         }
+    }
+
+    /**
+     * Enum representing the type of modification made to a list of items.
+     *
+     * This enum is used to specify the type of change that has occurred in the list, allowing appropriate
+     * actions to be taken based on the modification type.
+     *
+     * @property ITEM_INSERTED Indicates that a new item has been inserted into the list.
+     * @property ITEM_REMOVED Indicates that an item has been removed from the list.
+     * @property ITEM_CHANGED_SINGLE Indicates that a single item in the list has been changed.
+     * @property ITEM_CHANGED_ALL Indicates that all items in the list have been changed.
+     */
+    private enum class ModificationType {
+
+        /**
+         * Represents the insertion of a new item into the list.
+         */
+        ITEM_INSERTED,
+
+        /**
+         * Represents the removal of an item from the list.
+         */
+        ITEM_REMOVED,
+
+        /**
+         * Represents a change to a single item within the list.
+         */
+        ITEM_CHANGED_SINGLE,
+
+        /**
+         * Represents a change applied to all items within the list.
+         */
+        ITEM_CHANGED_ALL
     }
 }
