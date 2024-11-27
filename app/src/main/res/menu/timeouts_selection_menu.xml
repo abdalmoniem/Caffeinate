@@ -7,11 +7,20 @@
     <item
         android:id="@+id/remove_timeouts"
         android:icon="@drawable/delete_timeout_icon"
-        android:iconTint="?colorOnSurface"
+        android:iconTint="?colorError"
         android:title="@string/dialog_button_remove_timeout"
         android:tooltipText="@string/dialog_button_remove_timeout"
+        app:iconTint="?colorError"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/change_selection"
+        android:icon="@drawable/select_all_icon"
+        android:iconTint="?colorOnSurface"
+        android:title="@string/select_all_timeouts"
+        android:tooltipText="Select All"
         app:iconTint="?colorOnSurface"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always"/>
 
     <item
         android:id="@+id/add_timeout"
@@ -20,7 +29,7 @@
         android:title="@string/dialog_button_add_timeout"
         android:tooltipText="@string/dialog_button_add_timeout"
         app:iconTint="?colorOnSurface"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/save_selected"
@@ -29,5 +38,5 @@
         android:title="@string/dialog_button_ok"
         android:tooltipText="@string/dialog_button_ok"
         app:iconTint="?colorOnSurface"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 </menu>

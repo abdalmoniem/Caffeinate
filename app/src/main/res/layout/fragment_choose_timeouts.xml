@@ -44,10 +44,13 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:clipToPadding="false"
-            android:padding="10dp"
+            android:paddingTop="10dp"
+            android:paddingStart="30dp"
+            android:paddingEnd="30dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:paddingBottom="?actionBarSize"
             app:layout_constraintTop_toBottomOf="@id/toolbar">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -55,7 +58,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingBottom="?actionBarSize"
                 tools:itemCount="20"
                 tools:listitem="@layout/timeout_checkbox_item" />
         </androidx.coordinatorlayout.widget.CoordinatorLayout>

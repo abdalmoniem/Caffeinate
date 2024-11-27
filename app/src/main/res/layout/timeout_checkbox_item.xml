@@ -4,19 +4,55 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="5dp"
+    android:layout_marginBottom="10dp"
     app:cardCornerRadius="10dp"
-    app:strokeWidth="0dp"
     app:cardElevation="3dp"
-    app:contentPadding="10dp">
+    android:clickable="true"
+    android:focusable="true"
+    app:contentPadding="10dp"
+    app:strokeColor="?colorPrimary"
+    app:strokeWidth="0dp">
 
-    <com.google.android.material.checkbox.MaterialCheckBox
-        android:id="@+id/timeoutCheckBox"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:text="00m 30s"
-        android:textColor="?colorOnBackground"
-        android:textSize="20sp"
-        tools:ignore="HardcodedText,VisualLintButtonSize" />
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true">
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/timeoutCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="00m 30s"
+            android:textColor="?colorOnBackground"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/deleteTimeoutButton"
+            style="@style/Widget.Material3.Button.IconButton.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/delete_timeout_icon"
+            app:iconSize="32dp"
+            app:iconTint="?colorError"
+            app:layout_constraintBottom_toBottomOf="@+id/timeoutCheckBox"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/timeoutCheckBox"
+            app:strokeWidth="0dp"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+        <ImageView
+            android:id="@+id/selectedCheckMark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ok_icon_circle"
+            app:tint="?colorPrimary"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

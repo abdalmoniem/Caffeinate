@@ -70,4 +70,6 @@
     <string name="crowdin_link" translatable="false">https://crowdin.com/project/caffeinate</string>
     <string name="f_droid_link" translatable="false">https://f-droid.org/packages/com.hifnawy.caffeinate</string>
     <string name="izzy_on_droid_link" translatable="false">https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate</string>
+    <string name="select_all_timeouts">Select All</string>
+    <string name="deselect_all_timeouts">Deselect All</string>
 </resources>

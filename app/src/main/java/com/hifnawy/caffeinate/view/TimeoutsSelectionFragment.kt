@@ -15,6 +15,7 @@ import android.view.WindowInsets
 import android.widget.FrameLayout
 import android.widget.NumberPicker
 import androidx.annotation.IdRes
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.animation.addListener
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -78,8 +79,9 @@ class TimeoutsSelectionFragment(
         CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes) { checkBoxItems ->
             val isEmpty = checkBoxItems.isEmpty()
 
-            binding.toolbar.menu.findItem(R.id.remove_timeouts).isVisible = !isEmpty
             binding.toolbar.menu.findItem(R.id.save_selected).isVisible = !isEmpty
+        }.apply {
+            onItemSelectionChangedListener = CheckBoxAdapter.OnItemSelectionChangedListener(::onItemSelectionChanged)
         }
     }
 
@@ -102,6 +104,7 @@ class TimeoutsSelectionFragment(
     private val menuItemBehaviors by lazy {
         mutableListOf(
                 MenuItemBehavior(R.id.remove_timeouts, ::removeTimeouts),
+                MenuItemBehavior(R.id.change_selection, ::changeAllTimeoutsSelection),
                 MenuItemBehavior(R.id.add_timeout, ::addTimeout),
                 MenuItemBehavior(R.id.save_selected, ::saveSelectedTimeouts)
         )
@@ -282,6 +285,12 @@ class TimeoutsSelectionFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         binding.toolbar.toolbarHeight = 0.dp
 
+        toolbar.menu.findItem(R.id.remove_timeouts).isVisible = false
+        toolbar.menu.findItem(R.id.change_selection).apply {
+            isVisible = false
+            title = getString(R.string.select_all_timeouts)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tooltipText = title
+        }
         toolbar.menu.forEach { menuItem ->
             val onMenuItemClick = menuItemBehaviors.find { it.menuItemId == menuItem.itemId }?.onMenuItemClick
 
@@ -340,11 +349,67 @@ class TimeoutsSelectionFragment(
     private fun removeTimeouts(menuItem: MenuItem): Boolean {
         binding.root.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
-        checkBoxAdapter.checkBoxItems
-            .filter { checkBoxItem -> checkBoxItem.isChecked }
-            .forEach { checkBoxItem -> checkBoxAdapter.removeCheckBox(checkBoxItem) }
+        checkBoxAdapter.removeSelectedCheckBoxes()
 
         return true
+    }
+
+    /**
+     * Toggles the selection state of all timeout items in the list.
+     *
+     * This method is called when the user clicks the "Select all" or "Deselect all" menu item.
+     * It toggles the selection state of all [CheckBoxItem]s in the list of available timeout
+     * items.
+     *
+     * @param menuItem [MenuItem] The menu item that was clicked.
+     *
+     * @return [Boolean] `true` if the menu item was successfully handled, `false` otherwise.
+     *
+     * @see MenuItem
+     * @see CheckBoxItem
+     */
+    @Suppress("UNUSED_PARAMETER")
+    private fun changeAllTimeoutsSelection(menuItem: MenuItem): Boolean {
+        binding.root.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+        checkBoxAdapter.changeAllCheckBoxesSelection()
+
+        return true
+    }
+
+    /**
+     * Called when the selection state of one or more [CheckBoxItem]s changes.
+     *
+     * This method is called whenever the selection state of one or more [CheckBoxItem]s changes.
+     * It is called by the [CheckBoxAdapter] when the user selects or deselects one or more
+     * [CheckBoxItem]s.
+     *
+     * The method updates the toolbar menu items to reflect the current selection state.
+     * It shows or hides the "Remove" menu item based on whether any items are selected, and
+     * changes the icon of the "Select all" or "Deselect all" menu item based on whether any
+     * items are selected.
+     *
+     * @param selectedItems [List] The list of currently selected [CheckBoxItem]s.
+     *
+     * @see CheckBoxAdapter
+     * @see CheckBoxItem
+     * @see MenuItem
+     */
+    private fun onItemSelectionChanged(selectedItems: List<CheckBoxItem>) = with(binding.toolbar.menu) {
+        findItem(R.id.remove_timeouts).isVisible = selectedItems.isNotEmpty()
+        findItem(R.id.change_selection).apply {
+            isVisible = selectedItems.isNotEmpty()
+            title = when {
+                selectedItems.isNotEmpty() -> getString(R.string.deselect_all_timeouts)
+                else                       -> getString(R.string.select_all_timeouts)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tooltipText = title
+
+            icon = when {
+                selectedItems.isNotEmpty() -> AppCompatResources.getDrawable(requireContext(), R.drawable.deselect_all_icon)
+                else                       -> AppCompatResources.getDrawable(requireContext(), R.drawable.select_all_icon)
+            }
+        }
     }
 
     /**

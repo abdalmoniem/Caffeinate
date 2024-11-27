@@ -1,5 +1,6 @@
 package com.hifnawy.caffeinate.view
 
+import android.content.res.Resources
 import android.transition.Explode
 import android.transition.TransitionManager
 import android.view.HapticFeedbackConstants
@@ -8,9 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnticipateOvershootInterpolator
 import android.widget.CheckBox
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.TimeoutCheckboxItemBinding
+import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.isVisible
 import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_CHANGED_ALL
 import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_CHANGED_SINGLE
 import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_INSERTED
@@ -84,6 +87,25 @@ class CheckBoxAdapter(
     private val timeoutCheckBoxes: MutableList<CheckBoxItem> by lazy { timeoutCheckBoxes.map { it.copy() }.toMutableList() }
 
     /**
+     * A set of [CheckBoxItem]s that contains the items that are currently selected by the user.
+     *
+     * This set is used to store the items that are currently selected by the user. The set is modified by the adapter's methods
+     * when the user selects or deselects items.
+     *
+     * @see CheckBoxAdapter
+     */
+    private val selectedCheckBoxes = mutableSetOf<CheckBoxItem>()
+
+    /**
+     * Returns whether all items in the list are selected.
+     *
+     * This property is a convenience to check if all items in the list are selected.
+     *
+     * @return [Boolean] `true` if all items in the list are selected, `false` otherwise.
+     */
+    private val isAllSelected: Boolean get() = timeoutCheckBoxes.size == selectedCheckBoxes.size
+
+    /**
      * A transition that is used to animate the appearance and disappearance of the [RecyclerView] items.
      *
      * This transition is used to animate the appearance and disappearance of the [RecyclerView] items when the
@@ -108,12 +130,6 @@ class CheckBoxAdapter(
     private lateinit var recyclerView: RecyclerView
 
     /**
-     * The list of [CheckBoxItem]s to be managed by the adapter.
-     */
-    val checkBoxItems: List<CheckBoxItem>
-        get() = timeoutCheckBoxes
-
-    /**
      * A [CoroutineScope] that is used to launch coroutines on the main dispatcher.
      *
      * This scope is lazily initialized and provides a context to execute coroutines on the main thread,
@@ -121,6 +137,46 @@ class CheckBoxAdapter(
      * are launched on the main thread.
      */
     private val mainCoroutineScope by lazy { CoroutineScope(Dispatchers.Main) }
+
+    /**
+     * A utility property that converts a given integer value to a size in display pixels (DP).
+     *
+     * This property multiplies the given integer value by the device's display density and
+     * returns the result as an integer. It is a convenience method for converting a size
+     * in DP to a size in pixels.
+     *
+     * @return [Int] The size in DP, as an integer.
+     */
+    private val Int.dp: Int
+        get() = (this * Resources.getSystem().displayMetrics.density).toInt()
+
+    /**
+     * The list of [CheckBoxItem]s to be managed by the adapter.
+     */
+    val checkBoxItems: List<CheckBoxItem>
+        get() = timeoutCheckBoxes
+
+    /**
+     * Listener for changes in item selection.
+     *
+     * This listener is triggered whenever there is a change in the selection state of [CheckBoxItem]s.
+     * Implement this listener to handle any actions that should occur when the selection changes.
+     *
+     * @see OnItemSelectionChangedListener
+     */
+    var onItemSelectionChangedListener: OnItemSelectionChangedListener? = null
+
+    /**
+     * A flag indicating whether the user has started selecting items.
+     *
+     * This flag is used to track whether the user has started selecting items. When the user selects an item, the flag is set to {@code true}.
+     * When the user finishes selecting items, the flag is set to {@code false}.
+     *
+     * @see [changeCheckBoxSelection]
+     * @see [onBindViewHolder]
+     */
+    var isSelecting = false
+        private set
 
     /**
      * Listener interface for observing changes to the list of [CheckBoxItem]s.
@@ -143,6 +199,29 @@ class CheckBoxAdapter(
     }
 
     /**
+     * Listener interface for observing changes in the selection of [CheckBoxItem]s.
+     *
+     * This interface should be implemented by classes that wish to be notified when the selection state of the [CheckBoxItem]s changes.
+     * The implementing class can register itself as a listener and respond to changes in the selection by overriding the method provided
+     * in this interface.
+     *
+     * @see onItemSelectionChanged
+     */
+    fun interface OnItemSelectionChangedListener {
+
+        /**
+         * Called when the selection of [CheckBoxItem]s changes.
+         *
+         * This method is called whenever the selection state of one or more [CheckBoxItem]s changes.
+         * The implementing class should override this method to perform any necessary actions, such as updating the UI or processing the
+         * newly selected items.
+         *
+         * @param selectedItems [List] The list of currently selected [CheckBoxItem]s.
+         */
+        fun onItemSelectionChanged(selectedItems: List<CheckBoxItem>)
+    }
+
+    /**
      * A ViewHolder for the adapter's items.
      *
      * @param itemView [View] The view of the ViewHolder.
@@ -161,6 +240,17 @@ class CheckBoxAdapter(
         private val binding = TimeoutCheckboxItemBinding.bind(itemView)
 
         /**
+         * The root view of the [ViewHolder].
+         *
+         * This is the root view of the [ViewHolder] that is inflated from the layout file.
+         * It is used to bind the [View] of the [ViewHolder] to the [CheckBoxItem] associated with the
+         * [ViewHolder].
+         *
+         * @see TimeoutCheckboxItemBinding
+         */
+        val rootView = binding.root
+
+        /**
          * The [CheckBox] associated with the [ViewHolder].
          *
          * This [CheckBox] is the one that is bound to the [CheckBoxItem] associated with the [ViewHolder].
@@ -169,6 +259,28 @@ class CheckBoxAdapter(
          * @see CheckBoxItem
          */
         val checkBox: CheckBox = binding.timeoutCheckBox
+
+        /**
+         * The [ImageView] associated with the [ViewHolder] that is used to indicate
+         * whether the [CheckBoxItem] associated with the [ViewHolder] is selected or not.
+         *
+         * This [ImageView] is the one that is bound to the [CheckBoxItem] associated with the
+         * [ViewHolder]. It is used to display the checkmark icon when the [CheckBoxItem] is
+         * selected and hide it when the [CheckBoxItem] is not selected.
+         *
+         * @see CheckBoxItem
+         */
+        val selectedCheckMark = binding.selectedCheckMark
+
+        /**
+         * The delete button associated with the [ViewHolder].
+         *
+         * This button is the one that is bound to the [CheckBoxItem] associated with the [ViewHolder].
+         * It is used to delete the [CheckBoxItem] from the list of available timeouts.
+         *
+         * @see CheckBoxItem
+         */
+        val deleteButton = binding.deleteTimeoutButton
     }
 
     /**
@@ -203,21 +315,49 @@ class CheckBoxAdapter(
      * @param position [Int] The position of the item within the adapter's data set.
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder) {
-        checkBox.setOnCheckedChangeListener(null)
         val item = timeoutCheckBoxes[adapterPosition].apply {
             checkBox.text = text
             checkBox.isChecked = isChecked
-            checkBox.isEnabled = isEnabled
+            checkBox.isEnabled = isEnabled && !isSelecting
+
+            rootView.strokeWidth = when {
+                this in selectedCheckBoxes -> 3.dp
+                else                       -> 0.dp
+            }
+
+            deleteButton.isVisible = isEnabled && !isSelecting
+            selectedCheckMark.isVisible = isEnabled && isSelecting && this in selectedCheckBoxes
+        }
+        val itemClickListener = View.OnClickListener { view ->
+            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+            if (!isSelecting) {
+                item.isChecked = !item.isChecked
+                checkBox.isChecked = item.isChecked
+
+                timeoutCheckBoxes.updateFirstItem()
+
+                onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
+            } else {
+                changeCheckBoxSelection(item)
+            }
         }
 
-        checkBox.setOnCheckedChangeListener { checkBox, isChecked ->
-            checkBox.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+        rootView.setOnLongClickListener { view ->
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
 
-            item.isChecked = isChecked
+            changeCheckBoxSelection(item)
 
-            timeoutCheckBoxes.updateFirstItem()
+            true
+        }
 
-            onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
+        rootView.setOnClickListener(itemClickListener)
+        checkBox.setOnClickListener(itemClickListener)
+
+        deleteButton.setOnClickListener { view ->
+            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+            removeCheckBox(item)
         }
     }
 
@@ -240,20 +380,20 @@ class CheckBoxAdapter(
      *
      * @param checkBoxItem [CheckBoxItem] the item to be added
      */
-    fun addCheckBox(checkBoxItem: CheckBoxItem) {
-        timeoutCheckBoxes.find { item -> item.duration == checkBoxItem.duration } ?: run {
-            if (!timeoutCheckBoxes.add(checkBoxItem)) return@run
+    fun addCheckBox(checkBoxItem: CheckBoxItem) = with(timeoutCheckBoxes) {
+        if (find { item -> item.duration == checkBoxItem.duration } != null) return@with
+        if (!add(checkBoxItem)) return@with
 
-            notifyAndAnimateItem(ITEM_INSERTED, timeoutCheckBoxes.indexOf(checkBoxItem))
+        selectedCheckBoxes.clear()
 
-            timeoutCheckBoxes.sortBy { checkBox -> checkBox.duration }
+        notifyAndAnimateItem(ITEM_INSERTED, indexOf(checkBoxItem))
 
-            notifyAndAnimateItem(ITEM_CHANGED_ALL)
+        sortBy { checkBox -> checkBox.duration }
+        notifyAndAnimateItem(ITEM_CHANGED_ALL)
 
-            timeoutCheckBoxes.updateFirstItem()
+        updateFirstItem()
 
-            onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
-        }
+        onItemsChangedListener?.onItemChanged(this)
     }
 
     /**
@@ -269,19 +409,85 @@ class CheckBoxAdapter(
      */
     fun removeCheckBox(checkBoxItem: CheckBoxItem) = with(timeoutCheckBoxes) {
         val index = indexOf(checkBoxItem)
-
         if (!remove(checkBoxItem)) return@with
 
         notifyAndAnimateItem(ITEM_REMOVED, index)
 
-        firstOrNull()?.apply {
+        if (size == 1) first().apply {
             isChecked = true
             isEnabled = false
 
-            notifyAndAnimateItem(ITEM_CHANGED_SINGLE, indexOf(this))
+            notifyAndAnimateItem(ITEM_CHANGED_SINGLE, 0)
         }
 
         onItemsChangedListener?.onItemChanged(this)
+    }
+
+    /**
+     * Removes all checked [CheckBoxItem]s from the list.
+     *
+     * This method removes all checked [CheckBoxItem]s from the list.
+     * It is called by the [removeTimeouts][TimeoutsSelectionFragment.removeTimeouts] method in the [TimeoutsSelectionFragment].
+     *
+     * @see removeCheckBox
+     */
+    fun removeSelectedCheckBoxes() = selectedCheckBoxes.forEach { removeCheckBox(it) }
+
+    /**
+     * Toggles the selection state of all [CheckBoxItem]s in the list.
+     *
+     * - If not all items are selected, this method selects all items.
+     * - If all items are selected, this method deselects all items.
+     *
+     * This method also notifies the [RecyclerView] of the modifications and animates the changes if [animateSelection] is `true`.
+     *
+     * @param animateSelection [Boolean] `true` to animate the selection changes, `false` otherwise.
+     */
+    fun changeAllCheckBoxesSelection(animateSelection: Boolean = false) {
+        when {
+            !isAllSelected -> timeoutCheckBoxes.forEachIndexed { index, checkBoxItem ->
+                selectedCheckBoxes.add(checkBoxItem)
+
+                if (animateSelection) notifyAndAnimateItem(ITEM_CHANGED_SINGLE, index)
+                else notifyItemChanged(index)
+            }
+
+            isAllSelected  -> timeoutCheckBoxes.forEachIndexed { index, checkBoxItem ->
+                selectedCheckBoxes.remove(checkBoxItem)
+
+                if (animateSelection) notifyAndAnimateItem(ITEM_CHANGED_SINGLE, index)
+                else notifyItemChanged(index)
+            }
+        }
+
+        isSelecting = selectedCheckBoxes.isNotEmpty()
+
+        onItemSelectionChangedListener?.onItemSelectionChanged(selectedCheckBoxes.toList())
+    }
+
+    /**
+     * Toggles the selection state of the specified [checkBoxItem] in the list at the specified [position].
+     *
+     * - If the item is not selected, it is added to the [selectedCheckBoxes] list.
+     * - If the item is selected, it is removed from the [selectedCheckBoxes] list.
+     *
+     * This method also notifies the [RecyclerView] of the modification and animates the change.
+     * It is called by the [onBindViewHolder][CheckBoxAdapter.onBindViewHolder] and [onItemLongClick][View.setOnLongClickListener] methods.
+     *
+     * @param checkBoxItem [CheckBoxItem] the item to be toggled
+     */
+    private fun changeCheckBoxSelection(checkBoxItem: CheckBoxItem, animateSelection: Boolean = false) {
+        when (checkBoxItem) {
+            !in selectedCheckBoxes -> selectedCheckBoxes.add(checkBoxItem)
+            else                   -> selectedCheckBoxes.remove(checkBoxItem)
+        }
+
+        if (animateSelection) notifyAndAnimateItem(ITEM_CHANGED_ALL)
+        else notifyItemRangeChanged(0, timeoutCheckBoxes.size)
+
+        isSelecting = selectedCheckBoxes.isNotEmpty()
+
+        onItemSelectionChangedListener?.onItemSelectionChanged(selectedCheckBoxes.toList())
     }
 
     /**
