@@ -114,6 +114,15 @@ class CheckBoxAdapter(
         get() = timeoutCheckBoxes
 
     /**
+     * A [CoroutineScope] that is used to launch coroutines on the main dispatcher.
+     *
+     * This scope is lazily initialized and provides a context to execute coroutines on the main thread,
+     * which is useful for updating the UI. The [Dispatchers.Main] is used to ensure that the coroutines
+     * are launched on the main thread.
+     */
+    private val mainCoroutineScope by lazy { CoroutineScope(Dispatchers.Main) }
+
+    /**
      * Listener interface for observing changes to the list of [CheckBoxItem]s.
      *
      * This interface should be implemented by classes that wish to be notified when the list of [CheckBoxItem]s changes.
@@ -193,24 +202,22 @@ class CheckBoxAdapter(
      * @param holder [ViewHolder] The ViewHolder to bind the data to.
      * @param position [Int] The position of the item within the adapter's data set.
      */
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        with(holder) {
-            checkBox.setOnCheckedChangeListener(null)
-            val item = timeoutCheckBoxes[adapterPosition].apply {
-                checkBox.text = text
-                checkBox.isChecked = isChecked
-                checkBox.isEnabled = isEnabled
-            }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder) {
+        checkBox.setOnCheckedChangeListener(null)
+        val item = timeoutCheckBoxes[adapterPosition].apply {
+            checkBox.text = text
+            checkBox.isChecked = isChecked
+            checkBox.isEnabled = isEnabled
+        }
 
-            checkBox.setOnCheckedChangeListener { _, isChecked ->
-                itemView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+        checkBox.setOnCheckedChangeListener { checkBox, isChecked ->
+            checkBox.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
-                item.isChecked = isChecked
+            item.isChecked = isChecked
 
-                timeoutCheckBoxes.updateFirstItem()
+            timeoutCheckBoxes.updateFirstItem()
 
-                onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
-            }
+            onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
         }
     }
 
@@ -234,9 +241,9 @@ class CheckBoxAdapter(
      * @param checkBoxItem [CheckBoxItem] the item to be added
      */
     fun addCheckBox(checkBoxItem: CheckBoxItem) {
-        val isInList = timeoutCheckBoxes.firstOrNull { item -> item.duration == checkBoxItem.duration } != null
+        timeoutCheckBoxes.find { item -> item.duration == checkBoxItem.duration } ?: run {
+            if (!timeoutCheckBoxes.add(checkBoxItem)) return@run
 
-        if (!isInList && timeoutCheckBoxes.add(checkBoxItem)) {
             notifyAndAnimateItem(ITEM_INSERTED, timeoutCheckBoxes.indexOf(checkBoxItem))
 
             timeoutCheckBoxes.sortBy { checkBox -> checkBox.duration }
@@ -260,21 +267,21 @@ class CheckBoxAdapter(
      *
      * @param checkBoxItem [CheckBoxItem] the item to be removed
      */
-    fun removeCheckBox(checkBoxItem: CheckBoxItem) {
-        val index = timeoutCheckBoxes.indexOf(checkBoxItem)
+    fun removeCheckBox(checkBoxItem: CheckBoxItem) = with(timeoutCheckBoxes) {
+        val index = indexOf(checkBoxItem)
 
-        if (timeoutCheckBoxes.remove(checkBoxItem)) {
-            notifyAndAnimateItem(ITEM_REMOVED, index)
+        if (!remove(checkBoxItem)) return@with
 
-            timeoutCheckBoxes.firstOrNull()?.apply {
-                isChecked = true
-                isEnabled = false
-            }
+        notifyAndAnimateItem(ITEM_REMOVED, index)
 
-            notifyAndAnimateItem(ITEM_CHANGED_SINGLE, 0)
+        firstOrNull()?.apply {
+            isChecked = true
+            isEnabled = false
 
-            onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
+            notifyAndAnimateItem(ITEM_CHANGED_SINGLE, indexOf(this))
         }
+
+        onItemsChangedListener?.onItemChanged(this)
     }
 
     /**
@@ -286,41 +293,64 @@ class CheckBoxAdapter(
      * @param modificationType [ModificationType] the type of modification that has occurred
      * @param index [Int] the index of the item that has been modified. It is optional and can be null.
      */
-    private fun notifyAndAnimateItem(modificationType: ModificationType, index: Int? = null) {
-        TransitionManager.beginDelayedTransition(recyclerView, transition)
-
-        when (modificationType) {
-            ITEM_INSERTED       -> index?.let { notifyItemInserted(it) }
-            ITEM_REMOVED        -> index?.let { notifyItemRemoved(it) }
-            ITEM_CHANGED_SINGLE -> index?.let { notifyItemChanged(it) }
-            ITEM_CHANGED_ALL    -> when {
-                animationDuration > 0 -> CoroutineScope(Dispatchers.Main).launch {
-                    timeoutCheckBoxes.forEachIndexed { itemIndex, _ ->
-                        delay(50)
-                        TransitionManager.beginDelayedTransition(recyclerView, transition)
-                        notifyItemChanged(itemIndex)
-                    }
+    private fun notifyAndAnimateItem(modificationType: ModificationType, index: Int? = null) =
+            TransitionManager.beginDelayedTransition(recyclerView, transition).also {
+                when (modificationType) {
+                    ITEM_INSERTED       -> index?.let { notifyItemInserted(it) }
+                    ITEM_REMOVED        -> index?.let { notifyItemRemoved(it) }
+                    ITEM_CHANGED_SINGLE -> index?.let { notifyItemChanged(it) }
+                    ITEM_CHANGED_ALL    -> notifyItemsRangeChanged(0, timeoutCheckBoxes.size)
                 }
+            }
 
-                else                  -> notifyItemRangeChanged(0, timeoutCheckBoxes.size)
+    /**
+     * Notifies the [RecyclerView] that a range of items has changed and animates the change if required.
+     *
+     * This method determines whether to animate the change based on the [animationDuration]. If the duration is greater than zero,
+     * it will animate the change; otherwise, it will simply notify the change without animation.
+     *
+     * @param position [Int] The starting position of the range of items that has changed.
+     * @param size [Int] The number of items in the range that has changed.
+     */
+    private fun notifyItemsRangeChanged(position: Int, size: Int) {
+        when {
+            animationDuration > 0 -> notifyAndAnimateAll(position, size)
+            else                  -> notifyItemRangeChanged(position, size)
+        }
+    }
+
+    /**
+     * Notifies the [RecyclerView] that a range of items has changed and animates the change over time.
+     *
+     * This method notifies the [RecyclerView] that a range of items has changed and animates the change over time.
+     * The animation is done by notifying the [RecyclerView] of the change one item at a time with a delay in between.
+     * The delay is specified by the [animationDuration] divided by the number of items in the range.
+     *
+     * @param positionStart [Int] The starting position of the range of items that has changed.
+     * @param itemCount [Int] The number of items in the range that has changed.
+     */
+    private fun notifyAndAnimateAll(positionStart: Int, itemCount: Int) {
+        mainCoroutineScope.launch {
+            (positionStart..itemCount).forEach { index ->
+                delay(50)
+                TransitionManager.beginDelayedTransition(recyclerView, transition)
+                notifyItemChanged(index)
             }
         }
     }
 
     /**
-     * Updates the [firstOrNull] item of the list to be [enabled][CheckBoxItem.isEnabled] or [disabled][CheckBoxItem.isEnabled].
+     * Updates the [first] item of the list to be [enabled][CheckBoxItem.isEnabled] or [disabled][CheckBoxItem.isEnabled].
      *
-     * - If the [size][List.size] is `1`, the [firstOrNull] item will be [disabled][CheckBoxItem.isEnabled].
-     * - If the [size][List.size] is greater than `1`, the [firstOrNull] item will be [enabled][CheckBoxItem.isEnabled] if it is currently
+     * - If the [size][List.size] is `1`, the [first] item will be [disabled][CheckBoxItem.isEnabled].
+     * - If the [size][List.size] is greater than `1`, the [first] item will be [enabled][CheckBoxItem.isEnabled] if it is currently
      * [disabled][CheckBoxItem.isEnabled]
      */
-    private fun List<CheckBoxItem>.updateFirstItem() {
-        filter { checkBoxItem -> checkBoxItem.isChecked }.apply {
-            when (size) {
-                1    -> firstOrNull { checkBoxItem -> checkBoxItem.isChecked }?.apply { isEnabled = false }
-                else -> firstOrNull { checkBoxItem -> !checkBoxItem.isEnabled }?.apply { isEnabled = true }
-            }.apply { notifyAndAnimateItem(ITEM_CHANGED_SINGLE, this@updateFirstItem.indexOf(this)) }
-        }
+    private fun List<CheckBoxItem>.updateFirstItem() = filter { checkBoxItem -> checkBoxItem.isChecked }.run {
+        when (size) {
+            1    -> find { checkBoxItem -> checkBoxItem.isChecked }?.apply { isEnabled = false }
+            else -> find { checkBoxItem -> !checkBoxItem.isEnabled }?.apply { isEnabled = true }
+        }.run { notifyAndAnimateItem(ITEM_CHANGED_SINGLE, this@updateFirstItem.indexOf(this)) }
     }
 
     /**

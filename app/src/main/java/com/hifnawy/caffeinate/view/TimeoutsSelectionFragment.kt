@@ -76,10 +76,10 @@ class TimeoutsSelectionFragment(
      */
     private val checkBoxAdapter by lazy {
         CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes) { checkBoxItems ->
-            checkBoxItems.isEmpty().let { isEmpty ->
-                binding.toolbar.menu.findItem(R.id.remove_timeouts).isEnabled = !isEmpty
-                binding.toolbar.menu.findItem(R.id.save_selected).isEnabled = !isEmpty
-            }
+            val isEmpty = checkBoxItems.isEmpty()
+
+            binding.toolbar.menu.findItem(R.id.remove_timeouts).isVisible = !isEmpty
+            binding.toolbar.menu.findItem(R.id.save_selected).isVisible = !isEmpty
         }
     }
 
