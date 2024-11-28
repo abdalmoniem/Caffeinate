@@ -2,14 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="UnusedAttribute">
+    tools:ignore="UnusedAttribute, AlwaysShowAction">
 
     <item
         android:id="@+id/remove_timeouts"
         android:icon="@drawable/delete_timeout_icon"
         android:iconTint="?colorError"
-        android:title="@string/dialog_button_remove_timeout"
-        android:tooltipText="@string/dialog_button_remove_timeout"
+        android:title="@plurals/remove_timeout"
+        android:tooltipText="@plurals/remove_timeout"
         app:iconTint="?colorError"
         app:showAsAction="always" />
 
@@ -20,14 +20,23 @@
         android:title="@string/select_all_timeouts"
         android:tooltipText="Select All"
         app:iconTint="?colorOnSurface"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/add_infinite_timeout"
+        android:icon="@drawable/add_infinite_timeout_icon"
+        android:iconTint="?colorOnSurface"
+        android:title="@string/add_infinite_timeout"
+        android:tooltipText="@string/add_infinite_timeout"
+        app:iconTint="?colorOnSurface"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/add_timeout"
         android:icon="@drawable/add_timeout_icon"
         android:iconTint="?colorOnSurface"
-        android:title="@string/dialog_button_add_timeout"
-        android:tooltipText="@string/dialog_button_add_timeout"
+        android:title="@string/add_timeout"
+        android:tooltipText="@string/add_timeout"
         app:iconTint="?colorOnSurface"
         app:showAsAction="always" />
 
@@ -35,8 +44,8 @@
         android:id="@+id/save_selected"
         android:icon="@drawable/ok_icon"
         android:iconTint="?colorOnSurface"
-        android:title="@string/dialog_button_ok"
-        android:tooltipText="@string/dialog_button_ok"
+        android:title="@string/ok"
+        android:tooltipText="@string/ok"
         app:iconTint="?colorOnSurface"
         app:showAsAction="always" />
 </menu>

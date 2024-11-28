@@ -20,11 +20,11 @@ import androidx.core.animation.addListener
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.stephenvinouze.materialnumberpickercore.MaterialNumberPicker
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.DialogSetCustomTimeoutBinding
@@ -81,6 +81,8 @@ class TimeoutsSelectionFragment(
 
             with(binding.toolbar.menu) {
                 findItem(R.id.save_selected).isVisible = !isEmpty
+
+                findItem(R.id.add_infinite_timeout).isVisible = checkBoxItems.find { it.duration.isInfinite() } == null
             }
         }.apply { onItemsSelectionChangedListener = CheckBoxAdapter.OnItemsSelectionChangedListener(::onItemSelectionChanged) }
     }
@@ -105,6 +107,7 @@ class TimeoutsSelectionFragment(
         mutableListOf(
                 MenuItemBehavior(R.id.remove_timeouts, ::removeTimeouts),
                 MenuItemBehavior(R.id.change_selection, ::changeAllTimeoutsSelection),
+                MenuItemBehavior(R.id.add_infinite_timeout, ::addInfiniteTimeout),
                 MenuItemBehavior(R.id.add_timeout, ::addTimeout),
                 MenuItemBehavior(R.id.save_selected, ::saveSelectedTimeouts)
         )
@@ -123,6 +126,34 @@ class TimeoutsSelectionFragment(
      * @see BottomSheetDialog
      */
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
+
+    /**
+     * The minimum height of the drag handle in display pixels (DP).
+     *
+     * This property is used to control the height of the drag handle in the [BottomSheetDialog] that is created by the [onCreateDialog]
+     * function. The height of the drag handle is animated from [minDragHandleHeight] to [maxDragHandleHeight] and vice versa to create
+     * a smooth transition between the collapsed and expanded states of the dialog.
+     *
+     * @see maxDragHandleHeight
+     * @see onCreateDialog
+     * @see BottomSheetBehavior
+     * @see BottomSheetDialog
+     */
+    private val minDragHandleHeight = 0.dp
+
+    /**
+     * The maximum height of the drag handle in display pixels (DP).
+     *
+     * This property is used to control the height of the drag handle in the [BottomSheetDialog] that is created by the [onCreateDialog]
+     * function. The height of the drag handle is animated from [minDragHandleHeight] to [maxDragHandleHeight] and vice versa to create
+     * a smooth transition between the collapsed and expanded states of the dialog.
+     *
+     * @see maxDragHandleHeight
+     * @see onCreateDialog
+     * @see BottomSheetBehavior
+     * @see BottomSheetDialog
+     */
+    private val maxDragHandleHeight = 48.dp
 
     /**
      * The minimum height of the toolbar in display pixels (DP).
@@ -181,21 +212,11 @@ class TimeoutsSelectionFragment(
     private val maxToolbarTitleSize = 30f
 
     /**
-     * A utility property to set and get the height of the toolbar.
+     * A utility property to set and get the height of a view in pixels.
      *
-     * This property is used to control the height of the toolbar in the [BottomSheetDialog] that is created by the [onCreateDialog]
-     * function. The height of the toolbar is animated from [minToolbarHeight] to [maxToolbarHeight] and vice versa to create a smooth transition
-     * between the collapsed and expanded states of the dialog.
-     *
-     * @see minToolbarHeight
-     * @see maxToolbarHeight
-     * @see onCreateDialog
-     * @see BottomSheetBehavior
-     * @see BottomSheetDialog
-     *
-     * @return [Int] The height of the toolbar in display pixels (DP).
+     * @return [Int] The height of the view in pixels.
      */
-    private var MaterialToolbar.toolbarHeight: Int
+    private var View.viewHeight: Int
         get() = layoutParams.height
         set(value) {
             if (value <= 0) layoutParams.width = 0.dp
@@ -283,18 +304,23 @@ class TimeoutsSelectionFragment(
      * from a previous saved state as given here.
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
-        binding.toolbar.toolbarHeight = 0.dp
+        dragHandle.viewHeight = maxDragHandleHeight
+        toolbar.viewHeight = minToolbarHeight
 
-        toolbar.menu.findItem(R.id.remove_timeouts).isVisible = false
-        toolbar.menu.findItem(R.id.change_selection).apply {
-            isVisible = false
-            title = getString(R.string.select_all_timeouts)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tooltipText = title
-        }
-        toolbar.menu.forEach { menuItem ->
-            val onMenuItemClick = menuItemBehaviors.find { it.menuItemId == menuItem.itemId }?.onMenuItemClick
+        with(toolbar.menu) {
+            findItem(R.id.remove_timeouts).isVisible = false
+            findItem(R.id.add_infinite_timeout).isVisible = checkBoxAdapter.checkBoxItems.find { it.duration.isInfinite() } == null
+            findItem(R.id.change_selection).apply {
+                isVisible = false
+                title = getString(R.string.select_all_timeouts)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tooltipText = title
+            }
 
-            menuItem.setOnMenuItemClickListener(onMenuItemClick)
+            forEach { menuItem ->
+                val onMenuItemClick = menuItemBehaviors.find { it.menuItemId == menuItem.itemId }?.onMenuItemClick
+
+                menuItem.setOnMenuItemClickListener(onMenuItemClick)
+            }
         }
 
         toolbar.setNavigationOnClickListener { view ->
@@ -324,12 +350,10 @@ class TimeoutsSelectionFragment(
             dialog?.layoutParams?.height = windowHeight
 
             bottomSheetBehavior = behavior.apply {
-                skipCollapsed = true
-                isFitToContents = false
+                isFitToContents = true
                 dismissWithAnimation = true
-                halfExpandedRatio = 0.7f
                 peekHeight = windowHeight * 2 / 5
-                state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                state = BottomSheetBehavior.STATE_COLLAPSED
 
                 addBottomSheetCallback(BottomSheetBehaviorCallback())
             }
@@ -390,26 +414,31 @@ class TimeoutsSelectionFragment(
      * items are selected.
      *
      * @param selectedItems [List] The list of currently selected [CheckBoxItem]s.
+     * @param isSelecting [Boolean] Whether the user is currently selecting or deselecting items.
+     * @param isAllSelected [Boolean] Whether all items are currently selected.
      *
      * @see CheckBoxAdapter
      * @see CheckBoxItem
      * @see MenuItem
      */
-    private fun onItemSelectionChanged(selectedItems: List<CheckBoxItem>) = with(binding.toolbar.menu) {
-        val isEmpty = selectedItems.isEmpty()
+    private fun onItemSelectionChanged(selectedItems: List<CheckBoxItem>, isSelecting: Boolean, isAllSelected: Boolean) = with(binding.toolbar.menu) {
+        findItem(R.id.remove_timeouts).apply {
+            isVisible = isSelecting
 
-        findItem(R.id.remove_timeouts).isVisible = !isEmpty
+            title = requireContext().resources.getQuantityString(R.plurals.remove_timeout, selectedItems.size, selectedItems.size)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tooltipText = title
+        }
         findItem(R.id.change_selection).apply {
-            isVisible = !isEmpty
+            isVisible = isSelecting
             title = when {
-                !isEmpty -> getString(R.string.deselect_all_timeouts)
-                else     -> getString(R.string.select_all_timeouts)
+                isAllSelected -> getString(R.string.deselect_all_timeouts)
+                else          -> getString(R.string.select_all_timeouts)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tooltipText = title
 
             icon = when {
-                !isEmpty -> AppCompatResources.getDrawable(requireContext(), R.drawable.deselect_all_icon)
-                else     -> AppCompatResources.getDrawable(requireContext(), R.drawable.select_all_icon)
+                isAllSelected -> AppCompatResources.getDrawable(requireContext(), R.drawable.deselect_all_icon)
+                else          -> AppCompatResources.getDrawable(requireContext(), R.drawable.select_all_icon)
             }
         }
     }
@@ -429,6 +458,24 @@ class TimeoutsSelectionFragment(
         binding.root.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
         showSetCustomTimeoutDialog { timeout ->
+            if (checkBoxAdapter.checkBoxItems.find { it.duration == timeout } != null) {
+                Snackbar.make(
+                        binding.root,
+                        getString(
+                                R.string.timeout_already_exists,
+                                timeout.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext)
+                        ),
+                        Snackbar.LENGTH_SHORT
+                ).run {
+                    setAction(getString(R.string.ok)) { view ->
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        dismiss()
+                    }
+                    show()
+                }
+                return@showSetCustomTimeoutDialog
+            }
+
             checkBoxAdapter.addCheckBox(
                     CheckBoxItem(
                             text = timeout.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext),
@@ -438,6 +485,51 @@ class TimeoutsSelectionFragment(
                     )
             )
         }
+
+        return true
+    }
+
+    /**
+     * Adds an infinite timeout to the list of available timeouts.
+     *
+     * This method is called when the user selects the "Add Infinite" menu item.
+     * It performs a haptic feedback, creates a new [CheckBoxItem] with an infinite duration,
+     * and adds it to the list of available timeouts.
+     *
+     * @param menuItem [MenuItem] The menu item that was clicked.
+     * @return [Boolean] `true` if the menu item was successfully handled, `false` otherwise.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    private fun addInfiniteTimeout(menuItem: MenuItem): Boolean {
+        binding.root.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+        if (checkBoxAdapter.checkBoxItems.find { it.duration.isInfinite() } != null) {
+            Snackbar.make(
+                    binding.root,
+                    getString(
+                            R.string.timeout_already_exists,
+                            Duration.INFINITE.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext)
+                    ),
+                    Snackbar.LENGTH_SHORT
+            ).run {
+                setAction(getString(R.string.ok)) { view ->
+                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    dismiss()
+                }
+                show()
+            }
+
+            return false
+        }
+
+        checkBoxAdapter.addCheckBox(
+                CheckBoxItem(
+                        text = Duration.INFINITE.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext),
+                        isChecked = true,
+                        isEnabled = true,
+                        duration = Duration.INFINITE
+                )
+        )
 
         return true
     }
@@ -673,11 +765,24 @@ class TimeoutsSelectionFragment(
          * - [BottomSheetBehavior.STATE_HIDDEN]
          */
         override fun onStateChanged(bottomSheet: View, newState: Int) = with(binding) {
-            toolbar.toolbarHeight = when (newState) {
-                BottomSheetBehavior.STATE_EXPANDED      -> maxToolbarHeight
-                BottomSheetBehavior.STATE_HALF_EXPANDED -> minToolbarHeight
-                else                                    -> toolbar.measuredHeight
+            dragHandle.viewHeight = when (newState) {
+                BottomSheetBehavior.STATE_EXPANDED  -> minDragHandleHeight
+                BottomSheetBehavior.STATE_COLLAPSED -> maxDragHandleHeight
+                else                                -> dragHandle.measuredHeight
             }
+            toolbar.viewHeight = when (newState) {
+                BottomSheetBehavior.STATE_EXPANDED  -> maxToolbarHeight
+                BottomSheetBehavior.STATE_COLLAPSED -> minToolbarHeight
+                else                                -> toolbar.measuredHeight
+            }
+            toolbarTitle.setTextSize(
+                    TypedValue.COMPLEX_UNIT_SP,
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED  -> maxToolbarTitleSize
+                        BottomSheetBehavior.STATE_COLLAPSED -> minToolbarTitleSize
+                        else                                -> toolbarTitle.textSize
+                    }
+            )
         }
 
         /**
@@ -689,17 +794,19 @@ class TimeoutsSelectionFragment(
          * expanded states and from -1 to 0 it is between hidden and collapsed states.
          */
         override fun onSlide(bottomSheet: View, slideOffset: Float) = with(binding) {
-            val progress = (slideOffset - 0.5f) * 2 // Normalize to [0, 1]
-
-            toolbar.toolbarHeight = when {
-                slideOffset > 0.5f -> minToolbarHeight + ((maxToolbarHeight - minToolbarHeight) * progress).toInt()
-                else               -> minToolbarHeight
+            dragHandle.viewHeight = when {
+                slideOffset > 0f -> maxDragHandleHeight + ((minDragHandleHeight - maxDragHandleHeight) * slideOffset).toInt()
+                else             -> maxDragHandleHeight
+            }
+            toolbar.viewHeight = when {
+                slideOffset > 0f -> minToolbarHeight + ((maxToolbarHeight - minToolbarHeight) * slideOffset).toInt()
+                else             -> minToolbarHeight
             }
             toolbarTitle.setTextSize(
                     TypedValue.COMPLEX_UNIT_SP,
                     when {
-                        slideOffset > 0.5f -> minToolbarTitleSize + ((maxToolbarTitleSize - minToolbarTitleSize) * progress)
-                        else               -> minToolbarTitleSize
+                        slideOffset > 0f -> minToolbarTitleSize + ((maxToolbarTitleSize - minToolbarTitleSize) * slideOffset)
+                        else             -> minToolbarTitleSize
                     }
             )
             toolbar.alpha = slideOffset

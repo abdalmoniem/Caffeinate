@@ -653,11 +653,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      */
     private fun requestBatteryOptimizationPermission() {
         MaterialAlertDialogBuilder(this)
-            .setTitle(getString(R.string.dialog_battery_optimization_needed_title))
+            .setTitle(getString(R.string.battery_optimization_needed_title))
             .setIcon(R.drawable.coffee_icon)
             .setCancelable(false)
-            .setMessage(getString(R.string.dialog_battery_optimization_needed_message))
-            .setPositiveButton(getString(R.string.dialog_button_ok)) { _, _ ->
+            .setMessage(getString(R.string.battery_optimization_needed_message))
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->
                 startActivity(
                         Intent(
                                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
@@ -665,7 +665,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                         )
                 )
             }
-            .setNegativeButton(getString(R.string.dialog_button_cancel), null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
