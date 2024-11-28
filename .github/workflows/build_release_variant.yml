@@ -11,8 +11,8 @@ permissions: { }
 
 jobs:
   build-release-variant:
+    name: Build Release Variant
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
