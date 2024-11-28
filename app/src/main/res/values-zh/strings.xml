@@ -1,20 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">咖啡时间</string>
     <string name="app_icon">应用图标</string>
+    <string name="permissions_card_title">Permissions</string>
     <string name="battery_optimization_not_granted">电池优化：未允许！</string>
     <string name="battery_optimization_granted">电池优化：已允许！</string>
+    <string name="battery_optimization_needed_title">需要设置电池优化</string>
+    <string name="battery_optimization_needed_message">此应用需要设置电池优化才能正常工作。</string>
     <string name="background_optimization_not_granted">后台优化：未允许！</string>
     <string name="background_optimization_granted">后台优化：已允许！</string>
     <string name="notifications_permission_not_granted">通知权限：未授予！</string>
     <string name="notifications_permission_granted">通知权限：已授予！</string>
-    <string name="battery_optimization_needed_title">需要设置电池优化</string>
-    <string name="battery_optimization_needed_message">此应用需要设置电池优化才能正常工作。</string>
+    <string name="notifications_permission_required">需要通知权限</string>
+    <string name="overlay_permission_not_granted">Draw on Other Apps Permission: Not Granted!</string>
+    <string name="overlay_permission_granted">Draw on Other Apps Permission: Granted!</string>
+    <string name="overlay_permission_required">Draw on Other Apps Permission Required</string>
+    <string name="settings_card_title">Settings</string>
     <string name="app_theme_pref">主题</string>
+    <string name="app_theme_system_default">系统默认</string>
+    <string name="app_theme_system_light">浅色</string>
+    <string name="app_theme_system_dark">深色</string>
+    <string name="contrast">Contrast</string>
+    <string name="app_contrast_standard">Standard</string>
+    <string name="app_contrast_medium">Medium</string>
+    <string name="app_contrast_high">High</string>
     <string name="material_you_pref">质感设计 3</string>
+    <string name="material_you_pref_not_available">Material You theming is only available on Android 12 and up</string>
     <string name="material_you_pref_description">质感设计 3 主题仅在 Android 12 及以上系统可用</string>
     <string name="material_you_pref_off">关闭质感设计 3</string>
     <string name="material_you_pref_on">打开质感设计 3</string>
+    <string name="show_overlay_pref">Show Overlay</string>
+    <string name="show_overlay_pref_description">Show an Overlay of the remaining time on top of the screen, this overlay will stay on top even when the app is in the background.
+Some devices may require this option enabled in order for the app to work properly.</string>
+    <string name="show_overlay_pref_off">Show Overlay Off</string>
+    <string name="show_overlay_pref_on">Show Overlay On</string>
     <string name="allow_dimming_pref">允许暗屏</string>
     <string name="allow_dimming_pref_description">应用启动时，允许屏幕变暗</string>
     <string name="allow_dimming_pref_on">启用允许暗屏</string>
@@ -28,21 +47,28 @@
     <string name="caffeinate_button_off">关闭</string>
     <string name="quick_tile_off">开启</string>
     <string name="foreground_notification_action_next_timeout">下个倒计时</string>
+    <string name="foreground_notification_action_restart_timeout">Restart Timeout</string>
     <string name="foreground_notification_action_disable_dimming">禁用暗屏</string>
     <string name="foreground_notification_action_enable_dimming">启用暗屏</string>
     <string name="foreground_notification_tap_to_turn_off">点击通知以关闭</string>
     <string name="foreground_notification_title_duration_indefinite">应用将保持屏幕常亮</string>
     <string name="foreground_notification_title_duration_definite">应用将保持屏幕常亮%1$s</string>
-    <string name="ok">确认</string>
-    <string name="add_timeout">添加倒计时</string>
-    <string name="dialog_button_remove_timeout">删除倒计时</string>
-    <string name="cancel">取消</string>
-    <string name="notifications_permission_required">需要通知权限</string>
-    <string name="go_to_settings">前往设置</string>
-    <string name="app_theme_system_default">系统默认</string>
-    <string name="app_theme_system_light">浅色</string>
-    <string name="app_theme_system_dark">深色</string>
     <string name="time_format_hour_letter">时</string>
     <string name="time_format_minute_letter">分</string>
     <string name="time_format_second_letter">秒</string>
+    <string name="ok">确认</string>
+    <string name="cancel">取消</string>
+    <string name="go_to_settings">前往设置</string>
+    <string name="about">About</string>
+    <string name="about_version_code">Version Code: %s</string>
+    <string name="about_version_name">Version Name: %s</string>
+    <string name="select_all_timeouts">Select All</string>
+    <string name="deselect_all_timeouts">Deselect All</string>
+    <string name="add_timeout">添加倒计时</string>
+    <string name="add_infinite_timeout">Add Indefinite Timeout</string>
+    <string name="timeout_already_exists">Timeout %s Already Exists</string>
+    <plurals name="remove_timeout">
+        <item quantity="other">删除%d倒计时</item>
+    </plurals>
+    <!-- Untranslated strings -->
 </resources>
