@@ -1,5 +1,5 @@
 #file: noinspection Annotator
-name: Publish Release
+name: Publish Release By Tag
 run-name: ${{ github.workflow }} Tag ${{ inputs.releaseTag }}
 on:
   workflow_dispatch:
@@ -51,6 +51,7 @@ on:
 permissions: {}
 jobs:
   publish-release-by-tag:
+    name: Publish Release By Tag
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Tag ${{ inputs.releaseTag }}
