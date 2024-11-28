@@ -12,6 +12,7 @@
 # https://github.com/codacy/codacy-analysis-cli.
 
 name: Codacy Security Scan
+run-name: ${{ github.workflow }} ${{ github.event.repository.updated_at}}
 
 on:
   push:
