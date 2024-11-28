@@ -1,5 +1,5 @@
 #file: noinspection Annotator
-name: Publish Release on Tag
+name: Publish Release On Tag
 run-name: ${{ github.workflow }} ${{ github.ref_name }}
 
 on:
@@ -13,8 +13,8 @@ permissions: { }
 
 jobs:
   publish-release-on-tag:
+    name: Publish Release On Tag
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout ${{ github.ref }}
         uses: actions/checkout@v4
