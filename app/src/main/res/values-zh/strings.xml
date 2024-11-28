@@ -35,7 +35,9 @@
     <string name="foreground_notification_title_duration_definite">应用将保持屏幕常亮%1$s</string>
     <string name="ok">确认</string>
     <string name="add_timeout">添加倒计时</string>
-    <string name="dialog_button_remove_timeout">删除倒计时</string>
+    <plurals name="remove_timeout">
+        <item quantity="other">删除%d倒计时</item>
+    </plurals>
     <string name="cancel">取消</string>
     <string name="notifications_permission_required">需要通知权限</string>
     <string name="go_to_settings">前往设置</string>
