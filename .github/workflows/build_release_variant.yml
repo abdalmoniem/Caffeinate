@@ -10,7 +10,7 @@ on:
 permissions: { }
 
 jobs:
-  build:
+  build-release-variant:
     runs-on: ubuntu-latest
 
     steps:
