@@ -14,7 +14,7 @@ on:
 permissions: { }
 
 jobs:
-  build:
+  build-debug-variant:
     runs-on: ubuntu-latest
 
     steps:
