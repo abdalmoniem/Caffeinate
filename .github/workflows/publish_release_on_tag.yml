@@ -12,7 +12,7 @@ on:
 permissions: { }
 
 jobs:
-  build:
+  publish-release-on-tag:
     runs-on: ubuntu-latest
 
     steps:
