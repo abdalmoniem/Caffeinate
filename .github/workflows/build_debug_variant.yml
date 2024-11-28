@@ -15,8 +15,8 @@ permissions: { }
 
 jobs:
   build-debug-variant:
+    name: Build Debug Variant
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
