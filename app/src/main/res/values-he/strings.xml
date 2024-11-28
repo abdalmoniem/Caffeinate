@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="app_name">Caffeinate</string>
+    <string name="app_icon">App. Icon</string>
+    <string name="permissions_card_title">Permissions</string>
+    <string name="battery_optimization_not_granted">Battery Optimization: Not Granted!</string>
+    <string name="battery_optimization_granted">Battery Optimization: Granted!</string>
+    <string name="battery_optimization_needed_title">Battery optimization needed</string>
+    <string name="battery_optimization_needed_message">This app requires the Battery Optimization permission to work properly.</string>
+    <string name="background_optimization_not_granted">Background Optimization: Not Granted!</string>
+    <string name="background_optimization_granted">Background Optimization: Granted!</string>
+    <string name="notifications_permission_not_granted">Notifications Permission: Not Granted!</string>
+    <string name="notifications_permission_granted">Notifications Permission: Granted!</string>
+    <string name="notifications_permission_required">Notifications Permission Required</string>
+    <string name="overlay_permission_not_granted">Draw on Other Apps Permission: Not Granted!</string>
+    <string name="overlay_permission_granted">Draw on Other Apps Permission: Granted!</string>
+    <string name="overlay_permission_required">Draw on Other Apps Permission Required</string>
+    <string name="settings_card_title">Settings</string>
+    <string name="app_theme_pref">Theme</string>
+    <string name="app_theme_system_default">System Default</string>
+    <string name="app_theme_system_light">Light</string>
+    <string name="app_theme_system_dark">Dark</string>
+    <string name="contrast">Contrast</string>
+    <string name="app_contrast_standard">Standard</string>
+    <string name="app_contrast_medium">Medium</string>
+    <string name="app_contrast_high">High</string>
+    <string name="material_you_pref">Material You</string>
+    <string name="material_you_pref_not_available">Material You theming is only available on Android 12 and up</string>
+    <string name="material_you_pref_description">Match the app\'s colors to your wallpaper\'s colors.</string>
+    <string name="material_you_pref_off">Material You Off</string>
+    <string name="material_you_pref_on">Material You On</string>
+    <string name="show_overlay_pref">Show Overlay</string>
+    <string name="show_overlay_pref_description">Show an Overlay of the remaining time on top of the screen, this overlay will stay on top even when the app is in the background.
+Some devices may require this option enabled in order for the app to work properly.</string>
+    <string name="show_overlay_pref_off">Show Overlay Off</string>
+    <string name="show_overlay_pref_on">Show Overlay On</string>
+    <string name="allow_dimming_pref">Allow Dimming</string>
+    <string name="allow_dimming_pref_description">Allow screen to dim when App. is on.</string>
+    <string name="allow_dimming_pref_on">Allow Dimming Enabled</string>
+    <string name="allow_dimming_pref_off">Allow Dimming Disabled</string>
+    <string name="allow_while_locked_pref">Allow While Locked</string>
+    <string name="allow_while_locked_pref_description">Allow App. to keep running while the screen is locked</string>
+    <string name="allow_while_locked_pref_off">Allow While Locked Disabled</string>
+    <string name="allow_while_locked_pref_on">Allow While Locked Enabled</string>
+    <string name="timeouts_pref">Timeouts</string>
+    <string name="timeouts_pref_change">Change</string>
+    <string name="caffeinate_button_off">OFF</string>
+    <string name="quick_tile_off">Off</string>
+    <string name="foreground_notification_action_next_timeout">Next Timeout</string>
+    <string name="foreground_notification_action_restart_timeout">Restart Timeout</string>
+    <string name="foreground_notification_action_disable_dimming">Disable Dimming</string>
+    <string name="foreground_notification_action_enable_dimming">Enable Dimming</string>
+    <string name="foreground_notification_tap_to_turn_off">Tap to turn off</string>
+    <string name="foreground_notification_title_duration_indefinite">App. will keep the display on</string>
+    <string name="foreground_notification_title_duration_definite">App. will keep the display on for %1$s</string>
+    <string name="time_format_hour_letter">h</string>
+    <string name="time_format_minute_letter">m</string>
+    <string name="time_format_second_letter">s</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="about">About</string>
+    <string name="about_version_code">Version Code: %s</string>
+    <string name="about_version_name">Version Name: %s</string>
+    <string name="select_all_timeouts">Select All</string>
+    <string name="deselect_all_timeouts">Deselect All</string>
+    <string name="add_timeout">Add Timeout</string>
+    <string name="add_infinite_timeout">Add Indefinite Timeout</string>
+    <string name="timeout_already_exists">Timeout %s Already Exists</string>
+    <plurals name="remove_timeout">
+        <item quantity="one">Remove %d Timeout</item>
+        <item quantity="two">Remove %d Timeouts</item>
+        <item quantity="many">Remove %d Timeouts</item>
+        <item quantity="other">Remove %d Timeouts</item>
+    </plurals>
+    <!-- Untranslated strings -->
+</resources>
