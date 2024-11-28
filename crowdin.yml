@@ -6,6 +6,7 @@ files:
     languages_mapping:
       two_letters_code:
         ar-EG: ar-rEG
+        zh-CN: zh-rCN
         zh-TW: zh-rTW
   - source: /app/src/debug/res/values/strings.xml
     translation: /app/src/debug/res/values-%two_letters_code%/%original_file_name%
@@ -14,6 +15,7 @@ files:
     languages_mapping:
       two_letters_code:
         ar-EG: ar-rEG
+        zh-CN: zh-rCN
         zh-TW: zh-rTW
   - source: /fastlane/metadata/android/en-US/*.txt
     translation: /fastlane/metadata/android/%locale%/%original_file_name%
