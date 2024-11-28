@@ -79,10 +79,10 @@ class TimeoutsSelectionFragment(
         CheckBoxAdapter(caffeinateApplication.timeoutCheckBoxes) { checkBoxItems ->
             val isEmpty = checkBoxItems.isEmpty()
 
-            binding.toolbar.menu.findItem(R.id.save_selected).isVisible = !isEmpty
-        }.apply {
-            onItemSelectionChangedListener = CheckBoxAdapter.OnItemSelectionChangedListener(::onItemSelectionChanged)
-        }
+            with(binding.toolbar.menu) {
+                findItem(R.id.save_selected).isVisible = !isEmpty
+            }
+        }.apply { onItemsSelectionChangedListener = CheckBoxAdapter.OnItemsSelectionChangedListener(::onItemSelectionChanged) }
     }
 
     /**
@@ -396,18 +396,20 @@ class TimeoutsSelectionFragment(
      * @see MenuItem
      */
     private fun onItemSelectionChanged(selectedItems: List<CheckBoxItem>) = with(binding.toolbar.menu) {
-        findItem(R.id.remove_timeouts).isVisible = selectedItems.isNotEmpty()
+        val isEmpty = selectedItems.isEmpty()
+
+        findItem(R.id.remove_timeouts).isVisible = !isEmpty
         findItem(R.id.change_selection).apply {
-            isVisible = selectedItems.isNotEmpty()
+            isVisible = !isEmpty
             title = when {
-                selectedItems.isNotEmpty() -> getString(R.string.deselect_all_timeouts)
-                else                       -> getString(R.string.select_all_timeouts)
+                !isEmpty -> getString(R.string.deselect_all_timeouts)
+                else     -> getString(R.string.select_all_timeouts)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tooltipText = title
 
             icon = when {
-                selectedItems.isNotEmpty() -> AppCompatResources.getDrawable(requireContext(), R.drawable.deselect_all_icon)
-                else                       -> AppCompatResources.getDrawable(requireContext(), R.drawable.select_all_icon)
+                !isEmpty -> AppCompatResources.getDrawable(requireContext(), R.drawable.deselect_all_icon)
+                else     -> AppCompatResources.getDrawable(requireContext(), R.drawable.select_all_icon)
             }
         }
     }

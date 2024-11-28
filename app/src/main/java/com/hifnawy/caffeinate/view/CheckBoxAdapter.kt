@@ -72,7 +72,7 @@ data class CheckBoxItem(
  */
 class CheckBoxAdapter(
         timeoutCheckBoxes: List<CheckBoxItem>,
-        private val animationDuration: Long = 300,
+        private val animationDuration: Long = 50,
         private val onItemsChangedListener: OnItemsChangedListener? = null
 ) :
         RecyclerView.Adapter<CheckBoxAdapter.ViewHolder>() {
@@ -103,7 +103,7 @@ class CheckBoxAdapter(
      *
      * @return [Boolean] `true` if all items in the list are selected, `false` otherwise.
      */
-    private val isAllSelected: Boolean get() = timeoutCheckBoxes.size == selectedCheckBoxes.size
+    private val isAllSelected: Boolean get() = itemCount == selectedCheckBoxes.size
 
     /**
      * A transition that is used to animate the appearance and disappearance of the [RecyclerView] items.
@@ -162,9 +162,9 @@ class CheckBoxAdapter(
      * This listener is triggered whenever there is a change in the selection state of [CheckBoxItem]s.
      * Implement this listener to handle any actions that should occur when the selection changes.
      *
-     * @see OnItemSelectionChangedListener
+     * @see OnItemsSelectionChangedListener
      */
-    var onItemSelectionChangedListener: OnItemSelectionChangedListener? = null
+    var onItemsSelectionChangedListener: OnItemsSelectionChangedListener? = null
 
     /**
      * A flag indicating whether the user has started selecting items.
@@ -175,8 +175,7 @@ class CheckBoxAdapter(
      * @see [changeCheckBoxSelection]
      * @see [onBindViewHolder]
      */
-    var isSelecting = false
-        private set
+    private var isSelecting = false
 
     /**
      * Listener interface for observing changes to the list of [CheckBoxItem]s.
@@ -205,9 +204,9 @@ class CheckBoxAdapter(
      * The implementing class can register itself as a listener and respond to changes in the selection by overriding the method provided
      * in this interface.
      *
-     * @see onItemSelectionChanged
+     * @see onItemsSelectionChanged
      */
-    fun interface OnItemSelectionChangedListener {
+    fun interface OnItemsSelectionChangedListener {
 
         /**
          * Called when the selection of [CheckBoxItem]s changes.
@@ -218,7 +217,7 @@ class CheckBoxAdapter(
          *
          * @param selectedItems [List] The list of currently selected [CheckBoxItem]s.
          */
-        fun onItemSelectionChanged(selectedItems: List<CheckBoxItem>)
+        fun onItemsSelectionChanged(selectedItems: List<CheckBoxItem>)
     }
 
     /**
@@ -339,14 +338,14 @@ class CheckBoxAdapter(
 
                 onItemsChangedListener?.onItemChanged(timeoutCheckBoxes)
             } else {
-                changeCheckBoxSelection(item)
+                changeCheckBoxSelection(item, false)
             }
         }
 
         rootView.setOnLongClickListener { view ->
             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
 
-            changeCheckBoxSelection(item)
+            changeCheckBoxSelection(item, false)
 
             true
         }
@@ -379,21 +378,23 @@ class CheckBoxAdapter(
      * - The [updateFirstItem][List.updateFirstItem] method will be called after the list is modified.
      *
      * @param checkBoxItem [CheckBoxItem] the item to be added
+     * @param animate [Boolean] whether to animate the addition of the item
      */
-    fun addCheckBox(checkBoxItem: CheckBoxItem) = with(timeoutCheckBoxes) {
-        if (find { item -> item.duration == checkBoxItem.duration } != null) return@with
-        if (!add(checkBoxItem)) return@with
+    fun addCheckBox(checkBoxItem: CheckBoxItem, animate: Boolean = animationDuration > 0) = with(timeoutCheckBoxes) {
+        mainCoroutineScope.launch {
+            clearAllCheckBoxesSelection(animate)
+            delay(animationDuration)
 
-        selectedCheckBoxes.clear()
+            if (find { item -> item.duration == checkBoxItem.duration } != null) return@launch
+            if (!add(checkBoxItem)) return@launch
+            notifyAndAnimateItem(ITEM_INSERTED, indexOf(checkBoxItem))
+            delay(animationDuration)
 
-        notifyAndAnimateItem(ITEM_INSERTED, indexOf(checkBoxItem))
+            sortBy { checkBox -> checkBox.duration }
 
-        sortBy { checkBox -> checkBox.duration }
-        notifyAndAnimateItem(ITEM_CHANGED_ALL)
-
-        updateFirstItem()
-
-        onItemsChangedListener?.onItemChanged(this)
+            updateFirstItem()
+            onItemsChangedListener?.onItemChanged(this@with)
+        }
     }
 
     /**
@@ -406,21 +407,29 @@ class CheckBoxAdapter(
      * unchanged.
      *
      * @param checkBoxItem [CheckBoxItem] the item to be removed
+     * @param animate [Boolean] `true` to animate the removal of the item, `false` otherwise
      */
-    fun removeCheckBox(checkBoxItem: CheckBoxItem) = with(timeoutCheckBoxes) {
-        val index = indexOf(checkBoxItem)
-        if (!remove(checkBoxItem)) return@with
+    @Suppress("MemberVisibilityCanBePrivate")
+    fun removeCheckBox(checkBoxItem: CheckBoxItem, animate: Boolean = animationDuration > 0) = mainCoroutineScope.launch {
+        with(timeoutCheckBoxes) {
+            clearAllCheckBoxesSelection(animate)
+            delay(animationDuration)
+            val index = indexOf(checkBoxItem)
+            if (!remove(checkBoxItem)) return@launch
+            notifyAndAnimateItem(ITEM_REMOVED, index)
+            delay(animationDuration)
+            val isAllUnchecked = all { checkBox -> !checkBox.isChecked }
 
-        notifyAndAnimateItem(ITEM_REMOVED, index)
+            if (isAllUnchecked || size == 1) firstOrNull()?.apply {
+                isChecked = true
+                isEnabled = size != 1
 
-        if (size == 1) first().apply {
-            isChecked = true
-            isEnabled = false
+                notifyAndAnimateItem(ITEM_CHANGED_SINGLE, 0)
+                delay(animationDuration)
+            }
 
-            notifyAndAnimateItem(ITEM_CHANGED_SINGLE, 0)
+            onItemsChangedListener?.onItemChanged(this@with)
         }
-
-        onItemsChangedListener?.onItemChanged(this)
     }
 
     /**
@@ -429,9 +438,11 @@ class CheckBoxAdapter(
      * This method removes all checked [CheckBoxItem]s from the list.
      * It is called by the [removeTimeouts][TimeoutsSelectionFragment.removeTimeouts] method in the [TimeoutsSelectionFragment].
      *
+     * @param animate [Boolean] `true` to animate the removal of the checked items, `false` otherwise.
+     *
      * @see removeCheckBox
      */
-    fun removeSelectedCheckBoxes() = selectedCheckBoxes.forEach { removeCheckBox(it) }
+    fun removeSelectedCheckBoxes(animate: Boolean = animationDuration > 0) = selectedCheckBoxes.forEach { removeCheckBox(it, animate) }
 
     /**
      * Toggles the selection state of all [CheckBoxItem]s in the list.
@@ -439,34 +450,38 @@ class CheckBoxAdapter(
      * - If not all items are selected, this method selects all items.
      * - If all items are selected, this method deselects all items.
      *
-     * This method also notifies the [RecyclerView] of the modifications and animates the changes if [animateSelection] is `true`.
+     * This method also notifies the [RecyclerView] of the modifications and animates the changes if [animate] is `true`.
      *
-     * @param animateSelection [Boolean] `true` to animate the selection changes, `false` otherwise.
+     * @param animate [Boolean] `true` to animate the selection changes, `false` otherwise.
      */
-    fun changeAllCheckBoxesSelection(animateSelection: Boolean = false) {
+    fun changeAllCheckBoxesSelection(animate: Boolean = animationDuration > 0) = mainCoroutineScope.launch {
+        isSelecting = !isAllSelected
+
         when {
             !isAllSelected -> timeoutCheckBoxes.forEachIndexed { index, checkBoxItem ->
                 selectedCheckBoxes.add(checkBoxItem)
 
-                if (animateSelection) notifyAndAnimateItem(ITEM_CHANGED_SINGLE, index)
-                else notifyItemChanged(index)
+                if (animate) {
+                    delay(animationDuration)
+                    notifyAndAnimateItem(ITEM_CHANGED_SINGLE, index)
+                } else notifyItemChanged(index)
             }
 
             isAllSelected  -> timeoutCheckBoxes.forEachIndexed { index, checkBoxItem ->
                 selectedCheckBoxes.remove(checkBoxItem)
 
-                if (animateSelection) notifyAndAnimateItem(ITEM_CHANGED_SINGLE, index)
-                else notifyItemChanged(index)
+                if (animate) {
+                    delay(animationDuration)
+                    notifyAndAnimateItem(ITEM_CHANGED_SINGLE, index)
+                } else notifyItemChanged(index)
             }
         }
 
-        isSelecting = selectedCheckBoxes.isNotEmpty()
-
-        onItemSelectionChangedListener?.onItemSelectionChanged(selectedCheckBoxes.toList())
+        onItemsSelectionChangedListener?.onItemsSelectionChanged(selectedCheckBoxes.toList())
     }
 
     /**
-     * Toggles the selection state of the specified [checkBoxItem] in the list at the specified [position].
+     * Toggles the selection state of the specified [checkBoxItem] in the list.
      *
      * - If the item is not selected, it is added to the [selectedCheckBoxes] list.
      * - If the item is selected, it is removed from the [selectedCheckBoxes] list.
@@ -475,19 +490,46 @@ class CheckBoxAdapter(
      * It is called by the [onBindViewHolder][CheckBoxAdapter.onBindViewHolder] and [onItemLongClick][View.setOnLongClickListener] methods.
      *
      * @param checkBoxItem [CheckBoxItem] the item to be toggled
+     * @param animate [Boolean] `true` to animate the selection change, `false` otherwise
      */
-    private fun changeCheckBoxSelection(checkBoxItem: CheckBoxItem, animateSelection: Boolean = false) {
+    private fun changeCheckBoxSelection(checkBoxItem: CheckBoxItem, animate: Boolean = animationDuration > 0) = mainCoroutineScope.launch {
         when (checkBoxItem) {
             !in selectedCheckBoxes -> selectedCheckBoxes.add(checkBoxItem)
             else                   -> selectedCheckBoxes.remove(checkBoxItem)
         }
 
-        if (animateSelection) notifyAndAnimateItem(ITEM_CHANGED_ALL)
-        else notifyItemRangeChanged(0, timeoutCheckBoxes.size)
-
         isSelecting = selectedCheckBoxes.isNotEmpty()
+        onItemsSelectionChangedListener?.onItemsSelectionChanged(selectedCheckBoxes.toList())
 
-        onItemSelectionChangedListener?.onItemSelectionChanged(selectedCheckBoxes.toList())
+        if (animate) {
+            delay(animationDuration)
+            notifyAndAnimateItem(ITEM_CHANGED_ALL)
+        } else notifyItemRangeChanged(0, itemCount)
+    }
+
+    /**
+     * Clears all selected [CheckBoxItem]s from the [selectedCheckBoxes] list.
+     *
+     * This method is called whenever the list of [CheckBoxItem]s is modified to ensure that the selection state is consistent with the list.
+     * It is also called when the user selects or deselects all [CheckBoxItem]s in the list.
+     *
+     * @param animate [Boolean] `true` to animate the selection change, `false` otherwise
+     *
+     * @see [selectedCheckBoxes]
+     * @see [isSelecting]
+     * @see [addCheckBox]
+     * @see [removeCheckBox]
+     * @see [removeSelectedCheckBoxes]
+     */
+    private fun clearAllCheckBoxesSelection(animate: Boolean = animationDuration > 0) = mainCoroutineScope.launch {
+        isSelecting = false
+        selectedCheckBoxes.clear()
+        onItemsSelectionChangedListener?.onItemsSelectionChanged(emptyList())
+
+        if (animate) {
+            delay(animationDuration)
+            notifyAndAnimateItem(ITEM_CHANGED_ALL)
+        } else notifyItemRangeChanged(0, itemCount)
     }
 
     /**
@@ -505,7 +547,7 @@ class CheckBoxAdapter(
                     ITEM_INSERTED       -> index?.let { notifyItemInserted(it) }
                     ITEM_REMOVED        -> index?.let { notifyItemRemoved(it) }
                     ITEM_CHANGED_SINGLE -> index?.let { notifyItemChanged(it) }
-                    ITEM_CHANGED_ALL    -> notifyItemsRangeChanged(0, timeoutCheckBoxes.size)
+                    ITEM_CHANGED_ALL    -> notifyItemsRangeChanged(0, itemCount)
                 }
             }
 
@@ -516,13 +558,11 @@ class CheckBoxAdapter(
      * it will animate the change; otherwise, it will simply notify the change without animation.
      *
      * @param position [Int] The starting position of the range of items that has changed.
-     * @param size [Int] The number of items in the range that has changed.
+     * @param itemCount [Int] The number of items in the range that has changed.
      */
-    private fun notifyItemsRangeChanged(position: Int, size: Int) {
-        when {
-            animationDuration > 0 -> notifyAndAnimateAll(position, size)
-            else                  -> notifyItemRangeChanged(position, size)
-        }
+    private fun notifyItemsRangeChanged(position: Int, itemCount: Int) = when {
+        animationDuration > 0 -> notifyAndAnimateAll(position, itemCount)
+        else                  -> mainCoroutineScope.launch { notifyItemRangeChanged(position, itemCount) }
     }
 
     /**
@@ -535,13 +575,11 @@ class CheckBoxAdapter(
      * @param positionStart [Int] The starting position of the range of items that has changed.
      * @param itemCount [Int] The number of items in the range that has changed.
      */
-    private fun notifyAndAnimateAll(positionStart: Int, itemCount: Int) {
-        mainCoroutineScope.launch {
-            (positionStart..itemCount).forEach { index ->
-                delay(50)
-                TransitionManager.beginDelayedTransition(recyclerView, transition)
-                notifyItemChanged(index)
-            }
+    private fun notifyAndAnimateAll(positionStart: Int, itemCount: Int) = mainCoroutineScope.launch {
+        (positionStart .. itemCount).forEach { index ->
+            delay(animationDuration)
+            TransitionManager.beginDelayedTransition(recyclerView, transition)
+            notifyItemChanged(index)
         }
     }
 
