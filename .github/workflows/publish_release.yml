@@ -50,7 +50,7 @@ on:
           - debug
 permissions: {}
 jobs:
-  build:
+  publish-release-by-tag:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Tag ${{ inputs.releaseTag }}
