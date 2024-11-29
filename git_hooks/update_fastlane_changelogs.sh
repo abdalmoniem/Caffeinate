@@ -36,8 +36,8 @@ do
     echo "-----------------------------------------------------------------"
   fi
 
-  echo "$commitMessage" > "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt"
-  echo "saving to '$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/$versionCode.txt'"
+  echo "$commitMessage" > "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$versionCode.txt"
+  echo "saving to '$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$versionCode.txt'"
   echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   echo
 
@@ -56,13 +56,13 @@ if [ $changeLogs -gt 0 ]; then
     echo "commit '$currentCommitHash' is on the remote branch, creating a new change log commit..."
     echo
 
-    git add "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/"
+    git add "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/"
     git commit -sm "updated $changeLogs change logs(s)"
   else
     echo "commit '$currentCommitHash' is not on the remote branch, amending..."
     echo
 
-    git add "$gitTopLevel/fastlane/metadata/android/en-US/changeLogs/"
+    git add "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/"
     git commit --amend --no-edit
   fi
 fi

@@ -34,7 +34,7 @@ sealed class ServiceStatus {
      *
      * @author AbdAlMoniem AlHifnawy
      */
-    data class Running(private var startTimeout: Duration) : ServiceStatus() {
+    class Running(startTimeout: Duration) : ServiceStatus() {
 
         /**
          * Interface for observing changes to the remaining timeout duration while the service is running.
@@ -60,6 +60,16 @@ sealed class ServiceStatus {
              */
             fun onRemainingUpdated()
         }
+
+        /**
+         * The timeout duration in seconds.
+         *
+         * This property is used to determine when the service should stop.
+         *
+         * @return [Duration] the timeout duration in seconds.
+         */
+        var startTimeout: Duration = startTimeout
+            private set
 
         /**
          * Indicates whether the service is running indefinitely.

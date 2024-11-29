@@ -1,6 +1,6 @@
 #file: noinspection Annotator
 name: Publish Release On Tag
-run-name: ${{ github.workflow }} ${{ github.ref_name }}
+run-name: ${{ github.workflow }} ${{ github.ref_name }} ${{ github.event.repository.updated_at}}
 
 on:
   push:
@@ -18,9 +18,6 @@ jobs:
     steps:
       - name: Checkout ${{ github.ref }}
         uses: actions/checkout@v4
-
-      - name: Check base64
-        run: base64 --version
 
       - name: Create local.properties
         run: |
@@ -63,15 +60,19 @@ jobs:
 
       - name: Get Commit Message
         run: |
-          echo "COMMIT_MESSAGE=$(git show -s --format=%B)"
+          gitTopLevel="$(git rev-parse --show-toplevel)"
+          versionCodeFilter="\(versionCode\s\+=\s\+\)\([[:digit:]]\+\)"
+          versionCode=$(git show "$tag:app/build.gradle.kts" | grep versionCode | sed -e "s/$versionCodeFilter/\2/" | xargs)
+          
+          cat "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$versionCode.txt"
+          
           {
               echo 'COMMIT_MESSAGE<<EOF'
-              git show -s --format=%B | sed -e 's/Change-Id:\s*\w\+//' | sed -e 's/Signed-off-by:\s*.*//' | sed ':a;N;$!ba;s/\n*$//'
+              cat "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$versionCode.txt"
               echo EOF
           } >> $GITHUB_ENV
 
       - name: Publish Release ${{ github.ref_name }}
-        # noinspection SpellCheckingInspection
         uses: svenstaro/upload-release-action@v2
         with:
           file: ${{ env.ARTIFACT_PATH }}

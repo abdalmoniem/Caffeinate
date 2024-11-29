@@ -1,0 +1,125 @@
+* added picture in picture support
+   >
+* updated strings.xml
+   >
+* Update Codacy Configuration
+   >
+* New Crowdin updates (#58)
+   > - New translations strings.xml (Arabic, Egypt)
+   > - New translations strings.xml (Arabic)
+* Rename publish_release.yml to publish_release_by_tag.yml
+   >
+* Update publish_release_on_tag.yml
+   >
+* Update publish_release.yml
+   >
+* Update build_release_variant.yml
+   >
+* Update build_debug_variant.yml
+   >
+* Update publish_release_on_tag.yml
+   >
+* Update publish_release.yml
+   >
+* Update build_release_variant.yml
+   >
+* Update build_debug_variant.yml
+   >
+* Create codacy.yml
+   >
+* added option to add infinite timeout in the timeouts selection sheet
+   >
+* added beautiful animations to the timeouts selection sheet
+   >
+* added ability to select items in timeouts bottom sheet
+   > by long clicking on the item card, it will be selected and others will be selectable as well
+* fixed items hidden behind navigation bar in timeouts bottom sheet
+   >
+* changed timeouts selection UI from a dialog to a bottom sheet
+   > this maximizes screen space for managing timeouts
+* New Crowdin updates (#56)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Arabic, Egypt)
+* code improvement and bug fixes
+   >
+* added about dialog to show info about the app
+   >
+* fixed settings item description not visible after changing theme color
+   >
+* use MutableLiveData for states in MainActivityViewModel
+   > to insure consistency accross the UI
+* migrate architecture to MVVM
+   > used viewModel to improve animation of restart button
+* used K-Map to implement theme and contrast switching logic
+   > this is a very efficient and flexible way to implement the logic
+* improved theme and contrast switching logic
+   >
+* fixed permission handling
+   > permissions were checked only once when the app started, which could lead to crashes if these permissions were retracted while the app is running
+* added permissions and settings icon to main activity
+   >
+* adjust margins for app bar
+   >
+* initial implementation of contrasted themes
+   >
+* improved toolbar UI/UX
+   >
+* persist toolbar expanded state when the app theme changes from the main activity
+   >
+* replaced theme selection button with button toggle groups for easier access
+   >
+* fix soft navigation bar overlapping main activity UI
+   >
+* overall UI improvements
+   > - added widget shadows, so that they can be visible when on wallpapers of same colors
+   > - added overlay shadows, so that they can be visible when on wallpapers of same colors
+   > - added text auto sizing for all text elements in the widget
+   > - grouped permission cards and settings cards in main activity for better visibility
+   > - added collapsing toolbar in main activity with improved animations
+   > - preparing for Dynamic MediumContrast and HighContrast themes
+* simplify theme color implementation
+   >
+* baseline (non-dynamic) theme color improvement
+   > improved contrast ratio on non dynamic theme colors
+* fix app icon background on API >= 26
+   > fix black background on app icon for android versions greater than or equal API level 26
+* fix widget configuration crash
+   > fixed widget configuration activity crashing when the app is closed or not in memory
+* New Crowdin updates (#55)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Arabic, Egypt)
+* fixed colors, theming and icons
+   > - fixed themes for android versions less than API 26
+   > - fixed app icons not showing for android versions less than API 26
+   > - fixed un-appealing coloring for non dynamic color themes
+   > - improved color consistency accross app UI components
+* overall UI color improvements
+   > also fixed some incorrect translations
+* improved overlay appearance
+   > - added drop shadow to text overlay
+   > - the overlay text color is now dynamic depending on the theme applied
+   > - the overlay text size is adjusted depending on if the app's locale is RTL or not for better visibility
+   > - the overlay position changes dynamically from top/left to top/right if the app's locale is changed from LTR to RTL and vice versa when the app is running
+* improved widget appearance
+   > - added drop shadow to text elements in the widget
+   > - improved UI spacing between widget elements
+   > - improved widget configuration activity UI/UX
+* enahnced widget coloring
+   > - dynamic widget colors are now more vibrant
+   > - widget configuration screen shows realtime updates if a timeout is running
+* fix widgets configuration persistence
+   > fixed widgets configuration not persisting when the phone restarts
+* optimized widget dynamic colors
+   >
+* Update README.md
+   >
+* Renamed Build App to Build Debug Variant
+   >
+* Create Build Release Variant Workflow
+   > This workflow is triggered either manually or on every Friday at 12:00 AM
+* New Crowdin updates (#52)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Arabic, Egypt)
+   > - New translations strings.xml (Arabic)
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.8.0...v2.0.0

@@ -2,14 +2,18 @@ package com.hifnawy.caffeinate.view
 
 import android.Manifest
 import android.app.ActivityManager
+import android.app.PictureInPictureParams
+import android.app.PictureInPictureUiState
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Rational
 import android.view.HapticFeedbackConstants
 import android.view.Menu
 import android.view.MenuItem
@@ -44,10 +48,12 @@ import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormat
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.isVisible
+import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.onSizeChange
 import com.hifnawy.caffeinate.viewModel.MainActivityViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.math.min
 import com.google.android.material.R as materialR
 import timber.log.Timber as Log
 
@@ -145,12 +151,20 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private val notGrantedDrawableTint by lazy { MaterialColors.getColor(binding.root, materialR.attr.colorError) }
 
     /**
-     * The [ActivityResultLauncher] used to launch the overlay permission intent.
+     * A lazily initialized instance of [PictureInPictureParams.Builder] that is used to enter picture-in-picture mode.
      *
-     * This launcher is used to launch the overlay permission intent when the user clicks on the
-     * overlay permission card. The result of the launcher is not used in this activity.
+     * This field is used to store the [PictureInPictureParams.Builder] that is used to enter picture-in-picture mode.
+     * It is initialized lazily when it is first accessed. The instance is created using the
+     * [PictureInPictureParams.Builder] constructor and the [Rational] constructor.
+     * The aspect ratio of the builder is set to 1:1 to ensure that the activity is displayed in a square aspect ratio.
+     *
+     * @return [PictureInPictureParams.Builder] the instance of [PictureInPictureParams.Builder] that is used to enter picture-in-picture mode.
      */
-    private lateinit var overlayPermissionLauncher: ActivityResultLauncher<Intent>
+    private val pipParamsBuilder by lazy {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return@lazy null
+
+        PictureInPictureParams.Builder().setAspectRatio(Rational(1, 1))
+    }
 
     /**
      * An extension property on [Iterable] to get the enabled durations.
@@ -168,6 +182,37 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 limit = 10,
                 truncated = "..."
         ) { checkBoxItem -> checkBoxItem.duration.toLocalizedFormattedTime(binding.root.context) }
+
+    /**
+     * The [ActivityResultLauncher] used to launch the overlay permission intent.
+     *
+     * This launcher is used to launch the overlay permission intent when the user clicks on the
+     * overlay permission card. The result of the launcher is not used in this activity.
+     */
+    private lateinit var overlayPermissionLauncher: ActivityResultLauncher<Intent>
+
+    /**
+     * The source rectangle hint to use when entering picture-in-picture mode.
+     *
+     * This field is used to store the source rectangle hint that is passed to the
+     * [PictureInPictureParams.Builder] when entering picture-in-picture mode.
+     * It is used to specify the region of the screen that the activity is currently using.
+     *
+     * @see PictureInPictureParams.Builder.setSourceRectHint
+     */
+    private lateinit var pipSourceRectHint: Rect
+
+    /**
+     * Indicates whether the activity is currently in picture-in-picture mode.
+     *
+     * This flag is used to track whether the activity is currently in picture-in-picture mode.
+     * It is set to {@code true} when the activity enters picture-in-picture mode and
+     * {@code false} when it exits.
+     *
+     * @see onPictureInPictureModeChanged
+     * @see isInPictureInPictureMode
+     */
+    private var isInPictureInPictureMode = false
 
     /**
      * Called when the activity is starting.
@@ -250,6 +295,33 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                         }
                     }
                 }
+            }
+
+            addOnPictureInPictureModeChangedListener { pipModeInfo ->
+                isInPictureInPictureMode = pipModeInfo.isInPictureInPictureMode
+                coordinatorLayout.isVisible = !pipModeInfo.isInPictureInPictureMode
+                pipLayout.root.isVisible = pipModeInfo.isInPictureInPictureMode
+            }
+
+            root.onSizeChange { _, newWidth, newHeight, _, _ ->
+                Log.d("root layout size changed, newWidth: $newWidth, newHeight: $newHeight")
+
+                with(pipLayout.progressIndicator) {
+                    indicatorSize = min(newWidth, newHeight) - paddingStart - paddingEnd
+                    trackThickness = min(paddingStart, paddingEnd) / 2
+                }
+
+            }
+
+            pipLayout.root.onSizeChange { _, _, _, _, _ ->
+                pipSourceRectHint = Rect()
+                pipLayout.root.getGlobalVisibleRect(pipSourceRectHint)
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return@onSizeChange
+
+                pipParamsBuilder?.setSourceRectHint(pipSourceRectHint)
+
+                pipLayout.root.isVisible = isInPictureInPictureMode
             }
         }
     }
@@ -380,6 +452,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     override fun onPause() {
         super.onPause()
 
+        if (sharedPreferences.isPictureInPictureEnabled) return
+
         caffeinateApplication.run {
             keepAwakeServiceObservers.removeObserver(this@MainActivity)
             sharedPrefsObservers.removeObserver(this@MainActivity)
@@ -422,6 +496,49 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     }
 
     /**
+     * Called when the user is giving a hint that they are leaving your activity.
+     *
+     * This is called when the user presses the home button, or when the user starts navigating away from your activity.
+     * This is used by the system to determine whether to enter picture-in-picture mode.
+     *
+     * @see [onPictureInPictureModeChanged]
+     * @see [isInPictureInPictureMode]
+     * @see [enterPictureInPictureMode]
+     */
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (!sharedPreferences.isPictureInPictureEnabled || caffeinateApplication.lastStatusUpdate !is ServiceStatus.Running) return
+
+        binding.coordinatorLayout.isVisible = false
+        binding.pipLayout.root.isVisible = true
+
+        pipParamsBuilder?.run {
+            setSourceRectHint(pipSourceRectHint)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) setSeamlessResizeEnabled(false)
+
+            enterPictureInPictureMode(build())
+        }
+    }
+
+    /**
+     * Called when the picture in picture mode's UI state has changed.
+     *
+     * @param pipState The current state of the picture in picture mode's UI.
+     *
+     * @see PictureInPictureUiState
+     */
+    override fun onPictureInPictureUiStateChanged(pipState: PictureInPictureUiState) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return
+        if (!pipState.isTransitioningToPip) return
+
+        binding.coordinatorLayout.isVisible = false
+        binding.pipLayout.root.isVisible = true
+    }
+
+    /**
      * Called when there is a change in the permission state indicating whether all necessary permissions have been granted.
      *
      * @param isAllPermissionsGranted [Boolean] `true` if all necessary permissions have been granted, `false` otherwise.
@@ -429,9 +546,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     override fun onIsAllPermissionsGrantedUpdated(isAllPermissionsGranted: Boolean) {
         binding.toggleButton.isEnabled = isAllPermissionsGranted
 
-        changeShowOverlayPreferences(isAllPermissionsGranted && checkOverlayPermission())
-        changeAllowDimmingPreferences(isAllPermissionsGranted)
-        changeAllowWhileLockedPreferences(isAllPermissionsGranted)
+        changeOverlayPreferences(isAllPermissionsGranted && checkOverlayPermission())
+        changePictureInPicturePreferences(isAllPermissionsGranted)
+        changeDimmingPreferences(isAllPermissionsGranted)
+        changeWhileLockedPreferences(isAllPermissionsGranted)
         changeTimeoutsPreferences(isAllPermissionsGranted)
     }
 
@@ -442,6 +560,15 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      */
     override fun onIsOverlayEnabledUpdated(isOverlayEnabled: Boolean) {
         binding.overlaySwitch.isChecked = isOverlayEnabled
+    }
+
+    /**
+     * Called when the "Picture in Picture Enabled" preference changes.
+     *
+     * @param isPictureInPictureEnabled [Boolean] `true` if the "Picture in Picture" feature is enabled, `false` otherwise.
+     */
+    override fun onIsPictureInPictureEnabledUpdated(isPictureInPictureEnabled: Boolean) {
+        binding.pictureInPictureSwitch.isChecked = isPictureInPictureEnabled
     }
 
     /**
@@ -474,10 +601,18 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             viewModel.isRestartButtonEnabled.value =
                     (status as? ServiceStatus.Running)?.run { (!isRestarted && isCountingDown) || isRestarted } ?: false
 
-            toggleButton.text = when (status) {
+            val remainingText = when (status) {
                 is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
                 is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(root.context)
             }
+
+            toggleButton.text = remainingText
+
+            if (!isInPictureInPictureMode) return
+
+            pipLayout.progressIndicator.max = (status as? ServiceStatus.Running)?.run { startTimeout.inWholeSeconds.toInt() } ?: 0
+            pipLayout.progressIndicator.setProgressCompat((status as? ServiceStatus.Running)?.run { remaining.inWholeSeconds.toInt() } ?: 0, true)
+            pipLayout.progressIndicatorText.text = remainingText
         }
     }
 
@@ -731,9 +866,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      * 1. A [MaterialCardView][com.google.android.material.card.MaterialCardView] that shows the Material You preferences.
      * 2. A [TextView][android.widget.TextView] that shows the Material You preferences title.
      * 3. A [TextView][android.widget.TextView] that shows the Material You preferences subtitle.
-     * 4. A [MaterialSwitch][com.google.android.material.materialswitch.MaterialSwitch] that toggles the Material You preferences.
-     *
-     * The Material You preferences are enabled when the user has granted the [POST_NOTIFICATIONS][Manifest.permission.POST_NOTIFICATIONS] permission.
+     * 4. A [MaterialSwitch][com.google.android.material.materialswitch.MaterialSwitch] that toggles the Material You preferences..
      *
      * @param isEnabled [Boolean] `true` if the Material You preferences should be enabled, `false` otherwise.
      */
@@ -774,11 +907,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      * 3. A [TextView][android.widget.TextView] that shows the overlay preferences subtitle.
      * 4. A [MaterialSwitch][com.google.android.material.materialswitch.MaterialSwitch] that toggles the overlay preferences.
      *
-     * The overlay preferences are enabled when the user has granted the [SYSTEM_ALERT_WINDOW][Manifest.permission.SYSTEM_ALERT_WINDOW] permission.
-     *
      * @param isEnabled [Boolean] `true` if the overlay preferences should be enabled, `false` otherwise.
      */
-    private fun changeShowOverlayPreferences(isEnabled: Boolean) {
+    private fun changeOverlayPreferences(isEnabled: Boolean) {
         with(binding) {
             overlayCard.isEnabled = isEnabled
             overlayTextView.isEnabled = isEnabled
@@ -799,6 +930,37 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     }
 
     /**
+     * Enables the picture in picture preferences.
+     *
+     * The picture in picture preferences are:
+     * 1. A [MaterialCardView][com.google.android.material.card.MaterialCardView] that shows the picture in picture preferences.
+     * 2. A [TextView][android.widget.TextView] that shows the picture in picture preferences title.
+     * 3. A [TextView][android.widget.TextView] that shows the picture in picture preferences subtitle.
+     * 4. A [MaterialSwitch][com.google.android.material.materialswitch.MaterialSwitch] that toggles the picture in picture preferences.
+     *
+     * @param isEnabled [Boolean] `true` if the picture in picture preferences should be enabled, `false` otherwise.
+     */
+    private fun changePictureInPicturePreferences(isEnabled: Boolean) {
+        with(binding) {
+            pictureInPictureCard.isEnabled = isEnabled
+            pictureInPictureTextView.isEnabled = isEnabled
+            pictureInPictureSubTextTextView.isEnabled = isEnabled && sharedPreferences.isPictureInPictureEnabled
+            pictureInPictureSubTextTextView.isVisible = isEnabled && sharedPreferences.isPictureInPictureEnabled
+            pictureInPictureSwitch.isEnabled = isEnabled
+            pictureInPictureSwitch.isChecked = sharedPreferences.isPictureInPictureEnabled
+
+            pictureInPictureCard.setOnClickListener { pictureInPictureSwitch.isChecked = !sharedPreferences.isPictureInPictureEnabled }
+            pictureInPictureSwitch.setOnCheckedChangeListener { switch, isChecked ->
+                switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+                pictureInPictureSubTextTextView.isEnabled = isChecked
+                pictureInPictureSubTextTextView.isVisible = isChecked
+                sharedPreferences.isPictureInPictureEnabled = isChecked
+            }
+        }
+    }
+
+    /**
      * Enables the allow dimming preferences.
      *
      * The allow dimming preferences are:
@@ -807,11 +969,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      * 3. A [TextView][android.widget.TextView] that shows the allow dimming preferences subtitle.
      * 4. A [MaterialSwitch][com.google.android.material.materialswitch.MaterialSwitch] that toggles the allow dimming preferences.
      *
-     * The allow dimming preferences are enabled when the user has granted the [SYSTEM_ALERT_WINDOW][Manifest.permission.SYSTEM_ALERT_WINDOW] permission.
-     *
      * @param isEnabled [Boolean] `true` if the allow dimming preferences should be enabled, `false` otherwise.
      */
-    private fun changeAllowDimmingPreferences(isEnabled: Boolean) {
+    private fun changeDimmingPreferences(isEnabled: Boolean) {
         with(binding) {
             allowDimmingCard.isEnabled = isEnabled
             allowDimmingTextView.isEnabled = isEnabled
@@ -840,11 +1000,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      * 3. A [TextView][android.widget.TextView] that shows the allow while locked preferences subtitle.
      * 4. A [MaterialSwitch][com.google.android.material.materialswitch.MaterialSwitch] that toggles the allow while locked preferences.
      *
-     * The allow while locked preferences are enabled when the user has granted the [SYSTEM_ALERT_WINDOW][Manifest.permission.SYSTEM_ALERT_WINDOW] permission.
-     *
      * @param isEnabled [Boolean] `true` if the allow while locked preferences should be enabled, `false` otherwise.
      */
-    private fun changeAllowWhileLockedPreferences(isEnabled: Boolean) {
+    private fun changeWhileLockedPreferences(isEnabled: Boolean) {
         with(binding) {
             allowWhileLockedCard.isEnabled = isEnabled
             allowWhileLockedTextView.isEnabled = isEnabled
@@ -872,8 +1030,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
      * 2. A [TextView][android.widget.TextView] that shows the timeout preferences title.
      * 3. A [TextView][android.widget.TextView] that shows the timeout preferences subtitle.
      * 4. A [Button][android.widget.Button] that allows the user to choose a timeout duration.
-     *
-     * The timeout preferences are enabled when the user has granted the [SYSTEM_ALERT_WINDOW][Manifest.permission.SYSTEM_ALERT_WINDOW] permission.
      *
      * @param isEnabled [Boolean] `true` if all required permissions are granted, `false` otherwise.
      */

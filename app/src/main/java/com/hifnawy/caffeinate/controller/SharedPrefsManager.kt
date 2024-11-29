@@ -11,6 +11,7 @@ import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.CONT
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_DIMMING
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_MATERIAL_YOU
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_OVERLAY
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_PICTURE_IN_PICTURE
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_WHILE_LOCKED
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.IS_SERVICE_RUNNING
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.LAST_REMAINING_TIMEOUT
@@ -81,11 +82,6 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
         CONTRAST_LEVEL,
 
         /**
-         * A [Boolean] value indicating whether the screen should be dimmed while the service is running.
-         */
-        ENABLE_DIMMING,
-
-        /**
          * A [Boolean] value indicating whether Material You design elements should be enabled.
          */
         ENABLE_MATERIAL_YOU,
@@ -94,6 +90,16 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
          * A [Boolean] value indicating whether the overlay should be enabled.
          */
         ENABLE_OVERLAY,
+
+        /**
+         * A [Boolean] value indicating whether the application should be enabled in picture-in-picture mode.
+         */
+        ENABLE_PICTURE_IN_PICTURE,
+
+        /**
+         * A [Boolean] value indicating whether the screen should be dimmed while the service is running.
+         */
+        ENABLE_DIMMING,
 
         /**
          * A [Boolean] value indicating whether the service should be enabled while the screen is locked.
@@ -222,24 +228,13 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
     /**
      * List of available timeouts that can be selected by the user.
      *
-     * This list is used to populate the [DialogChooseTimeoutsBinding][com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding] and provide the
-     * user with a variety of timeouts to choose from.
-     *
-     * The items in this list are used to generate the list items in the
-     * [DialogChooseTimeoutsBinding][com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding] and are used to populate the
-     * [CheckBoxItem] list.
-     *
      * @return [List] A list of [Duration] objects representing the available timeouts.
      */
     // val timeouts by lazy { listOf(30.seconds, 5.minutes, 10.minutes, 15.minutes, 30.minutes, 60.minutes, 120.minutes, 240.minutes, 480.minutes, Duration.INFINITE) }
     val timeouts by lazy { listOf(30.seconds, 5.minutes, 10.minutes, 15.minutes, 30.minutes, 60.minutes, Duration.INFINITE) }
 
     /**
-     * Checks if all necessary permissions are granted.
-     *
-     * This property is used to keep track of whether all necessary permissions have been granted. It is used to determine whether the main activity
-     * should display the [DialogChooseTimeoutsBinding][com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding] or not, and to enable or
-     * disable the [DialogChooseTimeoutsBinding][com.hifnawy.caffeinate.databinding.DialogChooseTimeoutsBinding] based on the state of this property.
+     * Retrieves or sets whether all necessary permissions are granted.
      *
      * @return [Boolean] `true` if all necessary permissions are granted, `false` otherwise.
      */
@@ -304,6 +299,18 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
             sharedPreferences.edit().putBoolean(ENABLE_OVERLAY.name, value).apply()
             notifySharedPrefsObservers { observer -> observer.onIsOverlayEnabledUpdated(value) }
         }
+
+    /**
+     * Retrieves or sets whether picture-in-picture mode is enabled.
+     *
+     * This property is used to get or update the preference of whether picture-in-picture mode should be enabled.
+     * It allows the application to persist the user's preference across sessions.
+     *
+     * @return [Boolean] `true` if picture-in-picture mode is enabled, `false` otherwise.
+     */
+    var isPictureInPictureEnabled: Boolean
+        get() = sharedPreferences.getBoolean(ENABLE_PICTURE_IN_PICTURE.name, false)
+        set(value) = sharedPreferences.edit().putBoolean(ENABLE_PICTURE_IN_PICTURE.name, value).apply()
 
     /**
      * Retrieves or sets whether the screen should be dimmed while it is being kept awake.
@@ -457,6 +464,13 @@ interface SharedPrefsObserver : Observer {
      * @param isOverlayEnabled [Boolean] `true` if the overlay is enabled, `false` otherwise.
      */
     fun onIsOverlayEnabledUpdated(isOverlayEnabled: Boolean) = Unit
+
+    /**
+     * Called when the "Picture in Picture Enabled" preference changes.
+     *
+     * @param isPictureInPictureEnabled [Boolean] `true` if the "Picture in Picture" feature is enabled, `false` otherwise.
+     */
+    fun onIsPictureInPictureEnabledUpdated(isPictureInPictureEnabled: Boolean) = Unit
 
     /**
      * Called when the "Dimming Enabled" preference changes.

@@ -23,7 +23,7 @@ update_publish_release_yaml_file_and_add_tag() {
   fi
 
   # update the publish_release.yml file with the latest tags from Git repository
-  publishReleaseYaml=".github/workflows/publish_release.yml"
+  publishReleaseYaml=".github/workflows/publish_release_by_tag.yml"
   if [ -f "$publishReleaseYaml" ]; then
     tagsFromYaml="$("$yq" e '.on.workflow_dispatch.inputs.releaseTag.options' "$publishReleaseYaml" | tr -d '"\n' | sed -e "s/- //" | sed -e "s/- /, /gm")"
     updatedTags="$newTag $(git tag --sort=-creatordate | tr '\n' ' ' | xargs)"

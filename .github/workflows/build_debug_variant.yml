@@ -20,9 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check base64
-        run: base64 --version
-
       - name: Create local.properties
         run: |
           echo ${{ secrets.SIGNING_KEY }} | base64 -d > release_keystore.jks
