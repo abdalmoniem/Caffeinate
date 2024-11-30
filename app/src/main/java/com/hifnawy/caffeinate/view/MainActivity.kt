@@ -2,12 +2,15 @@ package com.hifnawy.caffeinate.view
 
 import android.Manifest
 import android.app.ActivityManager
+import android.app.PendingIntent
 import android.app.PictureInPictureParams
 import android.app.PictureInPictureUiState
+import android.app.RemoteAction
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -38,6 +41,8 @@ import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.controller.KeepAwakeService
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState
+import com.hifnawy.caffeinate.controller.PiPAction
+import com.hifnawy.caffeinate.controller.PictureInPictureActionsReceiver
 import com.hifnawy.caffeinate.controller.ServiceStatus
 import com.hifnawy.caffeinate.controller.ServiceStatusObserver
 import com.hifnawy.caffeinate.controller.SharedPrefsManager
@@ -151,6 +156,81 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private val notGrantedDrawableTint by lazy { MaterialColors.getColor(binding.root, materialR.attr.colorError) }
 
     /**
+     * Lazily initializes an instance of [PictureInPictureActionsReceiver] for handling PiP actions.
+     *
+     * This property creates and caches a [PictureInPictureActionsReceiver] using the application's context.
+     * The receiver is responsible for managing picture-in-picture mode actions within the application.
+     *
+     * @return [PictureInPictureActionsReceiver] the instance of the receiver for PiP actions.
+     */
+    private val pipActionReceiver by lazy { PictureInPictureActionsReceiver(caffeinateApplication) }
+
+    /**
+     * Provides a list of actions available in picture-in-picture mode.
+     *
+     * This property returns a list of [RemoteAction] objects that define
+     * the actions available to the user when the application is in
+     * picture-in-picture mode. The actions include restarting the service,
+     * switching to the next timeout, and toggling the service state.
+     *
+     * @return [List] A list of [RemoteAction] objects representing PiP actions.
+     */
+    private val pipActions
+        get() = when {
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.O -> emptyList()
+            else                                          -> listOf(
+                    RemoteAction(
+                            Icon.createWithResource(binding.root.context, R.drawable.restart_icon),
+                            "Restart",
+                            "Restart",
+                            PendingIntent.getBroadcast(
+                                    this@MainActivity,
+                                    0,
+                                    Intent(PiPAction.RESTART.name).apply {
+                                        `package` = packageName
+                                    },
+                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                            )
+                    ),
+                    RemoteAction(
+                            when (caffeinateApplication.lastStatusUpdate) {
+                                is ServiceStatus.Stopped -> Icon.createWithResource(binding.root.context, R.drawable.start_icon)
+                                is ServiceStatus.Running -> Icon.createWithResource(binding.root.context, R.drawable.stop_icon)
+                            },
+                            when (caffeinateApplication.lastStatusUpdate) {
+                                is ServiceStatus.Stopped -> "Start Timeout"
+                                is ServiceStatus.Running -> "Stop Timeout"
+                            },
+                            when (caffeinateApplication.lastStatusUpdate) {
+                                is ServiceStatus.Stopped -> "Start Timeout"
+                                is ServiceStatus.Running -> "Stop Timeout"
+                            },
+                            PendingIntent.getBroadcast(
+                                    this@MainActivity,
+                                    0,
+                                    Intent(PiPAction.TOGGLE.name).apply {
+                                        `package` = packageName
+                                    },
+                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                            )
+                    ),
+                    RemoteAction(
+                            Icon.createWithResource(binding.root.context, R.drawable.next_icon),
+                            "Next Timeout",
+                            "Next Timeout",
+                            PendingIntent.getBroadcast(
+                                    this@MainActivity,
+                                    0,
+                                    Intent(PiPAction.NEXT_TIMEOUT.name).apply {
+                                        `package` = packageName
+                                    },
+                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                            )
+                    )
+            )
+        }
+
+    /**
      * A lazily initialized instance of [PictureInPictureParams.Builder] that is used to enter picture-in-picture mode.
      *
      * This field is used to store the [PictureInPictureParams.Builder] that is used to enter picture-in-picture mode.
@@ -163,7 +243,18 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private val pipParamsBuilder by lazy {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return@lazy null
 
-        PictureInPictureParams.Builder().setAspectRatio(Rational(1, 1))
+        PictureInPictureParams.Builder().apply {
+            pipSourceRectHint = Rect()
+            binding.root.getGlobalVisibleRect(pipSourceRectHint)
+
+            setSourceRectHint(pipSourceRectHint)
+            setAspectRatio(Rational(1, 1))
+            setActions(pipActions)
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return@apply
+            setAutoEnterEnabled(true)
+            setSeamlessResizeEnabled(false)
+        }
     }
 
     /**
@@ -225,9 +316,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sharedPreferences.run {
-            setActivityTheme(contrastLevel, theme.mode, isMaterialYouEnabled)
-        }
+        sharedPreferences.run { setActivityTheme(contrastLevel, theme.mode, isMaterialYouEnabled) }
 
         enableEdgeToEdge()
         setContentView(binding.root)
@@ -235,8 +324,21 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
         overlayPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
-
         with(binding) {
+            pipLayout.root.isVisible = false
+
+            pipActionReceiver.onActionClickListener = PictureInPictureActionsReceiver.OnActionClickListener { action ->
+                Log.d("PiP Action Clicked, Action: $action")
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return@OnActionClickListener
+
+                pipParamsBuilder?.run {
+                    setActions(pipActions)
+                    setPictureInPictureParams(build())
+                }
+            }
+
+            pipParamsBuilder?.run { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) setPictureInPictureParams(build()) }
+
             appBar.post {
                 viewModel.run {
                     with(appBar) {
@@ -301,9 +403,18 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 isInPictureInPictureMode = pipModeInfo.isInPictureInPictureMode
                 coordinatorLayout.isVisible = !pipModeInfo.isInPictureInPictureMode
                 pipLayout.root.isVisible = pipModeInfo.isInPictureInPictureMode
+
+                pipActionReceiver.isRegistered = pipModeInfo.isInPictureInPictureMode
+
+                pipParamsBuilder?.run {
+                    setActions(pipActions)
+                    setPictureInPictureParams(build())
+                }
+
+                updatePictureInPictureView(caffeinateApplication.lastStatusUpdate)
             }
 
-            root.onSizeChange { _, newWidth, newHeight, _, _ ->
+            root.onSizeChange { view, newWidth, newHeight, _, _ ->
                 Log.d("root layout size changed, newWidth: $newWidth, newHeight: $newHeight")
 
                 with(pipLayout.progressIndicator) {
@@ -311,17 +422,15 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                     trackThickness = min(paddingStart, paddingEnd) / 2
                 }
 
-            }
-
-            pipLayout.root.onSizeChange { _, _, _, _, _ ->
-                pipSourceRectHint = Rect()
-                pipLayout.root.getGlobalVisibleRect(pipSourceRectHint)
-
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return@onSizeChange
 
-                pipParamsBuilder?.setSourceRectHint(pipSourceRectHint)
-
-                pipLayout.root.isVisible = isInPictureInPictureMode
+                pipParamsBuilder?.run {
+                    pipSourceRectHint = Rect()
+                    view.getGlobalVisibleRect(pipSourceRectHint)
+                    setAspectRatio(Rational(1, 1))
+                    setSourceRectHint(pipSourceRectHint)
+                    setPictureInPictureParams(build())
+                }
             }
         }
     }
@@ -511,22 +620,13 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         if (!sharedPreferences.isPictureInPictureEnabled || caffeinateApplication.lastStatusUpdate !is ServiceStatus.Running) return
 
-        binding.coordinatorLayout.isVisible = false
-        binding.pipLayout.root.isVisible = true
-
-        pipParamsBuilder?.run {
-            setSourceRectHint(pipSourceRectHint)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) setSeamlessResizeEnabled(false)
-
-            enterPictureInPictureMode(build())
-        }
+        pipParamsBuilder?.run { enterPictureInPictureMode(build()) }
     }
 
     /**
      * Called when the picture in picture mode's UI state has changed.
      *
-     * @param pipState The current state of the picture in picture mode's UI.
+     * @param pipState [PictureInPictureUiState] The current state of the picture in picture mode's UI.
      *
      * @see PictureInPictureUiState
      */
@@ -598,6 +698,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         with(binding) {
             Log.d("Status Changed: $status")
 
+            val autoEnterPiP = status is ServiceStatus.Running && sharedPreferences.isPictureInPictureEnabled
+            pipParamsBuilder?.run {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return@run
+
+                setAutoEnterEnabled(autoEnterPiP)
+                setPictureInPictureParams(build())
+            }
+
             viewModel.isRestartButtonEnabled.value =
                     (status as? ServiceStatus.Running)?.run { (!isRestarted && isCountingDown) || isRestarted } ?: false
 
@@ -610,9 +718,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
             if (!isInPictureInPictureMode) return
 
-            pipLayout.progressIndicator.max = (status as? ServiceStatus.Running)?.run { startTimeout.inWholeSeconds.toInt() } ?: 0
-            pipLayout.progressIndicator.setProgressCompat((status as? ServiceStatus.Running)?.run { remaining.inWholeSeconds.toInt() } ?: 0, true)
-            pipLayout.progressIndicatorText.text = remainingText
+            pipParamsBuilder?.run {
+                setActions(pipActions)
+                setPictureInPictureParams(build())
+            }
+            updatePictureInPictureView(status, remainingText)
         }
     }
 
@@ -1071,5 +1181,34 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             timeoutChoiceCard.setOnClickListener(timeoutChoiceClickListener)
             timeoutChoiceButton.setOnClickListener(timeoutChoiceClickListener)
         }
+    }
+
+    /**
+     * Updates the UI of the picture-in-picture view according to the given service status.
+     *
+     * @param status [ServiceStatus] The current service status.
+     * @param remainingString [String] The formatted remaining time string.
+     */
+    private fun updatePictureInPictureView(status: ServiceStatus, remainingString: String? = null) = with(binding) {
+        val remainingText = remainingString ?: when (status) {
+            is ServiceStatus.Stopped -> getString(R.string.caffeinate_button_off)
+            is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(root.context)
+        }
+
+        val max = when {
+            status is ServiceStatus.Running && status.startTimeout.isInfinite() -> 100
+            status is ServiceStatus.Running && status.startTimeout.isFinite()   -> status.startTimeout.inWholeSeconds.toInt()
+            else                                                                -> 100
+        }
+
+        val progress = when {
+            status is ServiceStatus.Running && status.remaining.isInfinite() -> 100
+            status is ServiceStatus.Running && status.remaining.isFinite()   -> status.remaining.inWholeSeconds.toInt()
+            else                                                             -> 100
+        }
+
+        pipLayout.progressIndicator.max = max
+        pipLayout.progressIndicator.setProgressCompat(progress, true)
+        pipLayout.progressIndicatorText.text = remainingText
     }
 }

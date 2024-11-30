@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:width="24dp"
@@ -30,5 +31,4 @@
                         -0.39 -1.03,-0.39 -1.41,0l-1.06,1.06c-0.39,0.39 -0.39,1.03 0,
                         1.41s1.03,0.39 1.41,0L7.05,18.36z"
         tools:ignore="VectorPath" />
-
 </vector>

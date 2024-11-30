@@ -20,11 +20,10 @@ import timber.log.Timber as Log
  *
  * @see CaffeinateApplication
  */
-open class LocaleChangeReceiver(
+class LocaleChangeReceiver(
         private val caffeinateApplication: CaffeinateApplication,
         private val onReceiveCallback: ((Context, Intent) -> Unit)? = null
-) :
-        RegistrableBroadcastReceiver(caffeinateApplication, IntentFilter(Intent.ACTION_LOCALE_CHANGED)) {
+) : RegistrableBroadcastReceiver(caffeinateApplication, IntentFilter(Intent.ACTION_LOCALE_CHANGED)) {
 
     /**
      * Called when the BroadcastReceiver receives an Intent broadcast.

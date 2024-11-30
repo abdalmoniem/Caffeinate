@@ -26,11 +26,10 @@ import timber.log.Timber as Log
  * @see RegistrableBroadcastReceiver
  * @see KeepAwakeService
  */
-open class ScreenLockReceiver(
+class ScreenLockReceiver(
         private val caffeinateApplication: CaffeinateApplication,
         private val onReceiveCallback: ((Context, Intent) -> Unit)? = null
-) :
-        RegistrableBroadcastReceiver(caffeinateApplication, IntentFilter(Intent.ACTION_SCREEN_OFF)) {
+) : RegistrableBroadcastReceiver(caffeinateApplication, IntentFilter(Intent.ACTION_SCREEN_OFF)) {
 
     /**
      * Called when the BroadcastReceiver receives an Intent broadcast.
