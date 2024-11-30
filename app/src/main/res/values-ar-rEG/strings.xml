@@ -34,10 +34,10 @@
 ظاهرة حتى لما البرنامج يبقى في الخلفية. بعض الأجهزة ممكن تعدحتاج تشغيل الخِيار ده عشان البرنامج يشتغل كويس.</string>
     <string name="show_overlay_pref_off">الشاشة العايمة مَطفية</string>
     <string name="show_overlay_pref_on">الشاشة العايمة شغالة</string>
-    <string name="picture_in_picture_pref">تفعيل الصورة فى الصورة</string>
-    <string name="picture_in_picture_pref_description">تفعيل الصورة فى الصورة يتيح للتطبيق العمل فى الخلفية</string>
-    <string name="picture_in_picture_pref_off">الصورة فى الصورة مُعطَّل</string>
-    <string name="picture_in_picture_pref_on">الصورة فى الصورة مُفعَّل</string>
+    <string name="picture_in_picture_pref">شَغَّل الصورة فى صورة</string>
+    <string name="picture_in_picture_pref_description">تشغيل الصورة فى الصورة هيخلى البرنامج يعرف يشتغل فى الخلفية</string>
+    <string name="picture_in_picture_pref_off">الصورة فى الصورة مَطفية</string>
+    <string name="picture_in_picture_pref_on">الصورة فى الصورة شغالة</string>
     <string name="allow_dimming_pref">خَلِّى إضائة الشاشة تِخْفِت</string>
     <string name="allow_dimming_pref_description">خَلِّى إضائة الشاشة تِخْفِت لما البرنامج يكون شغال.</string>
     <string name="allow_dimming_pref_on">خَفت إضائة الشاشة شغال</string>
@@ -52,8 +52,8 @@
     <string name="quick_tile_off">مَطفى</string>
     <string name="action_next_timeout">المُهلة اللى بعدها</string>
     <string name="action_restart_timeout">عيد التشغيل من الأول</string>
-    <string name="action_start_timeout">بَدْء المُهلة</string>
-    <string name="action_stop_timeout">إيقاف المُهلة</string>
+    <string name="action_start_timeout">إبدَء المُهلة</string>
+    <string name="action_stop_timeout">وَقَّف المُهلة</string>
     <string name="action_disable_dimming">اطفى الخَفت</string>
     <string name="action_enable_dimming">شَغَّل الخَفت</string>
     <string name="notification_title_indefinite_duration">البرنامج هيخلى الشاشة مفتوحة</string>
