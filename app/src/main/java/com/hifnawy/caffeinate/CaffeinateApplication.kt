@@ -61,7 +61,7 @@ class CaffeinateApplication : Application() {
      *
      * @return [Duration] the first timeout duration that was selected by the user, or [Duration.INFINITE] if no timeout duration was selected.
      */
-    private val firstTimeout: Duration
+    val firstTimeout: Duration
         get() = timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
 
     /**

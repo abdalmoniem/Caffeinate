@@ -252,7 +252,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             setActions(pipActions)
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return@apply
-            setAutoEnterEnabled(true)
             setSeamlessResizeEnabled(false)
         }
     }
@@ -294,18 +293,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private lateinit var pipSourceRectHint: Rect
 
     /**
-     * Indicates whether the activity is currently in picture-in-picture mode.
-     *
-     * This flag is used to track whether the activity is currently in picture-in-picture mode.
-     * It is set to {@code true} when the activity enters picture-in-picture mode and
-     * {@code false} when it exits.
-     *
-     * @see onPictureInPictureModeChanged
-     * @see isInPictureInPictureMode
-     */
-    private var isInPictureInPictureMode = false
-
-    /**
      * Called when the activity is starting.
      *
      * @param savedInstanceState [Bundle] If the activity is being re-initialized after
@@ -325,8 +312,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         overlayPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
         with(binding) {
-            pipLayout.root.isVisible = false
-
             pipActionReceiver.onActionClickListener = PictureInPictureActionsReceiver.OnActionClickListener { action ->
                 Log.d("PiP Action Clicked, Action: $action")
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return@OnActionClickListener
@@ -400,7 +385,6 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             }
 
             addOnPictureInPictureModeChangedListener { pipModeInfo ->
-                isInPictureInPictureMode = pipModeInfo.isInPictureInPictureMode
                 coordinatorLayout.isVisible = !pipModeInfo.isInPictureInPictureMode
                 pipLayout.root.isVisible = pipModeInfo.isInPictureInPictureMode
 
@@ -451,6 +435,9 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         changeMaterialYouPreferences(DynamicColors.isDynamicColorAvailable())
 
         with(binding) {
+            coordinatorLayout.isVisible = !isInPictureInPictureMode
+            pipLayout.root.isVisible = isInPictureInPictureMode
+
             appThemeSelectionView.run {
                 val themeButtons = mapOf(
                         appThemeSystemDefaultButton to SharedPrefsManager.Theme.SYSTEM_DEFAULT,

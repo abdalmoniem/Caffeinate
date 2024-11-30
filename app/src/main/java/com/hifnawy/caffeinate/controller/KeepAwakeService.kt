@@ -862,7 +862,10 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
          * @param caffeinateApplication [CaffeinateApplication] The application context.
          */
         private fun startWithoutDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
-            timeout = nextTimeout
+            timeout = when (lastStatusUpdate) {
+                is ServiceStatus.Stopped -> firstTimeout
+                is ServiceStatus.Running -> nextTimeout
+            }
             toggleState(this, STATE_START)
         }
 
