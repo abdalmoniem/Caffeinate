@@ -1,0 +1,11 @@
+<p><i>Caffeinate</i> est une application qui aide les développeurs Android à garder l'affichage de leur téléphone éveillé sans avoir à modifier les paramètres de l'appareil. Il peut être basculé à différents endroits :</p><ul><li>une tuile <code></code> dans les paramètres rapides, à côté du Wifi et du Bluetooth par exemple. Nécessite Android 7 ou plus récent.</li>
+<li>un <code>bouton</code> dans l'application elle-même.</li></ul>
+<p><b>Fonctionnalités</b></p><ul>
+<li>Utilise la classe <code>WakeLock</code> avec les options <code>SCREEN_DIM_WAKE_LOCK</code> ou <code>SCREEN_BRIGHT_WAKE_LOCK</code>, paramétrable par l'utilisateur.</li>
+<li>La durée d'activation est configurable</li>
+<li>Appuyer sur la <code>tuile</code> dans les paramètres rapide ou sur le <code>bouton</code> de l'application permet de sélectionner la durée d'activation et après <code>1 seconde</code> l'application est activée. Ensuite, appuyer sur la <code>tuile</code> ou le <code>bouton</code> interrompt l'application.</li>
+<li>Les durées d'activation disponibles sont <code>[30 secondes, 05 minutes, 10 minutes, 15 minutes, 30 minutes, 60 minutes, Ꝏ]</code></li>
+<li>Une option permet à l'écran de s'assombrir même si le <code>WakeLock</code> est activé.</li>
+<li>Une option permet de conserver l'activation de <code>WakeLock</code> si l'écran est verrouillé, afin que l'écran reste allumé après le déverrouillage. Le comportement par défaut est que le <code>WakeLock</code> est désactivé lorsque l'écran est verrouillé</li>
+<li>Options de thème multiples <code>[clair, sombre, thème par défaut et material you]</code></li>
+</ul>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">كافينيت</string>
     <string name="app_icon">أيقونة البرنامج</string>
     <string name="permissions_card_title">الأذونات</string>
@@ -11,10 +11,10 @@
     <string name="background_optimization_granted">تظبيط الشغل فى الخلفية: مِتَّاخِد!</string>
     <string name="notifications_permission_not_granted">إذن الإشعارات: مش مِتَّاخِد!</string>
     <string name="notifications_permission_granted">إذن الإشعارات: مِتَّاخِد!</string>
-    <string name="notifications_permission_required">محتاج إذن الإشعارات</string>
+    <string name="notifications_permission_required">إذن الإشعارات مطلوب</string>
     <string name="overlay_permission_not_granted">إذن الرسم على برامج تانية: مش مِتَّاخِد!</string>
     <string name="overlay_permission_granted">إذن الرسم على برامج تانية: مِتَّاخِد!</string>
-    <string name="overlay_permission_required">محتاج إذن الرسم على برامج تانية</string>
+    <string name="overlay_permission_required">إذن الرسم على برامج تانية مطلوب</string>
     <string name="settings_card_title">الإعدادات</string>
     <string name="app_theme_pref">السيم</string>
     <string name="app_theme_system_default">زى النظام</string>
@@ -22,33 +22,38 @@
     <string name="app_theme_system_dark">غامق</string>
     <string name="contrast">التباين</string>
     <string name="app_contrast_standard">عادى</string>
-    <string name="app_contrast_medium">نص نص</string>
+    <string name="app_contrast_medium">نُصّ نُصّ</string>
     <string name="app_contrast_high">عالى</string>
-    <string name="material_you_pref">ألوان متماشية مع النظام</string>
-    <string name="material_you_pref_not_available">الألوان المتماشية مع النظام موجودة بس على أندرويد ١٢ و طالع</string>
+    <string name="material_you_pref">ألوان ديناميكية</string>
+    <string name="material_you_pref_not_available">الألوان الديناميكية موجودة بس على أندرويد ١٢ و طالع</string>
     <string name="material_you_pref_description">خَلِّى ألوان البرنامج زى ألوان خلفية الشاشة بتاعتك.</string>
-    <string name="material_you_pref_off">الألوان المتماشية مش شغالة</string>
-    <string name="material_you_pref_on">الألوان المتماشية شغالة</string>
-    <string name="show_overlay_pref">اعرض شاشة عايمة</string>
-    <string name="show_overlay_pref_description">اعرض الوقت المتبقى فى شاشة عايمة على شاشة الموبايل من فوق، الشاشة دى هتفضل 
-ظاهرة حتى لما البرنامج يبقى في الخلفية.
-بعض الأجهزة ممكن تعوز تشغيل الخِيار ده عشان البرنامج يشتغل كويس.</string>
-    <string name="show_overlay_pref_off">الشاشة العايمة مش شغالة</string>
+    <string name="material_you_pref_off">الألوان الديناميكية مَطفية</string>
+    <string name="material_you_pref_on">الألوان الديناميكية شغالة</string>
+    <string name="show_overlay_pref">شَغَّل الشاشة العايمة</string>
+    <string name="show_overlay_pref_description">اعرض الوقت المِتبَقِّى فى شاشة عايمة على شاشة الموبايل من فوق، الشاشة دى هتفضل 
+ظاهرة حتى لما البرنامج يبقى في الخلفية. بعض الأجهزة ممكن تعدحتاج تشغيل الخِيار ده عشان البرنامج يشتغل كويس.</string>
+    <string name="show_overlay_pref_off">الشاشة العايمة مَطفية</string>
     <string name="show_overlay_pref_on">الشاشة العايمة شغالة</string>
-    <string name="allow_dimming_pref">خَفت الشاشة</string>
-    <string name="allow_dimming_pref_description">خلى الشاشة تِخفِت لما البرنامج يكون شغال</string>
-    <string name="allow_dimming_pref_on">خَفت الشاشة شغال</string>
-    <string name="allow_dimming_pref_off">خَفت الشاشة مش شغال</string>
-    <string name="allow_while_locked_pref">كَمِّل شغل</string>
+    <string name="picture_in_picture_pref">شَغَّل الصورة فى صورة</string>
+    <string name="picture_in_picture_pref_description">تشغيل الصورة فى الصورة هيخلى البرنامج يعرف يشتغل فى الخلفية</string>
+    <string name="picture_in_picture_pref_off">الصورة فى الصورة مَطفية</string>
+    <string name="picture_in_picture_pref_on">الصورة فى الصورة شغالة</string>
+    <string name="allow_dimming_pref">خَلِّى إضائة الشاشة تِخْفِت</string>
+    <string name="allow_dimming_pref_description">خَلِّى إضائة الشاشة تِخْفِت لما البرنامج يكون شغال.</string>
+    <string name="allow_dimming_pref_on">خَفت إضائة الشاشة شغال</string>
+    <string name="allow_dimming_pref_off">خَفت إضائة الشاشة مَطفى</string>
+    <string name="allow_while_locked_pref">كَمِّل شغل بعد الطَفى</string>
     <string name="allow_while_locked_pref_description">خلى البرنامج يكَمِّل شغل لما الشاشة تِطفِى</string>
     <string name="allow_while_locked_pref_off">تكميل الشغل مَطفى</string>
     <string name="allow_while_locked_pref_on">تكميل الشغل شغال</string>
     <string name="timeouts_pref">المُهَل</string>
     <string name="timeouts_pref_change">غيَّر</string>
-    <string name="caffeinate_button_off">مش شغال</string>
+    <string name="caffeinate_button_off">مَطفى</string>
     <string name="quick_tile_off">مَطفى</string>
     <string name="action_next_timeout">المُهلة اللى بعدها</string>
     <string name="action_restart_timeout">عيد التشغيل من الأول</string>
+    <string name="action_start_timeout">إبدَء المُهلة</string>
+    <string name="action_stop_timeout">وَقَّف المُهلة</string>
     <string name="action_disable_dimming">اطفى الخَفت</string>
     <string name="action_enable_dimming">شَغَّل الخَفت</string>
     <string name="notification_title_indefinite_duration">البرنامج هيخلى الشاشة مفتوحة</string>
