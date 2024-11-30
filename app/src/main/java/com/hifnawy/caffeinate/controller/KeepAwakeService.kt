@@ -15,7 +15,7 @@ import androidx.core.app.NotificationCompat
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_CHANGE_DIMMING_ENABLED
-import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_CHANGE_TIMEOUT
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_NEXT_TIMEOUT
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_RESTART
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_START
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_STOP
@@ -293,7 +293,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
             ACTION_START                  -> prepareService()
             ACTION_RESTART                -> restart(caffeinateApplication, restartDuration)
             ACTION_STOP                   -> stopCaffeine()
-            ACTION_CHANGE_TIMEOUT         -> startNextTimeout(caffeinateApplication, debounce = false)
+            ACTION_NEXT_TIMEOUT           -> startNextTimeout(caffeinateApplication, debounce = false)
             ACTION_CHANGE_DIMMING_ENABLED -> sharedPreferences.isDimmingEnabled = !sharedPreferences.isDimmingEnabled
         }
 
@@ -478,37 +478,37 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * @see [Notification]
      */
     private fun buildForegroundNotification(status: ServiceStatus): Notification = caffeinateApplication.run {
-        val notificationActionStopIntent =
+        val stopActionIntent =
                 NotificationUtils.getPendingIntent(localizedApplicationContext, KeepAwakeService::class.java, ACTION_STOP.name, 0)
-        val notificationActionNextTimeoutStr = localizedApplicationContext.getString(R.string.foreground_notification_action_next_timeout)
-        val notificationActionDimmingEnabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_disable_dimming)
-        val notificationActionDimmingDisabledStr = localizedApplicationContext.getString(R.string.foreground_notification_action_enable_dimming)
-        val notificationActionNextTimeout = NotificationUtils.getNotificationAction(
+        val nextTimeoutActionTitle = localizedApplicationContext.getString(R.string.action_next_timeout)
+        val dimmingEnabledActionTitle = localizedApplicationContext.getString(R.string.action_disable_dimming)
+        val dimmingDisabledActionTitle = localizedApplicationContext.getString(R.string.action_enable_dimming)
+        val nextTimeoutAction = NotificationUtils.getNotificationAction(
                 localizedApplicationContext,
                 KeepAwakeService::class.java,
-                ACTION_CHANGE_TIMEOUT.name,
+                ACTION_NEXT_TIMEOUT.name,
                 R.drawable.coffee_icon_on,
-                notificationActionNextTimeoutStr,
+                nextTimeoutActionTitle,
                 REQUEST_CODE_NEXT_TIMEOUT.ordinal
         )
-        val notificationActionRestartTimeout = when {
+        val restartTimeoutAction = when {
             status.run { this is ServiceStatus.Running && !isIndefinite } -> NotificationUtils.getNotificationAction(
                     this,
                     KeepAwakeService::class.java,
                     ACTION_RESTART.name,
                     R.drawable.coffee_icon_on,
-                    getString(R.string.foreground_notification_action_restart_timeout),
+                    getString(R.string.action_restart_timeout),
                     REQUEST_CODE_RESTART_TIMEOUT.ordinal
             )
 
-            else                                                           -> null
+            else                                                          -> null
         }
-        val notificationActionToggleDimming = NotificationUtils.getNotificationAction(
+        val toggleDimmingAction = NotificationUtils.getNotificationAction(
                 this,
                 KeepAwakeService::class.java,
                 ACTION_CHANGE_DIMMING_ENABLED.name,
                 R.drawable.coffee_icon_on,
-                if (isDimmingEnabled) notificationActionDimmingEnabledStr else notificationActionDimmingDisabledStr,
+                if (isDimmingEnabled) dimmingEnabledActionTitle else dimmingDisabledActionTitle,
                 REQUEST_CODE_TOGGLE_DIMMING.ordinal
         )
         val notificationBuilder = NotificationCompat.Builder(localizedApplicationContext, notificationChannelID)
@@ -518,8 +518,8 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
         if (status is ServiceStatus.Running) {
             durationStr = status.remaining.toLocalizedFormattedTime(localizedApplicationContext)
             contentTitle = when (status.remaining) {
-                Duration.INFINITE -> localizedApplicationContext.getString(R.string.foreground_notification_title_duration_indefinite)
-                else              -> localizedApplicationContext.getString(R.string.foreground_notification_title_duration_definite, durationStr)
+                Duration.INFINITE -> localizedApplicationContext.getString(R.string.notification_title_indefinite_duration)
+                else              -> localizedApplicationContext.getString(R.string.notification_title_definite_duration, durationStr)
             }
         }
 
@@ -529,15 +529,15 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
             .setAutoCancel(true)
             .setSubText(durationStr)
             .setContentTitle(contentTitle)
-            .setContentIntent(notificationActionStopIntent)
+            .setContentIntent(stopActionIntent)
             .setSmallIcon(R.drawable.coffee_icon_on)
             .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
-            .addAction(notificationActionNextTimeout)
-            .addAction(notificationActionRestartTimeout)
-            .addAction(notificationActionToggleDimming)
+            .addAction(nextTimeoutAction)
+            .addAction(restartTimeoutAction)
+            .addAction(toggleDimmingAction)
             .setContentInfo(localizedApplicationContext.getString(R.string.app_name))
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-            .setContentText(localizedApplicationContext.getString(R.string.foreground_notification_tap_to_turn_off))
+            .setContentText(localizedApplicationContext.getString(R.string.stop_notification_action_title))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) notificationChannel?.let { channel -> notificationBuilder.setChannelId(channel.id) }
 
@@ -724,7 +724,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
          * @property ACTION_START The service is being started.
          * @property ACTION_RESTART The service is being restarted.
          * @property ACTION_STOP The service is being stopped.
-         * @property ACTION_CHANGE_TIMEOUT The timeout duration is being changed.
+         * @property ACTION_NEXT_TIMEOUT The timeout duration is being changed.
          * @property ACTION_CHANGE_DIMMING_ENABLED The dimming feature is being toggled.
          *
          * @author AbdAlMoniem AlHifnawy
@@ -749,9 +749,12 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
             ACTION_STOP,
 
             /**
-             * Change the timeout duration for keeping the device awake.
+             * Change the timeout duration to the next available option.
+             *
+             * This action triggers the service to switch the current timeout duration
+             * to the next option in the list of configured timeouts.
              */
-            ACTION_CHANGE_TIMEOUT,
+            ACTION_NEXT_TIMEOUT,
 
             /**
              * Toggle the dimming feature on or off.

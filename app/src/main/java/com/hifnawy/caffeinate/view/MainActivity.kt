@@ -178,56 +178,47 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private val pipActions
         get() = when {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.O -> emptyList()
-            else                                          -> listOf(
-                    RemoteAction(
-                            Icon.createWithResource(binding.root.context, R.drawable.restart_icon),
-                            "Restart",
-                            "Restart",
-                            PendingIntent.getBroadcast(
-                                    this@MainActivity,
-                                    0,
-                                    Intent(PiPAction.RESTART.name).apply {
-                                        `package` = packageName
-                                    },
-                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                            )
-                    ),
-                    RemoteAction(
-                            when (caffeinateApplication.lastStatusUpdate) {
-                                is ServiceStatus.Stopped -> Icon.createWithResource(binding.root.context, R.drawable.start_icon)
-                                is ServiceStatus.Running -> Icon.createWithResource(binding.root.context, R.drawable.stop_icon)
-                            },
-                            when (caffeinateApplication.lastStatusUpdate) {
-                                is ServiceStatus.Stopped -> "Start Timeout"
-                                is ServiceStatus.Running -> "Stop Timeout"
-                            },
-                            when (caffeinateApplication.lastStatusUpdate) {
-                                is ServiceStatus.Stopped -> "Start Timeout"
-                                is ServiceStatus.Running -> "Stop Timeout"
-                            },
-                            PendingIntent.getBroadcast(
-                                    this@MainActivity,
-                                    0,
-                                    Intent(PiPAction.TOGGLE.name).apply {
-                                        `package` = packageName
-                                    },
-                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                            )
-                    ),
-                    RemoteAction(
-                            Icon.createWithResource(binding.root.context, R.drawable.next_icon),
-                            "Next Timeout",
-                            "Next Timeout",
-                            PendingIntent.getBroadcast(
-                                    this@MainActivity,
-                                    0,
-                                    Intent(PiPAction.NEXT_TIMEOUT.name).apply {
-                                        `package` = packageName
-                                    },
-                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                            )
-                    )
-            )
+            else                                          -> mutableListOf<RemoteAction>().apply {
+                val toggleActionIcon = when (caffeinateApplication.lastStatusUpdate) {
+                    is ServiceStatus.Stopped -> Icon.createWithResource(this@MainActivity, R.drawable.start_icon)
+                    is ServiceStatus.Running -> Icon.createWithResource(this@MainActivity, R.drawable.stop_icon)
+                }
+                val toggleActionTitle = when (caffeinateApplication.lastStatusUpdate) {
+                    is ServiceStatus.Stopped -> caffeinateApplication.localizedApplicationContext.getString(R.string.action_start_timeout)
+                    is ServiceStatus.Running -> caffeinateApplication.localizedApplicationContext.getString(R.string.action_stop_timeout)
+                }
+                val toggleActionPendingIntent = PendingIntent.getBroadcast(
+                        this@MainActivity,
+                        1,
+                        Intent(PiPAction.TOGGLE.name).apply { `package` = packageName },
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                val nextTimeoutActionIcon = Icon.createWithResource(this@MainActivity, R.drawable.next_icon)
+                val nextTimeoutActionTitle = caffeinateApplication.localizedApplicationContext.getString(R.string.action_next_timeout)
+                val nextTimeoutActionPendingIntent = PendingIntent.getBroadcast(
+                        this@MainActivity,
+                        2,
+                        Intent(PiPAction.NEXT_TIMEOUT.name).apply { `package` = packageName },
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                val restartActionIcon = Icon.createWithResource(this@MainActivity, R.drawable.restart_icon)
+                val restartActionTitle = caffeinateApplication.localizedApplicationContext.getString(R.string.action_restart_timeout)
+                val restartActionPendingIntent = PendingIntent.getBroadcast(
+                        this@MainActivity,
+                        3,
+                        Intent(PiPAction.RESTART.name).apply { `package` = packageName },
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                add(RemoteAction(toggleActionIcon, toggleActionTitle, toggleActionTitle, toggleActionPendingIntent))
+                add(RemoteAction(nextTimeoutActionIcon, nextTimeoutActionTitle, nextTimeoutActionTitle, nextTimeoutActionPendingIntent))
+
+                if (caffeinateApplication.lastStatusUpdate is ServiceStatus.Stopped) return@apply
+
+                add(0, RemoteAction(restartActionIcon, restartActionTitle, restartActionTitle, restartActionPendingIntent))
+            }
         }
 
     /**
