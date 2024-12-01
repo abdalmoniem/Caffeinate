@@ -5,13 +5,14 @@ import android.content.Context
 import android.os.Build
 import android.util.LayoutDirection
 import androidx.core.text.layoutDirection
+import com.hifnawy.caffeinate.controller.Observer
 import com.hifnawy.caffeinate.controller.QuickTileService
 import com.hifnawy.caffeinate.controller.ServiceStatus
 import com.hifnawy.caffeinate.controller.ServiceStatusObserver
-import com.hifnawy.caffeinate.view.CheckBoxItem
-import com.hifnawy.caffeinate.utils.LogDebugTree
 import com.hifnawy.caffeinate.controller.SharedPrefsManager
 import com.hifnawy.caffeinate.controller.SharedPrefsObserver
+import com.hifnawy.caffeinate.utils.LogDebugTree
+import com.hifnawy.caffeinate.view.CheckBoxItem
 import com.hifnawy.caffeinate.view.Widget
 import java.util.Locale
 import kotlin.time.Duration
@@ -225,8 +226,9 @@ class CaffeinateApplication : Application() {
         if (status is ServiceStatus.Stopped) timeout = firstTimeout
 
         keepAwakeServiceObservers.forEach { observer ->
-            Log.d("observer: <${observer::class.simpleName}> $observer")
+            Log.d("notifying ${Observer::class.simpleName}<${observer::class.simpleName}@${observer.hashCode().toString(16).uppercase()}>...")
             observer.onServiceStatusUpdated(status)
+            Log.d("${Observer::class.simpleName}<${observer::class.simpleName}@${observer.hashCode().toString(16).uppercase()}> notified!")
         }
 
         QuickTileService.requestTileStateUpdate(this)

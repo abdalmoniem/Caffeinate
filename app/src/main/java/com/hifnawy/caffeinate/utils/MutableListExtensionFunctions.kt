@@ -34,17 +34,17 @@ object MutableListExtensionFunctions {
     inline fun <reified ObserverType : Observer> MutableList<ObserverType>.addObserver(observer: ObserverType) {
         when {
             observer !in this -> {
-                Log.d("adding ${observer::class.simpleName} to ${this::class.simpleName}<${ObserverType::class.simpleName}>...")
+                Log.d("adding ${observer::class.simpleName} to ${javaClass.simpleName}<${ObserverType::class.simpleName}>...")
                 add(observer)
-                Log.d("${observer::class.simpleName} added to ${this::class.simpleName}<${ObserverType::class.simpleName}>!")
+                Log.d("${observer::class.simpleName} added to ${javaClass.simpleName}<${ObserverType::class.simpleName}>!")
             }
 
-            else              -> Log.d("${observer::class.simpleName} is already added to ${this::class.simpleName}<${ObserverType::class.simpleName}>!")
+            else              -> Log.d("${observer::class.simpleName} is already added to ${javaClass.simpleName}<${ObserverType::class.simpleName}>!")
         }
 
         if (isNotEmpty()) {
             Log.d(
-                    "Items in ${this::class.simpleName}<${ObserverType::class.simpleName}>:\n" +
+                    "Items in ${javaClass.simpleName}<${ObserverType::class.simpleName}>: " +
                     "[${joinToString(", ") { "${it::class.simpleName.toString()}@${it.hashCode().toString(16).uppercase()}" }}]"
             )
         }
@@ -62,20 +62,20 @@ object MutableListExtensionFunctions {
     inline fun <reified ObserverType : Observer> MutableList<ObserverType>.removeObserver(observer: ObserverType) {
         when {
             observer in this -> {
-                Log.d("removing ${observer::class.simpleName} from ${this::class.simpleName}<${ObserverType::class.simpleName}>...")
+                Log.d("removing ${observer::class.simpleName} from ${javaClass.simpleName}<${ObserverType::class.simpleName}>...")
 
                 when (remove(observer)) {
-                    true -> Log.d("${observer::class.simpleName} removed from ${this::class.simpleName}<${ObserverType::class.simpleName}>!")
-                    else -> Log.d("${observer::class.simpleName} is not present in ${this::class.simpleName}<${ObserverType::class.simpleName}>!")
+                    true -> Log.d("${observer::class.simpleName} removed from ${javaClass.simpleName}<${ObserverType::class.simpleName}>!")
+                    else -> Log.d("${observer::class.simpleName} is not present in ${javaClass.simpleName}<${ObserverType::class.simpleName}>!")
                 }
             }
 
-            else             -> Log.d("${observer::class.simpleName} is not present in ${this::class.simpleName}<${ObserverType::class.simpleName}>!")
+            else             -> Log.d("${observer::class.simpleName} is not present in ${javaClass.simpleName}<${ObserverType::class.simpleName}>!")
         }
 
         if (isNotEmpty()) {
             Log.d(
-                    "Items in ${this::class.simpleName}<${ObserverType::class.simpleName}>:\n" +
+                    "Items in ${javaClass.simpleName}<${ObserverType::class.simpleName}>: " +
                     "[${joinToString(", ") { "${it::class.simpleName.toString()}@${it.hashCode().toString(16).uppercase()}" }}]"
             )
         }

@@ -76,7 +76,7 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      * @see [start]
      * @see [cancel]
      */
-    fun stop() = job?.cancel(CancellationException("${this::class.simpleName} cancelled!"))
+    fun stop() = job?.cancel(CancellationException("${javaClass.simpleName} cancelled!"))
 
     /**
      * Cancels the timeout job and releases any system resources that were allocated
@@ -90,7 +90,7 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      * @see [start]
      * @see [stop]
      */
-    fun cancel() = cancel(CancellationException("${this::class.simpleName} cancelled!"))
+    fun cancel() = cancel(CancellationException("${javaClass.simpleName} cancelled!"))
 
     /**
      * Starts the timeout job.
@@ -106,14 +106,17 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      */
     fun start(startDuration: Duration, startAfter: Duration? = null) {
         job = launch {
-            Log.d("$currentTime: timeout initialized with duration: ${startDuration.toFormattedTime()}, isIndefinite: ${startDuration.isInfinite()}")
-
             startAfter?.let { delay(it) }
 
             val delayDuration = when {
                 startDuration.isInfinite() -> 10.seconds
                 else                       -> 1.seconds
             }
+
+            Log.d(
+                    "$currentTime: timeout initialized with duration: ${startDuration.toFormattedTime()}, " +
+                    "timeout update period: ${delayDuration.toFormattedTime()}"
+            )
 
             generateSequence(startDuration) { it - delayDuration }.forEach { duration ->
                 update(duration)
@@ -143,6 +146,6 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
             else      -> status.run { if (newRemaining < remaining || !isRestarted) remaining = newRemaining }
         }
 
-        Log.d("$currentTime: duration: ${newRemaining.toFormattedTime()}, status: $status, isIndefinite: ${newRemaining.isInfinite()}")
+        Log.d("$currentTime: updated status: $status")
     }
 }

@@ -368,7 +368,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
 
-        Log.d("${this::class.simpleName} service removed from task manager! restarting...")
+        Log.d("${javaClass.simpleName} service removed from task manager! restarting...")
 
         Intent(this, KeepAwakeService::class.java).apply {
             action = ACTION_RESTART.name
@@ -470,7 +470,8 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * @see [acquireWakeLock]
      */
     private fun prepareService(startAfter: Duration? = null) = caffeinateApplication.run {
-        Log.d("starting ${this@KeepAwakeService::class.simpleName} service...")
+        Log.d("starting ${localizedApplicationContext.getString(R.string.app_name)} with duration: ${timeout.toFormattedTime()}}")
+
         val status = when (val status = lastStatusUpdate) {
             is ServiceStatus.Running -> status.apply { remaining = timeout }
             is ServiceStatus.Stopped -> ServiceStatus.Running(timeout)
@@ -478,7 +479,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
 
         lastStatusUpdate = status
 
-        Log.d("status: $status, selectedDuration: ${status.remaining.toFormattedTime()}")
+        Log.d("starting status: $status")
 
         Log.d("sending foreground notification...")
         startForeground(NOTIFICATION_ID, buildForegroundNotification(status))
@@ -492,7 +493,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
 
         startCaffeine(status.remaining, startAfter)
 
-        Log.d("${this@KeepAwakeService::class.simpleName} service started!")
+        Log.d("${localizedApplicationContext.getString(R.string.app_name)} started!")
     }
 
     /**
@@ -604,9 +605,9 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
         wakeLock?.apply {
-            Log.d("releasing ${this@KeepAwakeService::wakeLock.name}...")
+            Log.d("releasing ${::wakeLock.name}...")
             releaseSafely(::wakeLock.name)
-            Log.d("${this@KeepAwakeService::wakeLock.name} released!")
+            Log.d("${::wakeLock.name} released!")
         } ?: Log.d("wakeLock is not held!")
         @Suppress("DEPRECATION")
         val wakeLockLevel = when {
@@ -625,12 +626,12 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                 wakeLockLevel,
                 "${caffeinateApplication.localizedApplicationContext.getString(R.string.app_name)}:wakeLockTag"
         ).apply {
-            Log.d("acquiring ${this@KeepAwakeService::wakeLock.name}, isDimmingEnabled: $isDimmingEnabled...")
+            Log.d("acquiring ${::wakeLock.name}, isDimmingEnabled: $isDimmingEnabled...")
             when {
                 duration.isInfinite() -> acquire()
                 else                  -> acquire(duration.inWholeMilliseconds)
             }
-            Log.d("${this@KeepAwakeService::wakeLock.name} acquired, isDimmingEnabled: $isDimmingEnabled!")
+            Log.d("${::wakeLock.name} acquired, isDimmingEnabled: $isDimmingEnabled!")
         }
     }
 
@@ -646,25 +647,25 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * @param startAfter [Duration] the duration to delay before starting the service
      */
     private fun startCaffeine(duration: Duration, startAfter: Duration? = null) = caffeinateApplication.run {
-        Log.d("starting ${localizedApplicationContext.getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: ${duration.isInfinite()}")
+        Log.d("starting ${this@KeepAwakeService::class.simpleName} service...")
 
         acquireWakeLock(duration)
 
         if (isOverlayEnabled) overlayHandler.showOverlay()
 
-        caffeineTimeoutJob.apply {
-            Log.d("stopping ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
+        with(caffeineTimeoutJob) {
+            Log.d("stopping ${::caffeineTimeoutJob.name}...")
             stop()
-            Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} stopped!")
+            Log.d("${::caffeineTimeoutJob.name} stopped!")
+
+            Log.d("starting ${::caffeineTimeoutJob.name}...")
+            start(duration, startAfter)
+            Log.d("${::caffeineTimeoutJob.name} started!")
         }
 
-        Log.d("starting ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
-        caffeineTimeoutJob.start(duration, startAfter)
-        Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} started!")
-
-        Log.d("${localizedApplicationContext.getString(R.string.app_name)} started!")
-
         sharedPreferences.isServiceRunning = true
+
+        Log.d("${this@KeepAwakeService::class.simpleName} service started!")
     }
 
     /**
@@ -679,21 +680,22 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      */
     private fun stopCaffeine() = caffeinateApplication.run {
         Log.d("stopping ${localizedApplicationContext.getString(R.string.app_name)}...")
+        Log.d("stopping ${this@KeepAwakeService::class.simpleName} service...")
 
         wakeLock?.apply {
-            Log.d("releasing ${this@KeepAwakeService::wakeLock.name}...")
+            Log.d("releasing ${::wakeLock.name}...")
             releaseSafely(::wakeLock.name)
-            Log.d("${this@KeepAwakeService::wakeLock.name} released!")
+            Log.d("${::wakeLock.name} released!")
         } ?: Log.d("wakeLock is not held!")
 
         caffeineTimeoutJob.apply {
-            Log.d("stopping ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
+            Log.d("stopping ${::caffeineTimeoutJob.name}...")
             stop()
-            Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} stopped!")
+            Log.d("${::caffeineTimeoutJob.name} stopped!")
 
-            Log.d("cancelling ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
+            Log.d("cancelling ${::caffeineTimeoutJob.name}...")
             cancel()
-            Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} cancelled!")
+            Log.d("${::caffeineTimeoutJob.name} cancelled!")
         }
 
         localeChangeReceiver.isRegistered = false
@@ -706,13 +708,14 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
 
         notificationManager.cancel(NOTIFICATION_ID)
 
-        Log.d("${localizedApplicationContext.getString(R.string.app_name)} stopped!")
-
         if (isOverlayEnabled) overlayHandler.hideOverlay()
 
         sharedPreferences.isServiceRunning = false
 
         stopSelf()
+
+        Log.d("${this@KeepAwakeService::class.simpleName} service stopped!")
+        Log.d("${localizedApplicationContext.getString(R.string.app_name)} stopped!")
     }
 
     /**

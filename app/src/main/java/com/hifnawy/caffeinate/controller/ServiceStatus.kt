@@ -95,7 +95,7 @@ sealed class ServiceStatus {
          * @see ServiceStatus.Running.startTimeout
          */
         var isCountingDown: Boolean = false
-            get() = prevRemaining?.let { remaining < it && remaining in Duration.ZERO..startTimeout && startTimeout.isFinite() } ?: false
+            get() = prevRemaining?.let { remaining < it && remaining in Duration.ZERO..startTimeout && remaining.isFinite() } ?: false
             private set
 
         /**
@@ -110,7 +110,7 @@ sealed class ServiceStatus {
          * @see ServiceStatus.Running.startTimeout
          */
         var isRestarted: Boolean = false
-            get() = prevRemaining?.let { remaining > it && remaining == startTimeout && startTimeout.isFinite() } ?: false
+            get() = prevRemaining?.let { remaining > it && remaining == startTimeout && remaining.isFinite() } ?: false
             private set
 
         /**
@@ -157,8 +157,7 @@ sealed class ServiceStatus {
 
         /**
          * Returns a string in the format
-         * "Running([remaining].[toFormattedTime]
-         * , isRestarted: [isRestarted], isCountingDown: [isCountingDown], isIndefinite: [isIndefinite])".
+         * "Running([remaining].[toFormattedTime], isRestarted: [isRestarted], isCountingDown: [isCountingDown], isIndefinite: [isIndefinite])".
          *
          * @return [String] a string representation of the object.
          */

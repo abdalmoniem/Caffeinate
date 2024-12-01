@@ -389,7 +389,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 updatePictureInPictureView(caffeinateApplication.lastStatusUpdate)
             }
 
-            root.onSizeChange { view, newWidth, newHeight, _, _ ->
+            root.onSizeChange { _, newWidth, newHeight, _, _ ->
                 Log.d("root layout size changed, newWidth: $newWidth, newHeight: $newHeight")
 
                 with(pipLayout.progressIndicator) {
@@ -401,7 +401,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
                 pipParamsBuilder?.run {
                     pipSourceRectHint = Rect(0, 0, newWidth, newHeight / 2)
-                    // view.getGlobalVisibleRect(pipSourceRectHint)
+
                     setAspectRatio(Rational(1, 1))
                     setSourceRectHint(pipSourceRectHint)
                     setPictureInPictureParams(build())
@@ -1180,9 +1180,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         }
 
         val progress = when {
-            status is ServiceStatus.Running && status.remaining.isInfinite() -> 100
-            status is ServiceStatus.Running && status.remaining.isFinite()   -> status.remaining.inWholeSeconds.toInt()
-            else                                                             -> 100
+            status is ServiceStatus.Running && status.remaining.isInfinite()                  -> 100
+            status is ServiceStatus.Running && (status.isRestarted || !status.isCountingDown) -> 0
+            status is ServiceStatus.Running && status.remaining.isFinite()                    -> status.remaining.inWholeSeconds.toInt()
+            else                                                                              -> 100
         }
 
         pipLayout.progressIndicator.max = max
