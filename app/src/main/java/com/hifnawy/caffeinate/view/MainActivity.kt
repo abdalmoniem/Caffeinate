@@ -400,8 +400,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return@onSizeChange
 
                 pipParamsBuilder?.run {
-                    pipSourceRectHint = Rect()
-                    view.getGlobalVisibleRect(pipSourceRectHint)
+                    pipSourceRectHint = Rect(0, 0, newWidth, newHeight / 2)
+                    // view.getGlobalVisibleRect(pipSourceRectHint)
                     setAspectRatio(Rational(1, 1))
                     setSourceRectHint(pipSourceRectHint)
                     setPictureInPictureParams(build())

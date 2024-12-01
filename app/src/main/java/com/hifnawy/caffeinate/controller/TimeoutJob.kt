@@ -140,7 +140,7 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
 
         when (newRemaining) {
             0.seconds -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
-            else      -> status.remaining = newRemaining
+            else      -> status.run { if (newRemaining < remaining || !isRestarted) remaining = newRemaining }
         }
 
         Log.d("$currentTime: duration: ${newRemaining.toFormattedTime()}, status: $status, isIndefinite: ${newRemaining.isInfinite()}")
