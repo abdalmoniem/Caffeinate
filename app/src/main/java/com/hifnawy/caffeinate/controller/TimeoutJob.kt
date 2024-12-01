@@ -6,6 +6,7 @@ import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,35 +36,47 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      *
      * @return [String] The current time formatted as "hh:mm:ss.SS a".
      */
-    private val currentTime: String
-        get() = SimpleDateFormat(
-                "hh:mm:ss.SS a",
-                Locale.ENGLISH
-        ).format(Date(System.currentTimeMillis()))
+    private val currentTime
+        get() = SimpleDateFormat("hh:mm:ss.SS a", Locale.ENGLISH).format(Date(System.currentTimeMillis()))
 
     /**
      * The job that is running the timeout loop.
      *
-     * This job is created when the [TimeoutJob] instance is created and is cancelled when the
-     * [TimeoutJob.cancel] method is called.
+     * This job is created when the [TimeoutJob] instance is created and is cancelled when the [stop] method is called.
      *
-     * @see [TimeoutJob.cancel]
+     * @see [stop]
      */
-    private var job = Job()
+    private var job: Job? = null
 
     /**
      * The [CoroutineContext][kotlin.coroutines.CoroutineContext] that is used to create coroutines.
      *
      * This context is a combination of a [Default][Dispatchers.Default] dispatcher and a [Job] that is used to
      * cancel the timeout job. The [Job] is created when the [TimeoutJob] instance is created and is
-     * cancelled when the [cancel][TimeoutJob.cancel] method is called.
+     * cancelled when the [stop] method is called.
      *
      * @return [kotlin.coroutines.CoroutineContext] The [CoroutineContext][kotlin.coroutines.CoroutineContext] that is used to create coroutines.
      *
-     * @see [TimeoutJob.cancel]
+     * @see [Dispatchers.Default]
+     * @see [Job]
+     * @see [start]
+     * @see [stop]
+     * @see [cancel]
      */
     override val coroutineContext
-        get() = Dispatchers.Default + job
+        get() = Dispatchers.Default + Job()
+
+    /**
+     * Stops the timeout job.
+     *
+     * This method stops the timeout job. If the timeout job was running, it will be cancelled.
+     *
+     * @throws [CancellationException] if the timeout job was running and was cancelled.
+     *
+     * @see [start]
+     * @see [cancel]
+     */
+    fun stop() = job?.cancel(CancellationException("${this::class.simpleName} cancelled!"))
 
     /**
      * Cancels the timeout job and releases any system resources that were allocated
@@ -74,30 +87,39 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      *
      * @throws [CancellationException] if the timeout job was running and was cancelled.
      *
-     * @see [TimeoutJob.start]
+     * @see [start]
+     * @see [stop]
      */
-    fun cancel(): Unit = job.cancel(CancellationException("${this::class.simpleName} cancelled!"))
+    fun cancel() = cancel(CancellationException("${this::class.simpleName} cancelled!"))
 
     /**
      * Starts the timeout job.
      *
-     * This method starts the timeout job with the specified [duration]. The job will update the status of the
+     * This method starts the timeout job with the specified [startDuration]. The job will update the status of the
      * [KeepAwakeService] periodically based on the current timeout. If the timeout is indefinite,
      * the job will run indefinitely.
      *
      * If the timeout job was already running, it will be stopped and restarted with the new duration.
      *
-     * @param duration [Duration] the duration to use for the timeout job.
-     *
-     * @return [Job] the [Job] that is running the timeout loop.
+     * @param startDuration [Duration] the duration to use for the timeout job.
+     * @param startAfter [Duration] the duration to delay before starting the timeout job.
      */
-    fun start(duration: Duration) = launch {
-        Log.d("timeout initialized with duration: ${duration.toFormattedTime()}, isIndefinite: ${duration.isInfinite()}")
+    fun start(startDuration: Duration, startAfter: Duration? = null) {
+        job = launch {
+            Log.d("$currentTime: timeout initialized with duration: ${startDuration.toFormattedTime()}, isIndefinite: ${startDuration.isInfinite()}")
 
-        generateSequence(duration) { it - 1.seconds }.forEach { duration ->
-            update(duration)
+            startAfter?.let { delay(it) }
 
-            delay(1.seconds)
+            val delayDuration = when {
+                startDuration.isInfinite() -> 10.seconds
+                else                       -> 1.seconds
+            }
+
+            generateSequence(startDuration) { it - delayDuration }.forEach { duration ->
+                update(duration)
+
+                delay(delayDuration)
+            }
         }
     }
 
@@ -114,17 +136,13 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
      */
     private suspend fun update(newRemaining: Duration) = withContext(Dispatchers.Main) {
         val status = caffeinateApplication.lastStatusUpdate
-        when (status) {
-            is ServiceStatus.Running -> {
-                when (newRemaining) {
-                    0.seconds -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
-                    else      -> status.run { if (newRemaining < remaining || !isRestarted) remaining = newRemaining }
-                }
-            }
+        if (status !is ServiceStatus.Running) return@withContext
 
-            is ServiceStatus.Stopped -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_START)
+        when (newRemaining) {
+            0.seconds -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
+            else      -> status.remaining = newRemaining
         }
 
-        Log.d("${currentTime}: duration: ${newRemaining.toFormattedTime()}, status: $status, isIndefinite: ${newRemaining.isInfinite()}")
+        Log.d("$currentTime: duration: ${newRemaining.toFormattedTime()}, status: $status, isIndefinite: ${newRemaining.isInfinite()}")
     }
 }

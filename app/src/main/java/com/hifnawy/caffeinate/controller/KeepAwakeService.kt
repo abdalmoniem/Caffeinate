@@ -18,8 +18,10 @@ import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeSer
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_NEXT_TIMEOUT
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_RESTART
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_START
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_START_DELAYED
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_STOP
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_START
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_START_DELAYED
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_STOP
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_TOGGLE
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.NotificationActionRequestCode.REQUEST_CODE_NEXT_TIMEOUT
@@ -34,6 +36,7 @@ import com.hifnawy.caffeinate.utils.WakeLockExtensionFunctions.releaseSafely
 import com.hifnawy.caffeinate.view.OverlayHandler
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 import timber.log.Timber as Log
 
 /**
@@ -133,6 +136,24 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
     private val screenLockReceiver by lazy { ScreenLockReceiver(caffeinateApplication) }
 
     /**
+     * The frequency at which the notification should be updated.
+     *
+     * @see [Duration]
+     * @see [buildForegroundNotification]
+     * @see [onServiceStatusUpdated]
+     */
+    private val notificationPeriod by lazy { 1.seconds }
+
+    /**
+     * The time source used to measure the time elapsed since the last notification update.
+     *
+     * @see [TimeSource]
+     * @see [buildForegroundNotification]
+     * @see [onServiceStatusUpdated]
+     */
+    private val notificationTimeMarker by lazy { TimeSource.Monotonic }
+
+    /**
      * A lazy delegate that provides the notification channel ID for the service's notifications.
      *
      * This delegate initializes the notification channel ID using the application's localized name,
@@ -169,6 +190,16 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
             else                                           -> null
         }
     }
+
+    /**
+     * The time of the previous notification.
+     *
+     * @see [Duration]
+     * @see [buildForegroundNotification]
+     * @see [onServiceStatusUpdated]
+     * @see [notificationPeriod]
+     */
+    private var previousNotificationTime = notificationTimeMarker.markNow()
 
     /**
      * A flag indicating whether the screen overlay is enabled.
@@ -230,7 +261,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * @see startCaffeine
      * @see stopCaffeine
      */
-    private var caffeineTimeoutJob: TimeoutJob? = null
+    private val caffeineTimeoutJob by lazy { TimeoutJob(caffeinateApplication) }
 
     /**
      * This method is called when a client is binding to the service with bindService().
@@ -291,6 +322,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
         }
         when (keepAwakeServiceAction) {
             ACTION_START                  -> prepareService()
+            ACTION_START_DELAYED          -> prepareService(DEBOUNCE_DURATION)
             ACTION_RESTART                -> restart(caffeinateApplication, restartDuration)
             ACTION_STOP                   -> stopCaffeine()
             ACTION_NEXT_TIMEOUT           -> startNextTimeout(caffeinateApplication, debounce = false)
@@ -405,9 +437,14 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
 
         when (status) {
             is ServiceStatus.Running -> {
-                notificationManager.notify(NOTIFICATION_ID, buildForegroundNotification(status))
                 if (isOverlayEnabled) overlayHandler.overlayText =
                         status.remaining.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext)
+
+                if (previousNotificationTime.elapsedNow() >= notificationPeriod) {
+                    notificationManager.notify(NOTIFICATION_ID, buildForegroundNotification(status))
+
+                    previousNotificationTime = notificationTimeMarker.markNow()
+                }
             }
 
             is ServiceStatus.Stopped -> stopForeground(STOP_FOREGROUND_REMOVE)
@@ -427,10 +464,12 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * It acquires a wake lock and starts the foreground service
      * with the notification that displays the remaining time.
      *
+     * @param startAfter [Duration] the duration to delay before starting the service
+     *
      * @see [startForeground]
      * @see [acquireWakeLock]
      */
-    private fun prepareService() = caffeinateApplication.run {
+    private fun prepareService(startAfter: Duration? = null) = caffeinateApplication.run {
         Log.d("starting ${this@KeepAwakeService::class.simpleName} service...")
         val status = when (val status = lastStatusUpdate) {
             is ServiceStatus.Running -> status.apply { remaining = timeout }
@@ -451,7 +490,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
         localeChangeReceiver.isRegistered = true
         onIsWhileLockedEnabledUpdated(isWhileLockedEnabled)
 
-        startCaffeine(status.remaining)
+        startCaffeine(status.remaining, startAfter)
 
         Log.d("${this@KeepAwakeService::class.simpleName} service started!")
     }
@@ -604,26 +643,23 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * specified [duration], and the screen will be kept on for the specified duration.
      *
      * @param duration [Duration] the duration of the wake lock.
+     * @param startAfter [Duration] the duration to delay before starting the service
      */
-    private fun startCaffeine(duration: Duration) = caffeinateApplication.run {
+    private fun startCaffeine(duration: Duration, startAfter: Duration? = null) = caffeinateApplication.run {
         Log.d("starting ${localizedApplicationContext.getString(R.string.app_name)} with duration: ${duration.toFormattedTime()}, isIndefinite: ${duration.isInfinite()}")
 
         acquireWakeLock(duration)
 
         if (isOverlayEnabled) overlayHandler.showOverlay()
 
-        caffeineTimeoutJob?.apply {
-            Log.d("cancelling ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
-            cancel()
-            Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} cancelled!")
+        caffeineTimeoutJob.apply {
+            Log.d("stopping ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
+            stop()
+            Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} stopped!")
         }
 
-        Log.d("creating ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
-        caffeineTimeoutJob = TimeoutJob(caffeinateApplication)
-        Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} created!")
-
         Log.d("starting ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
-        caffeineTimeoutJob?.start(duration)
+        caffeineTimeoutJob.start(duration, startAfter)
         Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} started!")
 
         Log.d("${localizedApplicationContext.getString(R.string.app_name)} started!")
@@ -650,7 +686,11 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
             Log.d("${this@KeepAwakeService::wakeLock.name} released!")
         } ?: Log.d("wakeLock is not held!")
 
-        caffeineTimeoutJob?.apply {
+        caffeineTimeoutJob.apply {
+            Log.d("stopping ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
+            stop()
+            Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} stopped!")
+
             Log.d("cancelling ${this@KeepAwakeService::caffeineTimeoutJob.name}...")
             cancel()
             Log.d("${this@KeepAwakeService::caffeineTimeoutJob.name} cancelled!")
@@ -705,6 +745,11 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
             STATE_START,
 
             /**
+             * The service will be running and keeping the device awake with after a delay.
+             */
+            STATE_START_DELAYED,
+
+            /**
              * The service is stopped and the device is not being kept awake.
              */
             STATE_STOP,
@@ -735,6 +780,11 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
              * Start the service to keep the device awake.
              */
             ACTION_START,
+
+            /**
+             * Start the service to keep the device awake with a delay.
+             */
+            ACTION_START_DELAYED,
 
             /**
              * Restart the service to keep the device awake.
@@ -842,17 +892,32 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                 timeout = nextTimeout
                 return when (prevTimeout) {
                     lastTimeout -> STATE_STOP
-                    else        -> STATE_START
+                    else        -> STATE_START_DELAYED
                 }
             }
 
-            val debounceOffset = timeout - DEBOUNCE_DURATION / 2
             val keepAwakeServiceState = when {
-                status.remaining <= debounceOffset -> STATE_STOP
-                else                               -> nextTimeout()
+                status.isCountingDown -> STATE_STOP
+                else                  -> nextTimeout()
             }
 
             toggleState(this, keepAwakeServiceState)
+        }
+
+        /**
+         * Starts the KeepAwakeService with debouncing.
+         *
+         * If the service is not running, this function will start the service with the provided timeout.
+         * If the service is already running, this function will debounce the next timeout by waiting for [DEBOUNCE_DURATION]
+         * before starting the new timeout.
+         *
+         * @param caffeinateApplication [CaffeinateApplication] The application context.
+         */
+        private fun startWithDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
+            when (val status = lastStatusUpdate) {
+                is ServiceStatus.Stopped -> toggleState(this, STATE_START_DELAYED)
+                is ServiceStatus.Running -> debounce(status, this)
+            }
         }
 
         /**
@@ -870,22 +935,6 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                 is ServiceStatus.Running -> nextTimeout
             }
             toggleState(this, STATE_START)
-        }
-
-        /**
-         * Starts the KeepAwakeService with debouncing.
-         *
-         * If the service is not running, this function will start the service with the provided timeout.
-         * If the service is already running, this function will debounce the next timeout by waiting for [DEBOUNCE_DURATION]
-         * before starting the new timeout.
-         *
-         * @param caffeinateApplication [CaffeinateApplication] The application context.
-         */
-        private fun startWithDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
-            when (val status = lastStatusUpdate) {
-                is ServiceStatus.Stopped -> toggleState(this, STATE_START)
-                is ServiceStatus.Running -> debounce(status, this)
-            }
         }
 
         /**
@@ -958,7 +1007,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
          * @param startTimeout [Duration] The timeout duration to use when starting the service. If `null`, the service will use the previously set timeout.
          */
         fun restart(caffeinateApplication: CaffeinateApplication, startTimeout: Duration? = null) =
-                toggleState(caffeinateApplication, STATE_START, startTimeout)
+                toggleState(caffeinateApplication, STATE_START_DELAYED, startTimeout)
 
         /**
          * Toggles the state of the KeepAwakeService.
@@ -979,13 +1028,14 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
         ): Unit = caffeinateApplication.run {
             Log.d("newState: $newKeepAwakeServiceState")
             val start = when (newKeepAwakeServiceState) {
-                STATE_START  -> true
-                STATE_STOP   -> false
-                STATE_TOGGLE -> lastStatusUpdate is ServiceStatus.Stopped
+                STATE_START         -> true
+                STATE_START_DELAYED -> true
+                STATE_STOP          -> false
+                STATE_TOGGLE        -> lastStatusUpdate is ServiceStatus.Stopped
             }
             val intent = Intent(localizedApplicationContext, KeepAwakeService::class.java).apply {
                 action = when {
-                    start -> ACTION_START.name
+                    start -> if (newKeepAwakeServiceState == STATE_START_DELAYED) ACTION_START_DELAYED.name else ACTION_START.name
                     else  -> ACTION_STOP.name
                 }
             }

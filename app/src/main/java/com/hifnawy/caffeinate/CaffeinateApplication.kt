@@ -168,8 +168,10 @@ class CaffeinateApplication : Application() {
             field = status
 
             when (status) {
-                is ServiceStatus.Running -> status.onRemainingUpdated =
-                        ServiceStatus.Running.RemainingValueObserver { notifyKeepAwakeServiceObservers(status) }
+                is ServiceStatus.Running -> if (status.onRemainingUpdated == null) {
+                    notifyKeepAwakeServiceObservers(status)
+                    status.onRemainingUpdated = ServiceStatus.Running.RemainingValueObserver { notifyKeepAwakeServiceObservers(status) }
+                }
 
                 is ServiceStatus.Stopped -> notifyKeepAwakeServiceObservers(status)
             }

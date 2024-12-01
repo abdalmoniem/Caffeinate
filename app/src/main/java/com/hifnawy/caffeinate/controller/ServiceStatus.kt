@@ -27,6 +27,7 @@ sealed class ServiceStatus {
      *
      * @param startTimeout [Duration] the timeout duration in seconds.
      *
+     * @property isIndefinite [Boolean] whether the service is running indefinitely or not.
      * @property isCountingDown [Boolean] whether the service is currently counting down or not.
      * @property isRestarted [Boolean] whether the service has been restarted or not.
      * @property remaining [Duration] the remaining timeout duration in seconds.
@@ -93,8 +94,8 @@ sealed class ServiceStatus {
          * @see ServiceStatus.Running.remaining
          * @see ServiceStatus.Running.startTimeout
          */
-        var isCountingDown = false
-            get() = remaining < prevRemaining && remaining in Duration.ZERO..startTimeout && startTimeout.isFinite()
+        var isCountingDown: Boolean = false
+            get() = prevRemaining?.let { remaining < it && remaining in Duration.ZERO..startTimeout && startTimeout.isFinite() } ?: false
             private set
 
         /**
@@ -108,8 +109,8 @@ sealed class ServiceStatus {
          * @see ServiceStatus.Running.remaining
          * @see ServiceStatus.Running.startTimeout
          */
-        var isRestarted = false
-            get() = remaining > prevRemaining && remaining == startTimeout && startTimeout.isFinite()
+        var isRestarted: Boolean = false
+            get() = prevRemaining?.let { remaining > it && remaining == startTimeout && startTimeout.isFinite() } ?: false
             private set
 
         /**
@@ -128,7 +129,7 @@ sealed class ServiceStatus {
 
                 onRemainingUpdated?.onRemainingUpdated()
 
-                if (prevRemaining != field) return
+                if (prevRemaining != field && field < startTimeout) return
                 startTimeout = field
             }
 
@@ -152,7 +153,7 @@ sealed class ServiceStatus {
          * @see isCountingDown
          * @see isRestarted
          */
-        private var prevRemaining = Duration.INFINITE
+        private var prevRemaining: Duration? = null
 
         /**
          * Returns a string in the format

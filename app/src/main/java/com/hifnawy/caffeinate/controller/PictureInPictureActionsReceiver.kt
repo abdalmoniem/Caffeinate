@@ -100,7 +100,7 @@ class PictureInPictureActionsReceiver(
             RESTART.name -> KeepAwakeService.restart(caffeinateApplication)
             NEXT_TIMEOUT.name -> KeepAwakeService.startNextTimeout(caffeinateApplication, debounce = false)
             TOGGLE.name -> when (caffeinateApplication.lastStatusUpdate) {
-                is ServiceStatus.Stopped -> KeepAwakeService.startNextTimeout(caffeinateApplication, debounce = false)
+                is ServiceStatus.Stopped -> KeepAwakeService.startNextTimeout(caffeinateApplication)
                 is ServiceStatus.Running -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)
             }
 
