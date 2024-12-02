@@ -30,7 +30,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
-import androidx.lifecycle.lifecycleScope
 import com.afollestad.assent.Permission
 import com.afollestad.assent.askForPermissions
 import com.google.android.material.appbar.AppBarLayout
@@ -55,10 +54,9 @@ import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
 import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.isVisible
 import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.onSizeChange
 import com.hifnawy.caffeinate.viewModel.MainActivityViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.min
+import kotlin.time.Duration.Companion.seconds
 import com.google.android.material.R as materialR
 import timber.log.Timber as Log
 
@@ -394,13 +392,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
                 with(pipLayout.progressIndicator) {
                     indicatorSize = min(newWidth, newHeight) - paddingStart - paddingEnd
-                    trackThickness = min(paddingStart, paddingEnd) / 2
+                    // indicatorsTrackThickness = min(paddingStart, paddingEnd) / 2
                 }
 
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return@onSizeChange
 
                 pipParamsBuilder?.run {
-                    pipSourceRectHint = Rect(0, 0, newWidth, newHeight / 2)
+                    val length = min(newWidth, newHeight) / 2
+                    pipSourceRectHint = Rect(0, 0, length, length)
 
                     setAspectRatio(Rational(1, 1))
                     setSourceRectHint(pipSourceRectHint)
@@ -974,14 +973,11 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             materialYouCard.setOnClickListener { materialYouSwitch.isChecked = !sharedPreferences.isMaterialYouEnabled }
             materialYouSwitch.setOnCheckedChangeListener { switch, isChecked ->
                 switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                lifecycleScope.launch {
-                    materialYouSubTextTextView.isEnabled = isChecked
-                    materialYouSubTextTextView.isVisible = isChecked
 
-                    delay(300)
+                materialYouSubTextTextView.isEnabled = isChecked
+                materialYouSubTextTextView.isVisible = isChecked
 
-                    sharedPreferences.run { changeThemeAndContrast(theme, contrastLevel, isChecked) }
-                }
+                sharedPreferences.run { changeThemeAndContrast(theme, contrastLevel, isChecked) }
             }
         }
     }
@@ -1173,21 +1169,15 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(root.context)
         }
 
-        val max = when {
-            status is ServiceStatus.Running && status.startTimeout.isInfinite() -> 100
-            status is ServiceStatus.Running && status.startTimeout.isFinite()   -> status.startTimeout.inWholeSeconds.toInt()
-            else                                                                -> 100
+        pipLayout.progressIndicator.text = remainingText
+        pipLayout.progressIndicator.hoursIndicatorMax = when (status) {
+            is ServiceStatus.Stopped -> 0
+            is ServiceStatus.Running -> status.startTimeout.toComponents { hours, _, _, _ -> hours }.toInt()
         }
 
-        val progress = when {
-            status is ServiceStatus.Running && status.remaining.isInfinite()                  -> 100
-            status is ServiceStatus.Running && (status.isRestarted || !status.isCountingDown) -> 0
-            status is ServiceStatus.Running && status.remaining.isFinite()                    -> status.remaining.inWholeSeconds.toInt()
-            else                                                                              -> 100
+        pipLayout.progressIndicator.progress = when (status) {
+            is ServiceStatus.Stopped -> 0.seconds
+            is ServiceStatus.Running -> status.remaining
         }
-
-        pipLayout.progressIndicator.max = max
-        pipLayout.progressIndicator.setProgressCompat(progress, true)
-        pipLayout.progressIndicatorText.text = remainingText
     }
 }

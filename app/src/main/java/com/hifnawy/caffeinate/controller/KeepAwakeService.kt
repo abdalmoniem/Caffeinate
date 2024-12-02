@@ -887,25 +887,30 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
          *
          * @param status [ServiceStatus] The current status of the KeepAwakeService.
          * @param caffeinateApplication [CaffeinateApplication] The application context.
+         * @param wrapAround [Boolean] Whether to wrap around to the first timeout if the last timeout is reached.
          *
          * @return [KeepAwakeServiceState] The next [KeepAwakeServiceState] to transition to.
          */
-        private fun debounce(status: ServiceStatus.Running, caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
-            fun nextTimeout(): KeepAwakeServiceState {
-                timeout = nextTimeout
-                return when (prevTimeout) {
-                    lastTimeout -> STATE_STOP
-                    else        -> STATE_START_DELAYED
+        private fun debounce(status: ServiceStatus.Running, caffeinateApplication: CaffeinateApplication, wrapAround: Boolean = false) =
+                caffeinateApplication.run {
+                    fun nextTimeout(): KeepAwakeServiceState {
+                        timeout = nextTimeout
+
+                        if (wrapAround) return STATE_START_DELAYED
+                        return when (prevTimeout) {
+                            lastTimeout -> STATE_STOP
+                            else        -> STATE_START_DELAYED
+                        }
+                    }
+
+                    val keepAwakeServiceState = when {
+                        wrapAround            -> nextTimeout()
+                        status.isCountingDown -> STATE_STOP
+                        else                  -> nextTimeout()
+                    }
+
+                    toggleState(this, keepAwakeServiceState)
                 }
-            }
-
-            val keepAwakeServiceState = when {
-                status.isCountingDown -> STATE_STOP
-                else                  -> nextTimeout()
-            }
-
-            toggleState(this, keepAwakeServiceState)
-        }
 
         /**
          * Starts the KeepAwakeService with debouncing.
@@ -915,11 +920,12 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
          * before starting the new timeout.
          *
          * @param caffeinateApplication [CaffeinateApplication] The application context.
+         * @param wrapAround [Boolean] Whether to wrap around to the first timeout if the last timeout is reached.
          */
-        private fun startWithDebounce(caffeinateApplication: CaffeinateApplication) = caffeinateApplication.run {
+        private fun startWithDebounce(caffeinateApplication: CaffeinateApplication, wrapAround: Boolean = false) = caffeinateApplication.run {
             when (val status = lastStatusUpdate) {
                 is ServiceStatus.Stopped -> toggleState(this, STATE_START_DELAYED)
-                is ServiceStatus.Running -> debounce(status, this)
+                is ServiceStatus.Running -> debounce(status, this, wrapAround)
             }
         }
 
@@ -966,14 +972,16 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
          * @param caffeinateApplication [CaffeinateApplication] The application context.
          * @param debounce [Boolean] If `true`, the service will debounce the next timeout by waiting for [DEBOUNCE_DURATION]
          * before starting the new timeout. If `false`, the service will start the new timeout immediately.
+         * @param wrapAround [Boolean] If `true`, the service will wrap around to the first timeout if the last timeout is reached.
          */
-        fun startNextTimeout(caffeinateApplication: CaffeinateApplication, debounce: Boolean = true) = caffeinateApplication.run {
-            when {
-                timeoutCheckBoxes.size == 1 -> startSingleTimeout(this)
-                debounce                    -> startWithDebounce(this)
-                else                        -> startWithoutDebounce(this)
-            }
-        }
+        fun startNextTimeout(caffeinateApplication: CaffeinateApplication, debounce: Boolean = true, wrapAround: Boolean = false) =
+                caffeinateApplication.run {
+                    when {
+                        timeoutCheckBoxes.size == 1 -> startSingleTimeout(this)
+                        debounce                    -> startWithDebounce(this, wrapAround)
+                        else                        -> startWithoutDebounce(this)
+                    }
+                }
 
         /**
          * Starts the KeepAwakeService indefinitely.
@@ -1030,6 +1038,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                 startTimeout: Duration? = null
         ): Unit = caffeinateApplication.run {
             Log.d("newState: $newKeepAwakeServiceState")
+
             val start = when (newKeepAwakeServiceState) {
                 STATE_START         -> true
                 STATE_START_DELAYED -> true
@@ -1043,7 +1052,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
                 }
             }
 
-            startTimeout?.run { timeout = this }
+            startTimeout?.let { timeout = it }
 
             when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> localizedApplicationContext.startForegroundService(intent)

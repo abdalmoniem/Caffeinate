@@ -3,6 +3,7 @@ package com.hifnawy.caffeinate.utils
 import android.content.Context
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
+import java.util.Locale
 import kotlin.time.Duration
 
 /**
@@ -27,13 +28,13 @@ object DurationExtensionFunctions {
             isInfinite() -> "Ꝏ"
             else         -> {
                 val format = when {
-                    hideLegend || CaffeinateApplication.isRTL -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
-                    else                                      -> if (hours == 0L) "%02dm %02ds" else "%02dh %02dm %02ds"
+                    hideLegend -> if (hours == 0L) "%02d:%02d" else "%02d:%02d:%02d"
+                    else       -> if (hours == 0L) "%02dm %02ds" else "%02dh %02dm %02ds"
                 }
 
                 when (hours) {
-                    0L   -> String.format(CaffeinateApplication.applicationLocale, format, minutes, seconds)
-                    else -> String.format(CaffeinateApplication.applicationLocale, format, hours, minutes, seconds)
+                    0L   -> String.format(Locale.ENGLISH, format, minutes, seconds)
+                    else -> String.format(Locale.ENGLISH, format, hours, minutes, seconds)
                 }
             }
         }

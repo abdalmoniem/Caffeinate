@@ -98,7 +98,7 @@ class PictureInPictureActionsReceiver(
 
         when (intent.action) {
             RESTART.name -> KeepAwakeService.restart(caffeinateApplication)
-            NEXT_TIMEOUT.name -> KeepAwakeService.startNextTimeout(caffeinateApplication, debounce = false)
+            NEXT_TIMEOUT.name -> KeepAwakeService.startNextTimeout(caffeinateApplication, wrapAround = true)
             TOGGLE.name -> when (caffeinateApplication.lastStatusUpdate) {
                 is ServiceStatus.Stopped -> KeepAwakeService.startNextTimeout(caffeinateApplication)
                 is ServiceStatus.Running -> KeepAwakeService.toggleState(caffeinateApplication, KeepAwakeServiceState.STATE_STOP)

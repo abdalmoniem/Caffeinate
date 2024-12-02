@@ -1,0 +1,49 @@
+<resources>
+    <declare-styleable name="CircularDurationView">
+        <attr name="indicatorSize" format="dimension" />
+        <attr name="indicatorsGapSize" format="dimension" />
+        <attr name="indicatorsColor" format="color" />
+        <attr name="indicatorsTrackColor" format="color" />
+        <attr name="indicatorsTrackGapSize" format="dimension" />
+        <attr name="indicatorsTrackThickness" format="dimension" />
+        <attr name="indicatorsTrackCornerRadius" format="dimension" />
+        <attr name="animated" default="true" format="boolean" />
+
+        <attr name="hoursIndicatorMax" default="24" format="integer" />
+        <attr name="hoursIndicatorProgress" format="integer" />
+        <attr name="hoursIndicatorColor" format="color" />
+        <attr name="hoursIndicatorTrackColor" format="color" />
+        <attr name="hoursIndicatorTrackGapSize" format="dimension" />
+        <attr name="hoursIndicatorTrackThickness" format="dimension" />
+        <attr name="hoursIndicatorTrackCornerRadius" format="dimension" />
+
+        <attr name="minutesIndicatorProgress" format="integer" />
+        <attr name="minutesIndicatorColor" format="color" />
+        <attr name="minutesIndicatorTrackColor" format="color" />
+        <attr name="minutesIndicatorTrackGapSize" format="dimension" />
+        <attr name="minutesIndicatorTrackThickness" format="dimension" />
+        <attr name="minutesIndicatorTrackCornerRadius" format="dimension" />
+
+        <attr name="secondsIndicatorProgress" format="integer" />
+        <attr name="secondsIndicatorColor" format="color" />
+        <attr name="secondsIndicatorTrackColor" format="color" />
+        <attr name="secondsIndicatorTrackGapSize" format="dimension" />
+        <attr name="secondsIndicatorTrackThickness" format="dimension" />
+        <attr name="secondsIndicatorTrackCornerRadius" format="dimension" />
+
+        <attr name="text" format="string" />
+        <attr name="textColor" format="color" />
+        <attr name="textStyle" format="flags">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+        <attr name="textAlign" format="enum">
+            <enum name="right" value="0" />
+            <enum name="center" value="1" />
+            <enum name="left" value="2" />
+        </attr>
+        <attr name="textPadding" format="dimension" />
+        <attr name="textFontFamily" format="reference" />
+    </declare-styleable>
+</resources>
