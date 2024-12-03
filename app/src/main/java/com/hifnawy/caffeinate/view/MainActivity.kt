@@ -1175,9 +1175,10 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             is ServiceStatus.Running -> status.startTimeout.toComponents { hours, _, _, _ -> hours }.toInt()
         }
 
-        pipLayout.progressIndicator.progress = when (status) {
-            is ServiceStatus.Stopped -> 0.seconds
-            is ServiceStatus.Running -> status.remaining
+        pipLayout.progressIndicator.progress = when {
+            status is ServiceStatus.Stopped -> 0.seconds
+            status is ServiceStatus.Running && !status.isRestarted && status.isCountingDown -> status.remaining
+            else -> 0.seconds
         }
     }
 }

@@ -11,8 +11,8 @@ materialNumberPickerVersion = "1.0.5"
 junitVersion = "4.13.2"
 androidxJunitVersion = "1.2.1"
 espressoCoreVersion = "3.6.1"
-androidApplicationVersion = "8.7.2"
-kotlinVersion = "1.9.22"
+androidApplicationVersion = "8.7.3"
+kotlinVersion = "2.1.0"
 
 [libraries]
 androidxCoreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtxVersion" }

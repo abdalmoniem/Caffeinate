@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true">
@@ -31,6 +32,8 @@
         app:textAlign="center"
         app:textColor="?colorPrimary"
         app:textPadding="5dp"
-        app:textStyle="normal" />
-    <!--app:textFontFamily="@font/manrope"/>-->
+        app:textStyle="normal"
+        tools:ignore="PxUsage" />
+    <!-- since the DPI changes when this view is in Picture-in-Picture mode
+         we need to ignore this warning -->
 </androidx.constraintlayout.widget.ConstraintLayout>
