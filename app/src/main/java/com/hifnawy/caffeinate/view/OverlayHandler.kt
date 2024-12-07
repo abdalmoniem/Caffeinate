@@ -223,12 +223,14 @@ class OverlayHandler(private val context: Context) {
      * It displays the overlay on the screen with Gravity.TOP | Gravity.START or
      * Gravity.TOP | Gravity.END depending on the current locale.
      *
+     * @param initialText [String] The initial text to display in the overlay.
+     *
      * @throws [WindowManager.BadTokenException] if the window token is invalid.
      * @throws [WindowManager.InvalidDisplayException] if the display is invalid.
      *
      * @see hideOverlay
      */
-    fun showOverlay() {
+    fun showOverlay(initialText: String? = null) {
         if (!isOverlayVisible) {
             Log.d("Showing overlay...")
 
@@ -240,6 +242,8 @@ class OverlayHandler(private val context: Context) {
                 x = 30
                 y = 0
             }
+
+            initialText?.let { overlayText = it }
 
             overlayTextSize = when {
                 CaffeinateApplication.isRTL -> context.resources.getDimension(R.dimen.overlayTextSizeRTL)

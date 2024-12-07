@@ -1,0 +1,82 @@
+name: CodeQL Security Scan
+run-name: ${{ github.workflow }} ${{ github.event.repository.updated_at}}
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: "00 00 * * 5"
+
+jobs:
+  analyze:
+    name: 'CodeQL Security Scan: Analyze (${{ matrix.language }})'
+    runs-on: ubuntu-latest
+    
+    permissions:
+      security-events: write # required for all workflows
+      packages: read # required to fetch internal or private CodeQL packs
+      actions: read # only required for workflows in private repositories
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create local.properties
+        run: |
+          echo ${{ secrets.SIGNING_KEY }} | base64 -d > release_keystore.jks
+
+          keystoreFile=$(realpath release_keystore.jks)
+
+          echo "keystoreFile: $keystoreFile"
+
+          echo "storePassword=${{ secrets.KEY_STORE_PASSWORD }}" >> local.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> local.properties
+          echo "keyAlias=release_key" >> local.properties
+          echo "storeFile=$keystoreFile" >> local.properties
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: 21
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2.1.3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - name: Build App
+        if: matrix.build-mode == 'manual'
+        run: bash gradlew :app:assembleDebug
+
+      - name: Get APK Name
+        run: |
+          apk=$(find app/build/outputs/apk/debug/*.apk)
+          echo $apk
+          echo APK_PATH=$apk >> $GITHUB_ENV
+
+      - name: Create Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build_artifacts
+          path: ${{ env.APK_PATH }}
+          if-no-files-found: error
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"

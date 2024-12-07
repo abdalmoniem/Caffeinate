@@ -1,8 +1,6 @@
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import java.io.FileInputStream
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Properties
 
 /**
@@ -14,30 +12,6 @@ import java.util.Properties
  * interactions.
  */
 private val packageName = "com.hifnawy.caffeinate"
-
-/**
- * A DateTimeFormatter for formatting the current date and time.
- *
- * This formatter is used to generate a string representation of the current date and time
- * in the format "dd/MMM/yyyy_hh:mm:ss.S a". This format is used to log the start of the build
- * process.
- *
- * @see LocalDateTime
- * @see DateTimeFormatter
- */
-private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy_hh:mm:ss.S a")
-
-/**
- * The current date and time at the start of the build process.
- *
- * This field is used to generate a string representation of the current date and time
- * in the format "dd/MMM/yyyy_hh:mm:ss.S a". This format is used to log the start of the build
- * process.
- *
- * @see LocalDateTime
- * @see DateTimeFormatter
- */
-private val buildDateAndTime = LocalDateTime.now()
 
 /**
  * The file object representing the local.properties file in the root project directory.
@@ -64,8 +38,6 @@ private var isDebuggingEnabled = false
  * @see ApplicationBuildType.signingConfig
  */
 private var isSigningConfigEnabled = false
-
-project.logger.lifecycle("INFO: Build Started at: ${buildDateAndTime.format(dateTimeFormatter)}")
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -115,12 +87,10 @@ android {
         minSdk = 24
         compileSdk = 35
         targetSdk = 35
-        versionCode = 31
-        versionName = "2.0.0"
+        versionCode = 32
+        versionName = "2.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "BUILD_DATE_AND_TIME", "\"${buildDateAndTime.format(dateTimeFormatter)}\"")
     }
 
     sourceSets.forEach { sourceSet ->
@@ -240,6 +210,7 @@ dependencies {
     implementation(libs.assent)
     implementation(libs.gson)
     implementation(libs.materialNumberPicker)
+    implementation(libs.circulardurationview)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidxJunit)

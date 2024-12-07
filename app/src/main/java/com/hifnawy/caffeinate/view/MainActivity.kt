@@ -313,63 +313,61 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
             pipParamsBuilder?.run { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) setPictureInPictureParams(build()) }
 
-            appBar.post {
-                viewModel.run {
-                    with(appBar) {
-                        appBarVerticalOffset.observe(this@MainActivity) { verticalOffset ->
-                            val params = layoutParams as CoordinatorLayout.LayoutParams
-                            val behavior = params.behavior as AppBarLayout.Behavior
-                            behavior.topAndBottomOffset = verticalOffset
-                            requestLayout()
-                        }
+            with(appBar) {
+                post {
+                    viewModel.appBarVerticalOffset.observe(this@MainActivity) { verticalOffset ->
+                        val params = layoutParams as CoordinatorLayout.LayoutParams
+                        val behavior = params.behavior as AppBarLayout.Behavior
+                        behavior.topAndBottomOffset = verticalOffset
+                        requestLayout()
+                    }
+                }
 
-                        addOnOffsetChangedListener { appBarLayout, verticalOffset ->
-                            viewModel.appBarVerticalOffset.value = verticalOffset
-                            val totalScrollRange = appBarLayout.totalScrollRange
-                            val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.5f)
+                addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+                    viewModel.appBarVerticalOffset.value = verticalOffset
+                    val totalScrollRange = appBarLayout.totalScrollRange
+                    val collapseFactor = (1f - abs(verticalOffset / totalScrollRange.toFloat())).coerceAtLeast(0.5f)
 
-                            toolbar.navigationIcon = when (caffeinateApplication.lastStatusUpdate) {
-                                is ServiceStatus.Stopped -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_off)
-                                is ServiceStatus.Running -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_on)
-                            }?.run {
-                                val bitmap = toBitmap((intrinsicWidth * collapseFactor).toInt(), (intrinsicHeight * collapseFactor).toInt())
-                                bitmap.toDrawable(resources)
+                    toolbar.navigationIcon = when (caffeinateApplication.lastStatusUpdate) {
+                        is ServiceStatus.Stopped -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_off)
+                        is ServiceStatus.Running -> AppCompatResources.getDrawable(root.context, R.drawable.toolbar_icon_on)
+                    }?.run {
+                        val bitmap = toBitmap((intrinsicWidth * collapseFactor).toInt(), (intrinsicHeight * collapseFactor).toInt())
+                        bitmap.toDrawable(resources)
+                    }
+                }
+            }
+
+            with(restartButton) {
+                viewModel.isRestartButtonEnabled.observe(this@MainActivity) { isButtonEnabled ->
+                    if (isButtonEnabled && isEnabled) return@observe
+                    val animationDuration = 300L
+                    val rotationFrom = if (isButtonEnabled) -360f else 360f
+                    val rotationTo = if (isButtonEnabled) 360f else -360f
+                    val scaleFrom = if (isButtonEnabled) 0f else 1f
+                    val scaleTo = if (isButtonEnabled) 1f else 0f
+
+                    rotation = rotationFrom
+                    scaleX = scaleFrom
+                    scaleY = scaleFrom
+
+                    animate()
+                        .rotation(rotationTo)
+                        .scaleX(scaleTo)
+                        .scaleY(scaleTo)
+                        .setDuration(animationDuration)
+                        .withStartAction {
+                            if (isButtonEnabled && !isEnabled) {
+                                isEnabled = true
+                                isVisible = true
+                            }
+                        }.withEndAction {
+                            if (!isButtonEnabled && isEnabled) {
+                                isEnabled = false
+                                isVisible = false
                             }
                         }
-                    }
-
-                    with(restartButton) {
-                        isRestartButtonEnabled.observe(this@MainActivity) { isButtonEnabled ->
-                            if (isButtonEnabled && isEnabled) return@observe
-                            val animationDuration = 300L
-                            val rotationFrom = if (isButtonEnabled) -360f else 360f
-                            val rotationTo = if (isButtonEnabled) 360f else -360f
-                            val scaleFrom = if (isButtonEnabled) 0f else 1f
-                            val scaleTo = if (isButtonEnabled) 1f else 0f
-
-                            rotation = rotationFrom
-                            scaleX = scaleFrom
-                            scaleY = scaleFrom
-
-                            animate()
-                                .rotation(rotationTo)
-                                .scaleX(scaleTo)
-                                .scaleY(scaleTo)
-                                .setDuration(animationDuration)
-                                .withStartAction {
-                                    if (isButtonEnabled && !isEnabled) {
-                                        isEnabled = true
-                                        isVisible = true
-                                    }
-                                }.withEndAction {
-                                    if (!isButtonEnabled && isEnabled) {
-                                        isEnabled = false
-                                        isVisible = false
-                                    }
-                                }
-                                .start()
-                        }
-                    }
+                        .start()
                 }
             }
 
@@ -392,10 +390,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
                 with(pipLayout.progressIndicator) {
                     indicatorSize = min(newWidth, newHeight) - paddingStart - paddingEnd
-                    // indicatorsTrackThickness = min(paddingStart, paddingEnd) / 2
+                    indicatorsTrackThickness = min(paddingStart, paddingEnd) / 2
                 }
-
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return@onSizeChange
 
                 pipParamsBuilder?.run {
                     val length = min(newWidth, newHeight) / 2
@@ -1170,15 +1166,19 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         }
 
         pipLayout.progressIndicator.text = remainingText
+
         pipLayout.progressIndicator.hoursIndicatorMax = when (status) {
             is ServiceStatus.Stopped -> 0
             is ServiceStatus.Running -> status.startTimeout.toComponents { hours, _, _, _ -> hours }.toInt()
         }
 
         pipLayout.progressIndicator.progress = when {
-            status is ServiceStatus.Stopped -> 0.seconds
+            status is ServiceStatus.Stopped                                                 -> 0.seconds
+
+            status is ServiceStatus.Running && status.remaining.isInfinite() ||
             status is ServiceStatus.Running && !status.isRestarted && status.isCountingDown -> status.remaining
-            else -> 0.seconds
+
+            else                                                                            -> 0.seconds
         }
     }
 }

@@ -138,6 +138,8 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
     /**
      * The frequency at which the notification should be updated.
      *
+     * @return [Duration] the frequency at which the notification should be updated.
+     *
      * @see [Duration]
      * @see [buildForegroundNotification]
      * @see [onServiceStatusUpdated]
@@ -146,6 +148,9 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
 
     /**
      * The time source used to measure the time elapsed since the last notification update.
+     *
+     * @return [TimeSource.Monotonic] the time source used to measure the time elapsed since
+     * the last notification update.
      *
      * @see [TimeSource]
      * @see [buildForegroundNotification]
@@ -192,7 +197,40 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
     }
 
     /**
+     * A lazy delegate that provides a reference to the [PowerManager] instance that handles power management.
+     *
+     * This delegate is used to access the power manager's methods, such as [PowerManager.newWakeLock] and
+     * [PowerManager.WakeLock.acquire].
+     *
+     * @return [PowerManager] the power manager instance.
+     *
+     * @see PowerManager
+     * @see PowerManager.WakeLock
+     * @see PowerManager.newWakeLock
+     * @see PowerManager.WakeLock.acquire
+     * @see PowerManager.WakeLock.release
+     * @see acquireWakeLock
+     */
+    private val powerManager by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
+
+    /**
+     * A [TimeoutJob] that manages the timing of the caffeine session.
+     *
+     * This job is responsible for handling the countdown and updating the service status
+     * as the timeout duration progresses. It is created when a caffeine session starts
+     * and is cancelled when the session stops.
+     *
+     * @return [TimeoutJob] the timeout job instance.
+     *
+     * @see startCaffeine
+     * @see stopCaffeine
+     */
+    private val caffeineTimeoutJob by lazy { TimeoutJob(caffeinateApplication) }
+
+    /**
      * The time of the previous notification.
+     *
+     * @return [TimeSource.Monotonic.ValueTimeMark] the time of the previous notification.
      *
      * @see [Duration]
      * @see [buildForegroundNotification]
@@ -212,6 +250,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * This flag is initially set to the value that is stored in the shared preferences.
      * The value of this flag is updated whenever the preference is changed by the user.
      *
+     * @return [Boolean] `true` if the screen overlay is enabled, `false` otherwise.
      */
     private var isOverlayEnabled = false
         get() = field && Settings.canDrawOverlays(this)
@@ -225,6 +264,8 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      *
      * This flag is initially set to the value that is stored in the shared preferences.
      * The value of this flag is updated whenever the preference is changed by the user.
+     *
+     * @return [Boolean] `true` if the screen should be dimmed while it is being kept awake, `false` otherwise.
      */
     private var isDimmingEnabled = false
 
@@ -237,6 +278,8 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      *
      * This flag is initially set to the value that is stored in the shared preferences.
      * The value of this flag is updated whenever the preference is changed by the user.
+     *
+     * @return [Boolean] `true` if the screen should be kept awake while the device is locked, `false` otherwise.
      */
     private var isWhileLockedEnabled = false
 
@@ -246,22 +289,13 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * This wake lock is used to prevent the device from going to sleep while the service is running.
      * It is acquired when the service is started and released when the service is stopped.
      *
-     * @see prepareService
-     * @see stopService
+     * @return [PowerManager.WakeLock] the wake lock instance.
+     *
+     * @see PowerManager.WakeLock
+     * @see PowerManager.newWakeLock
+     * @see acquireWakeLock
      */
     private var wakeLock: PowerManager.WakeLock? = null
-
-    /**
-     * A [TimeoutJob] that manages the timing of the caffeine session.
-     *
-     * This job is responsible for handling the countdown and updating the service status
-     * as the timeout duration progresses. It is created when a caffeine session starts
-     * and is cancelled when the session stops.
-     *
-     * @see startCaffeine
-     * @see stopCaffeine
-     */
-    private val caffeineTimeoutJob by lazy { TimeoutJob(caffeinateApplication) }
 
     /**
      * This method is called when a client is binding to the service with bindService().
@@ -602,25 +636,23 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      */
     @SuppressLint("WakelockTimeout")
     private fun acquireWakeLock(duration: Duration) {
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-
         wakeLock?.apply {
             Log.d("releasing ${::wakeLock.name}...")
             releaseSafely(::wakeLock.name)
             Log.d("${::wakeLock.name} released!")
         } ?: Log.d("wakeLock is not held!")
+
         @Suppress("DEPRECATION")
         val wakeLockLevel = when {
-            isDimmingEnabled -> {
-                Log.d("using ${PowerManager::SCREEN_DIM_WAKE_LOCK.name}")
-                PowerManager.SCREEN_DIM_WAKE_LOCK
-            }
+            isDimmingEnabled -> PowerManager.SCREEN_DIM_WAKE_LOCK
+            else             -> PowerManager.SCREEN_BRIGHT_WAKE_LOCK
+        } or PowerManager.ACQUIRE_CAUSES_WAKEUP
 
-            else             -> {
-                Log.d("using ${PowerManager::SCREEN_BRIGHT_WAKE_LOCK.name}")
-                PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-            }
-        } or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE
+        @Suppress("DEPRECATION")
+        when (wakeLockLevel) {
+            PowerManager.SCREEN_DIM_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP    -> Log.d("using ${PowerManager::SCREEN_DIM_WAKE_LOCK.name}")
+            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP -> Log.d("using ${PowerManager::SCREEN_BRIGHT_WAKE_LOCK.name}")
+        }
 
         wakeLock = powerManager.newWakeLock(
                 wakeLockLevel,
@@ -651,12 +683,19 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
 
         acquireWakeLock(duration)
 
-        if (isOverlayEnabled) overlayHandler.showOverlay()
+        if (isOverlayEnabled) overlayHandler.showOverlay(
+                when (val status = lastStatusUpdate) {
+                    is ServiceStatus.Stopped -> null
+                    is ServiceStatus.Running -> status.remaining.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext)
+                }
+        )
 
         with(caffeineTimeoutJob) {
             Log.d("stopping ${::caffeineTimeoutJob.name}...")
             stop()
             Log.d("${::caffeineTimeoutJob.name} stopped!")
+
+            if (duration.isInfinite()) return@with
 
             Log.d("starting ${::caffeineTimeoutJob.name}...")
             start(duration, startAfter)

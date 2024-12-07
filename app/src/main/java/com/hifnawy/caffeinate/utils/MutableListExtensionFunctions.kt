@@ -32,6 +32,17 @@ object MutableListExtensionFunctions {
      * @param observer [ObserverType] the observer to be added to the list. The type must be a subtype of [Observer].
      */
     inline fun <reified ObserverType : Observer> MutableList<ObserverType>.addObserver(observer: ObserverType) {
+        if (observer::class in itemClasses) filter { it::class == observer::class }.run {
+            Log.d("$${ObserverType::class.simpleName} was previously already added to ${javaClass.simpleName}<${ObserverType::class.simpleName}>!")
+
+            Log.d(
+                    "Previous Items in ${javaClass.simpleName}<${ObserverType::class.simpleName}>: " +
+                    "[${joinToString(", ") { "${it::class.simpleName.toString()}@${it.hashCode().toString(16).uppercase()}" }}]"
+            )
+
+            this@addObserver.removeAll(this)
+        }
+
         when {
             observer !in this -> {
                 Log.d("adding ${observer::class.simpleName} to ${javaClass.simpleName}<${ObserverType::class.simpleName}>...")
