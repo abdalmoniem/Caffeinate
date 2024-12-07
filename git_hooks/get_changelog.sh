@@ -5,9 +5,12 @@ gitTopLevel="$(git rev-parse --show-toplevel)"
 versionCodeFilter="\(versionCode\s\+=\s\+\)\([[:digit:]]\+\)"
 previousTag=$(git tag | sort | tail -n 2 | head -n 1)
 latestTag=$(git describe --tags $(git rev-list --tags --max-count=1))
+commitHashesBetweenTags=$(git log $previousTag..$latestTag --pretty=format:"%H")
+commitHashCount=$(echo "$commitHashesBetweenTags" | wc -l)
 previousVersionCode=$(git show "$previousTag:app/build.gradle.kts" | grep versionCode | sed -e "s/$versionCodeFilter/\2/" | xargs)
 latestVersionCode=$(git show "$tag:app/build.gradle.kts" | grep versionCode | sed -e "s/$versionCodeFilter/\2/" | xargs)
-changeLogs=0
+changelogsPath="$gitTopLevel/fastlane/metadata/android/en-US/changelogs"
+changelogs=0
 subjects=()
 bodies=()
 
@@ -19,65 +22,72 @@ if [ -z "$latestTag" ] || [ -z "$previousTag" ]; then
   exit 1
 fi
 
+if [ ! -d "$changelogsPath" ]; then
+  echo "Creating changelogs folder..."
+  mkdir -p "$changelogsPath"
+fi
+
+if [ $commitHashCount -gt 0 ] && [ -f "$changelogsPath/$latestVersionCode.txt" ]; then
+  echo "'$changelogsPath/$latestVersionCode.txt' already exists, deleting..."
+  rm "$changelogsPath/$latestVersionCode.txt"
+fi
+
 echo "Generating Changelog between $previousTag and $latestTag..."
-while read commit_hash
+for commitHash in $commitHashesBetweenTags
 do
-  subject=$(git log --format=%s -n 1 $commit_hash | sed -e 's/Change-Id:\s*.*//' | sed -e 's/Signed-off-by:\s*.*//' | sed -e 's/^[^a-zA-Z0-9]*//')
-  body=$(git log --format=%b -n 1 $commit_hash | sed -e 's/Change-Id:\s*.*//' | sed -e 's/Signed-off-by:\s*.*//' | sed -e 's/^[^a-zA-Z0-9]*//')
+  subject=$(git log --format=%s -n 1 $commitHash | sed -e 's/Change-Id:\s*.*//' | sed -e 's/Signed-off-by:\s*.*//' | sed -e 's/^[^a-zA-Z0-9]*//')
+  body=$(git log --format=%b -n 1 $commitHash | sed -e 's/Change-Id:\s*.*//' | sed -e 's/Signed-off-by:\s*.*//' | sed -e 's/^[^a-zA-Z0-9]*//')
 
   subjects+=("$subject")
   bodies+=("$body")
-  changeLogs=${#subjects[@]}
+  changelogs=${#subjects[@]}
 
-  if [ $changeLogs -eq 1 ]; then
-    echo "saving to '$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$latestVersionCode.txt'..."
+  if [ $changelogs -eq 1 ]; then
+    echo "saving to '$changelogsPath/$latestVersionCode.txt'..."
   fi
 
-  echo "Commit: $commit_hash"
-  echo "* $subject" | tee -a "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$latestVersionCode.txt"
+  echo "Commit: $commitHash"
+  echo "* $subject" | tee -a "$changelogsPath/$latestVersionCode.txt"
 
   readarray -t lines <<< "$body"
   lineCount=${#lines[@]}
   for line in "${lines[@]}"; do
     if [[ -n "$line" ]]; then
       if [ $lineCount -gt 1 ]; then
-        echo "   > - $line" | tee -a "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$latestVersionCode.txt"
+        echo "   > - $line" | tee -a "$changelogsPath/$latestVersionCode.txt"
       else
-        echo "   > $line" | tee -a "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$latestVersionCode.txt"
+        echo "   > $line" | tee -a "$changelogsPath/$latestVersionCode.txt"
       fi
     else
       if [ $lineCount -eq 1 ]; then
-        echo "   >" | tee -a "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$latestVersionCode.txt"
+        echo "   >" | tee -a "$changelogsPath/$latestVersionCode.txt"
       fi
     fi
   done
   echo "------------------------------"
-done < <(git log "$previousTag".."$latestTag" --pretty=format:"%H")
+done
 
-if [ $changeLogs -gt 0 ]; then
-  echo "$changeLogs change log(s) saved to '$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$latestVersionCode.txt'!"
-  echo | tee -a "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$latestVersionCode.txt"
+if [ $changelogs -gt 0 ]; then
+  echo "$changelogs changelog(s) saved to '$changelogsPath/$latestVersionCode.txt'!"
+  echo | tee -a "$changelogsPath/$latestVersionCode.txt"
   echo "**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/$previousTag...$latestTag" |\
-  tee -a "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/$latestVersionCode.txt"
+  tee -a "$changelogsPath/$latestVersionCode.txt"
 
   currentCommitHash=$(git rev-parse HEAD)
   isCurrentCommitOnRemote=$(git branch -r --contains "$currentCommitHash")
   if [ -n "$isCurrentCommitOnRemote" ]; then
-    newVersionName="${newTag#v}"
-
     echo "commit '$currentCommitHash' is on the remote branch, creating a new change log commit..."
     echo
 
-    git add "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/"
-    git commit -sm "updated $changeLogs change log(s)"
+    git add "$changelogsPath/"
+    git commit -sm "updated $changelogs change log(s)"
   else
     echo "commit '$currentCommitHash' is not on the remote branch, amending..."
     echo
 
-    git add "$gitTopLevel/fastlane/metadata/android/en-US/changelogs/"
+    git add "$changelogsPath/"
     git commit --amend --no-edit
   fi
 else
-  echo "No / $changeLogs change log(s) found between $previousTag and $latestTag"
+  echo "No / $changelogs change log(s) found between $previousTag and $latestTag"
 fi
-

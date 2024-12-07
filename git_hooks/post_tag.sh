@@ -123,7 +123,7 @@ if [ "$1" ]; then
     if [ "$currentVersionCode" -le "$prevTagVersionCode" ]; then
       echo "ERROR: current tag: $newTag has versionCode less than or equal to the previous tag: $prevTag, please change versionCode in "$buildGradleFile:"$currentVersionCodeLineNumber"""
       echo "$prevTag:$buildGradleFile:$prevTagVersionCodeLineNumber:versionCode = $prevTagVersionCode"
-      echo "$newTag:$buildGradleFile:$currentVersionCodeLineNumber:versionCode = $currentVersionCode"
+      echo "$newTag:$buildGradleFile:$currentVersionCodeLineNumber:versionCode = $currentVersionCode << should be $((currentVersionCode + 1))"
       versionCodeMatch=true
     fi
 
@@ -134,7 +134,7 @@ if [ "$1" ]; then
       fi
       echo "ERROR: current tag: $newTag has versionName the same as the previous tag: $prevTag, please change versionName in "$buildGradleFile:"$currentVersionNameLineNumber"""
       echo "$prevTag:$buildGradleFile:$prevTagVersionNameLineNumber:versionName = $prevTagVersionName"
-      echo "$newTag:$buildGradleFile:$currentVersionNameLineNumber:versionName = $currentVersionName"
+      echo "$newTag:$buildGradleFile:$currentVersionNameLineNumber:versionName = $currentVersionName << should be $newTag"
       versionNameMatch=true
     fi
 

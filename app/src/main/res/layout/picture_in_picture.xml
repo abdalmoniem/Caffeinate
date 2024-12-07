@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true">
 
-    <com.hifnawy.caffeinate.view.CircularDurationView
+    <com.hifnawy.circulardurationview.CircularDurationView
         android:id="@+id/progressIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -15,10 +14,10 @@
         app:hoursIndicatorMax="30"
         app:hoursIndicatorProgress="10"
         app:hoursIndicatorTrackColor="?colorPrimaryContainer"
-        app:indicatorsGapSize="15px"
-        app:indicatorsTrackCornerRadius="30px"
-        app:indicatorsTrackGapSize="10px"
-        app:indicatorsTrackThickness="30px"
+        app:indicatorsGapSize="5dp"
+        app:indicatorsTrackCornerRadius="30dp"
+        app:indicatorsTrackGapSize="10dp"
+        app:indicatorsTrackThickness="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -29,11 +28,11 @@
         app:secondsIndicatorColor="?colorTertiary"
         app:secondsIndicatorProgress="40"
         app:secondsIndicatorTrackColor="?colorTertiaryContainer"
+        app:showSubText="false"
+        app:staggeredInfiniteAnimationDelay="100"
+        app:subTextPadding="5dp"
         app:textAlign="center"
         app:textColor="?colorPrimary"
         app:textPadding="5dp"
-        app:textStyle="normal"
-        tools:ignore="PxUsage" />
-    <!-- since the DPI changes when this view is in Picture-in-Picture mode
-         we need to ignore this warning -->
+        app:textStyle="normal" />
 </androidx.constraintlayout.widget.ConstraintLayout>

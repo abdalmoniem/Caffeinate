@@ -108,11 +108,7 @@ class TimeoutJob(private val caffeinateApplication: CaffeinateApplication) : Cor
         job = launch {
             startAfter?.let { delay(it) }
 
-            val delayDuration = when {
-                startDuration.isInfinite() -> 10.seconds
-                else                       -> 1.seconds
-            }
-
+            val delayDuration = 1.seconds
             Log.d(
                     "$currentTime: timeout initialized with duration: ${startDuration.toFormattedTime()}, " +
                     "timeout update period: ${delayDuration.toFormattedTime()}"

@@ -1,0 +1,38 @@
+* picture in picture UI polish
+   >
+* update dependencies and improve UI LAF
+   >
+* created new custom CircularDurationView for PiP mode
+   >
+* code improvement and bug fixes
+   >
+* New translations strings.xml (Arabic, Egypt) (#75)
+   >
+* fix restart bugs in TimeoutJob
+   > also improved PiP transition smoothing
+* improved debouncing logic and increased TimeoutJob throughput
+   > the TimeoutJob can now send updates at a minimum of every 50 milliseconds (was previously 1 second)
+* New Crowdin updates (#74)
+   > - New translations full_description.txt (French)
+   > - New translations short_description.txt (French)
+   > - New translations title.txt (French)
+   > - New translations full_description.txt (Arabic)
+   > - New translations short_description.txt (Arabic)
+   > - New translations title.txt (Arabic)
+   > - New translations title.txt (German)
+   > - New translations full_description.txt (Arabic, Egypt)
+   > - New translations short_description.txt (Arabic, Egypt)
+   > - New translations title.txt (Arabic, Egypt)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Arabic, Egypt)
+* code improvement and bug fixes
+   >
+* fix issues in PiP mode
+   > - fixed issue where when the system theme changed while a PiP window is showing, the countdown disappears and the main activity shows in the PiP window
+   > - fixed issue where when the `toggle` action was click on a PiP window while the service is stopped, the service would start the second available timeout, not the first
+* picture in picture mode enhancements
+   > - fixed pip layout flickering and showing on top of the main activity when changing themes
+   > - added `restart timeout`, `toggle timeout` and `next timeout` pip actions
+   > - added seamless transition support for pip (only for android 12 and up) this option animates and zooms in the activity and transitions to pip and animates and zooms out from pip to the main activity seamlessly
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v2.0.0...v2.0.1
