@@ -99,8 +99,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             isDebuggable = isDebuggingEnabled
 
             project.logger.lifecycle("INFO: $name isDebuggable: $isDebuggingEnabled")
@@ -162,12 +162,12 @@ android {
         val variant = this
         variant.outputs.all {
             this as BaseVariantOutputImpl
-            val applicationId =
-                    if (variant.buildType.name == "release") "$applicationId.release" else applicationId
-            val apkName =
-                    "${applicationId}_${variant.buildType.name}_v${android.defaultConfig.versionName}.apk"
+            val applicationId = if (variant.buildType.name == "release") "$applicationId.release" else applicationId
+            val baseName = "${applicationId}_${variant.buildType.name}_v${android.defaultConfig.versionName}"
 
-            outputFileName = apkName
+            setProperty("archivesBaseName", baseName)
+
+            outputFileName = "$baseName.apk"
         }
     }
 
