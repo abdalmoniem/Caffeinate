@@ -568,12 +568,13 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         binding.root.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
         when (item.itemId) {
-            R.id.about -> AboutBottomSheetFragment.newInstance.show(supportFragmentManager, "about")
+            R.id.about          -> AboutFragment.newInstance.show(supportFragmentManager, AboutFragment::class.simpleName)
+            R.id.privacy_policy -> PrivacyPolicyFragment.newInstance.show(supportFragmentManager, PrivacyPolicyFragment::class.simpleName)
         }
 
         return when (item.itemId) {
-            in listOf(R.id.about) -> true
-            else                  -> super.onOptionsItemSelected(item)
+            in listOf(R.id.about, R.id.privacy_policy) -> true
+            else                                       -> super.onOptionsItemSelected(item)
         }
     }
 

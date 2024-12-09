@@ -81,6 +81,114 @@ Some devices may require this option enabled in order for the App. to work prope
         <item quantity="many">Remove %d Timeouts</item>
         <item quantity="other">Remove %d Timeouts</item>
     </plurals>
+    <string name="privacy_policy">privacy_policy</string>
+    <string name="privacy_policy_content">
+        <![CDATA[
+            <!DOCTYPE html>
+            <html lang="en">
+                <head>
+                    <title>Caffeinate Privacy Notice</title>
+                    <style>
+                        h2 {
+                            margin-top: 20px;
+                        }
+                        p {
+                            margin-bottom: 16px;
+                        }
+                    </style>
+                </head>
+
+                <body>
+                    <h2>Introduction</h2>
+                    <p>
+                        Welcome to Caffeinate! This privacy notice outlines how we collect, use, and protect your
+                        personal information when you use our mobile application. By using Caffeinate, you agree to
+                        the terms described in this notice.
+                    </p>
+
+                    <h2>Data Collection</h2>
+                    <p>
+                        Notification Access: Caffeinate requests notification access to provide you with personalized
+                        updates of the remaining time. We do not store any notification content or personally
+                        identifiable information (PII) outside of your device.
+                    </p>
+
+                    <h2>Information Usage</h2>
+                    <h3>Personal Data</h3>
+                    <p>
+                        We do not collect or store any personal data such as names, email addresses,
+                        or phone numbers.
+                    </p>
+
+                    <h2>Usage Analytics</h2>
+                    <p>Caffeinate does not track your usage behavior or collect analytics data.</p>
+
+                    <h2>Data Security</h2>
+                    <h3>On-Device Storage</h3>
+                    <p>
+                        All data used by Caffeinate remains on your device. Caffeinate does not transmit or
+                        store any data externally.
+                    </p>
+
+                    <h2>Third-Party Services</h2>
+                    <h3>Advertisements</h3>
+                    <p>Caffeinate does not display third-party ads.</p>
+
+                    <h3>External Links</h3>
+                    <p>
+                        Caffeinate may contain links to external websites. Please note that we are not
+                        responsible for the privacy practices of these sites.
+                    </p>
+
+                    <h2>Children’s Privacy</h2>
+                    <p>
+                        Caffeinate is not intended for children under the age of 13. We do not knowingly collect any
+                        information from children.
+                    </p>
+
+                    <h2>Changes to this notice</h2>
+                    <p>
+                        Caffeinate may update this privacy notice from time to time. Any changes will be reflected in
+                        the app and on our website.
+                    </p>
+
+                    <h2>Contact Us</h2>
+                    <p>
+                        If you have any questions or concerns about this privacy notice, please contact me at
+                        <a href="mailto:abdalmoniemalhifnawy@gmail.com">abdalmoniemalhifnawy@gmail.com</a>.
+                    </p>
+
+                    <h1>Android Permissions</h1>
+                    <h2>WAKE_LOCK</h2>
+                    <p>
+                        This permission allows an application to hold a wake lock to keep the device from sleeping.
+                    </p>
+
+                    <h2>FOREGROUND_SERVICE</h2>
+                    <p>
+                        This permission allows an application to run in the background as a foreground service.
+                    </p>
+
+                    <h2>POST_NOTIFICATIONS</h2>
+                    <p>
+                        This permission allows the app to notify the user when a timeout is started. It is
+                        optional and up to the user whether they want to be notified or not.
+                    </p>
+
+                    <h2>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</h2>
+                    <p>
+                        This permission allows an application to request that the system ignore battery
+                        optimizations.
+                    </p>
+
+                    <h2>SYSTEM_ALERT_WINDOW</h2>
+                    <p>
+                        This permission allows an application to display an overlay on top of other apps.
+                    </p>
+                </body>
+            </html>
+        ]]>
+    </string>
 
     <!-- Untranslated strings -->
     <string name="github_link" translatable="false">https://github.com/abdalmoniem/Caffeinate</string>

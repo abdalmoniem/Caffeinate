@@ -35,7 +35,7 @@ import com.google.android.material.R as materialR
  *
  * @author AbdAlMoniem AlHifnawy
  */
-class AboutBottomSheetFragment : BottomSheetDialogFragment() {
+class AboutFragment : BottomSheetDialogFragment() {
 
     /**
      * A lazy delegate that inflates the layout of this fragment and stores the result in a
@@ -232,9 +232,9 @@ class AboutBottomSheetFragment : BottomSheetDialogFragment() {
     }
 
     /**
-     * Companion object for the [AboutBottomSheetFragment] class.
+     * Companion object for the [AboutFragment] class.
      *
-     * Provides a static way to create a new instance of [AboutBottomSheetFragment] and
+     * Provides a static way to create a new instance of [AboutFragment] and
      * provides a way to access the fragment's static properties and methods.
      *
      * @author AbdAlMoniem AlHifnawy
@@ -242,11 +242,11 @@ class AboutBottomSheetFragment : BottomSheetDialogFragment() {
     companion object {
 
         /**
-         * Creates a new instance of [AboutBottomSheetFragment] and returns it.
+         * Creates a new instance of [AboutFragment] and returns it.
          *
-         * @return [AboutBottomSheetFragment] The newly created instance.
+         * @return [AboutFragment] The newly created instance.
          */
         val newInstance
-            get() = AboutBottomSheetFragment()
+            get() = AboutFragment()
     }
 }
