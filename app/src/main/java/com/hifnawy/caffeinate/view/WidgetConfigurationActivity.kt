@@ -8,17 +8,18 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.RemoteViews
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.card.MaterialCardView
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.databinding.ActivityWidgetConfigurationBinding
 import com.hifnawy.caffeinate.controller.ServiceStatus
 import com.hifnawy.caffeinate.controller.ServiceStatusObserver
+import com.hifnawy.caffeinate.controller.SharedPrefsManager
+import com.hifnawy.caffeinate.databinding.ActivityWidgetConfigurationBinding
 import com.hifnawy.caffeinate.utils.ActivityExtensionFunctions.setActivityTheme
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
-import com.hifnawy.caffeinate.controller.SharedPrefsManager
 import java.io.Serializable
 import timber.log.Timber as Log
 
@@ -211,4 +212,10 @@ class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
  *
  * @author AbdAlMoniem AlHifnawy
  */
-data class WidgetConfiguration(val widgetId: Int, val showBackground: Boolean) : Serializable
+@Keep
+data class WidgetConfiguration(
+        @Keep
+        val widgetId: Int,
+        @Keep
+        val showBackground: Boolean
+) : Serializable

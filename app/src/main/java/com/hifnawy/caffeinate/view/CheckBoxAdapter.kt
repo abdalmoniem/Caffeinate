@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.view.animation.AnticipateOvershootInterpolator
 import android.widget.CheckBox
 import android.widget.ImageView
+import androidx.annotation.Keep
 import androidx.recyclerview.widget.RecyclerView
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.TimeoutCheckboxItemBinding
@@ -40,22 +41,27 @@ import kotlin.time.Duration
  *
  * @author AbdAlMoniem AlHifnawy
  */
+@Keep
 data class CheckBoxItem(
         /**
          * the text displayed in the CheckBox
          */
+        @Keep
         var text: String,
         /**
          * the checked state of the CheckBox
          */
+        @Keep
         var isChecked: Boolean,
         /**
          * the enabled state of the CheckBox. When the enabled state is false, the CheckBox is grayed out.
          */
+        @Keep
         var isEnabled: Boolean = false,
         /**
          * the duration associated with the item, which is used to sort the items in ascending order.
          */
+        @Keep
         var duration: Duration,
 ) : Serializable
 

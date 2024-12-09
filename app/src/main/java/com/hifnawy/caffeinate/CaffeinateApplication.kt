@@ -16,6 +16,7 @@ import com.hifnawy.caffeinate.view.CheckBoxItem
 import com.hifnawy.caffeinate.view.Widget
 import java.util.Locale
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import timber.log.Timber as Log
 
 /**
@@ -54,6 +55,41 @@ class CaffeinateApplication : Application() {
     private val sharedPreferences by lazy { SharedPrefsManager(this) }
 
     /**
+     * Returns the current locale set by the user in the system settings.
+     *
+     * If the device is running Android 13 (API level 33) or later, the current locale is retrieved
+     * from the [resources.configuration.locales][android.content.res.Configuration.getLocales] list. Otherwise, the current locale is retrieved
+     * from the [getDefault][Locale.getDefault] method.
+     *
+     * @return the current locale set by the user in the system settings.
+     *
+     * @see android.content.res.Configuration
+     * @see Locale.getDefault
+     */
+    private val currentLocale: Locale
+        get() = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> resources.configuration.locales[0]
+            else                                                  -> Locale.getDefault()
+        }
+
+    /**
+     * A list of [CheckBoxItem]s that represent the timeout durations the user can select from.
+     *
+     * This list is stored in the app's SharedPreferences and is loaded when the app is launched.
+     *
+     * The list of timeout durations is used to populate the [RecyclerView][androidx.recyclerview.widget.RecyclerView] in the "Choose timeout" dialog,
+     * which is shown when the user clicks the "Choose timeout" button in the app's UI.
+     *
+     * The list is also used to determine the next timeout duration to use when the current timeout duration is finished.
+     *
+     * @see CheckBoxItem
+     * @see android.content.SharedPreferences
+     * @see androidx.recyclerview.widget.RecyclerView
+     */
+    val timeoutCheckBoxes
+        get() = sharedPreferences.timeoutCheckBoxes
+
+    /**
      * The first timeout duration that was selected by the user.
      *
      * This is the first timeout duration that was selected by the user in the list of available timeout durations. When the user selects a new
@@ -62,7 +98,7 @@ class CaffeinateApplication : Application() {
      *
      * @return [Duration] the first timeout duration that was selected by the user, or [Duration.INFINITE] if no timeout duration was selected.
      */
-    val firstTimeout: Duration
+    val firstTimeout
         get() = timeoutCheckBoxes.first { checkBoxItem -> checkBoxItem.isChecked }.duration
 
     /**
@@ -73,7 +109,7 @@ class CaffeinateApplication : Application() {
      *
      * @return [Duration] the last timeout duration that was selected by the user.
      */
-    val lastTimeout: Duration
+    val lastTimeout
         get() = timeoutCheckBoxes.last { checkBoxItem -> checkBoxItem.isChecked }.duration
 
     /**
@@ -84,15 +120,14 @@ class CaffeinateApplication : Application() {
      *
      * @return [Duration] the previously selected timeout duration.
      */
-    val prevTimeout: Duration
-        get() {
-            val timeoutCheckBox = timeoutCheckBoxes.first { timeoutCheckBox -> timeoutCheckBox.duration == timeout }
+    val prevTimeout
+        get() = timeoutCheckBoxes.first { timeoutCheckBox -> timeoutCheckBox.duration == timeout }.let { timeoutCheckBox ->
             val index = timeoutCheckBoxes.indexOf(timeoutCheckBox)
             var prevIndex = (index - 1 + timeoutCheckBoxes.size) % timeoutCheckBoxes.size
 
             while (!timeoutCheckBoxes[prevIndex].isChecked) prevIndex = (prevIndex - 1 + timeoutCheckBoxes.size) % timeoutCheckBoxes.size
 
-            return timeoutCheckBoxes[prevIndex].duration
+            timeoutCheckBoxes[prevIndex].duration
         }
 
     /**
@@ -104,15 +139,14 @@ class CaffeinateApplication : Application() {
      *
      * @return [Duration] the next timeout duration that will be used when the KeepAwakeService is running.
      */
-    val nextTimeout: Duration
-        get() {
-            val timeoutCheckBox = timeoutCheckBoxes.first { timeoutCheckBox -> timeoutCheckBox.duration == timeout }
+    val nextTimeout
+        get() = timeoutCheckBoxes.first { timeoutCheckBox -> timeoutCheckBox.duration == timeout }.let { timeoutCheckBox ->
             val index = timeoutCheckBoxes.indexOf(timeoutCheckBox)
             var nextIndex = (index + 1) % timeoutCheckBoxes.size
 
             while (!timeoutCheckBoxes[nextIndex].isChecked) nextIndex = (nextIndex + 1) % timeoutCheckBoxes.size
 
-            return timeoutCheckBoxes[nextIndex].duration
+            timeoutCheckBoxes[nextIndex].duration
         }
 
     /**
@@ -126,7 +160,7 @@ class CaffeinateApplication : Application() {
      * @see com.hifnawy.caffeinate.controller.KeepAwakeService
      * @see SharedPrefsManager.timeouts
      */
-    var timeout: Duration = sharedPreferences.timeouts.first()
+    var timeout = 0.seconds
 
     /**
      * A list of observers that are notified whenever the status of the KeepAwakeService changes.
@@ -179,23 +213,6 @@ class CaffeinateApplication : Application() {
         }
 
     /**
-     * A list of [CheckBoxItem]s that represent the timeout durations the user can select from.
-     *
-     * This list is stored in the app's SharedPreferences and is loaded when the app is launched.
-     *
-     * The list of timeout durations is used to populate the [RecyclerView][androidx.recyclerview.widget.RecyclerView] in the "Choose timeout" dialog,
-     * which is shown when the user clicks the "Choose timeout" button in the app's UI.
-     *
-     * The list is also used to determine the next timeout duration to use when the current timeout duration is finished.
-     *
-     * @see CheckBoxItem
-     * @see android.content.SharedPreferences
-     * @see androidx.recyclerview.widget.RecyclerView
-     */
-    lateinit var timeoutCheckBoxes: MutableList<CheckBoxItem>
-        private set
-
-    /**
      * The context of the application localized to the user's current locale.
      *
      * This context is used to get localized strings, which are used in the application's UI.
@@ -238,24 +255,6 @@ class CaffeinateApplication : Application() {
     }
 
     /**
-     * Returns the current locale set by the user in the system settings.
-     *
-     * If the device is running Android 13 (API level 33) or later, the current locale is retrieved
-     * from the [resources.configuration.locales][android.content.res.Configuration.getLocales] list. Otherwise, the current locale is retrieved
-     * from the [getDefault][Locale.getDefault] method.
-     *
-     * @return the current locale set by the user in the system settings.
-     *
-     * @see android.content.res.Configuration
-     * @see Locale.getDefault
-     */
-    private val currentLocale: Locale
-        get() = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> resources.configuration.locales[0]
-            else                                                  -> Locale.getDefault()
-        }
-
-    /**
      * Applies the locale configuration set by the user.
      *
      * This method sets the locale of the application to the one set by the user in the settings.
@@ -274,8 +273,6 @@ class CaffeinateApplication : Application() {
         @Suppress("AppBundleLocaleChanges")
         configuration.setLocale(currentLocale)
         localizedApplicationContext = createConfigurationContext(configuration)
-
-        timeoutCheckBoxes = sharedPreferences.timeoutCheckBoxes
     }
 
     /**
