@@ -1,0 +1,8 @@
+* bump app version to 2.0.2
+   > added privacy policy
+* added privacy policy
+   >
+* picture in picture UI polish
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v2.0.1...v2.0.2

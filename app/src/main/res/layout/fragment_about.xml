@@ -7,7 +7,7 @@
     android:layout_gravity="bottom"
     android:clipToPadding="false"
     app:layout_behavior="@string/bottom_sheet_behavior"
-    tools:context=".view.AboutBottomSheetFragment">
+    tools:context=".view.AboutFragment">
 
     <com.google.android.material.bottomsheet.BottomSheetDragHandleView
         android:id="@+id/dragHandle"
