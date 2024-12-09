@@ -1,0 +1,8 @@
+* privacy policy colors now match the app's theme
+   >
+* preparing for play store release
+   >
+* added privacy policy
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v2.0.2...v2.0.3

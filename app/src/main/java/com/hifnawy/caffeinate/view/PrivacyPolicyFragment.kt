@@ -4,21 +4,26 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.FrameLayout
+import androidx.annotation.ColorInt
 import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.color.MaterialColors
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.FragmentPrivacyPolicyBinding
+import org.jsoup.Jsoup
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import com.google.android.material.R as materialR
 
 /**
  * A [BottomSheetDialogFragment] that displays the privacy policy of the application.
@@ -129,9 +134,16 @@ class PrivacyPolicyFragment : BottomSheetDialogFragment() {
         }
 
         val html = getString(R.string.privacy_policy_content)
-        val body = extractBodyContent(html)
+        val body = extractBodyContent(html)?.run {
+            MutableHtml(this).apply {
+                setHtmlTagColor("h1", MaterialColors.getColor(root, materialR.attr.colorPrimary))
+                setHtmlTagColor("h2", MaterialColors.getColor(root, materialR.attr.colorSecondary))
+                setHtmlTagColor("h3", MaterialColors.getColor(root, materialR.attr.colorTertiary))
+            }.content
+        }
 
         privacyPolicyContent.text = Html.fromHtml(body, HtmlCompat.FROM_HTML_OPTION_USE_CSS_COLORS)
+        privacyPolicyContent.movementMethod = LinkMovementMethod.getInstance()
     }
 
     /**
@@ -171,6 +183,7 @@ class PrivacyPolicyFragment : BottomSheetDialogFragment() {
      *
      * @return [String] The content of the raw resource file.
      */
+    @Suppress("unused")
     private fun readRawFileContent(context: Context, rawResId: Int): String {
         val inputStream = context.resources.openRawResource(rawResId)
         val reader = BufferedReader(InputStreamReader(inputStream))
@@ -194,12 +207,47 @@ class PrivacyPolicyFragment : BottomSheetDialogFragment() {
      *
      * @param html [String] The HTML string to extract the content from.
      *
-     * @return [String] The extracted content of the `<body>` element.
+     * @return [String] The extracted content of the `<body>` element or null if not found.
      */
-    private fun extractBodyContent(html: String): String {
-        val bodyRegex = Regex("<body.*?>(.*?)</body>", RegexOption.DOT_MATCHES_ALL)
-        val matchResult = bodyRegex.find(html)
-        return matchResult?.groups?.get(1)?.value?.trim() ?: ""
+    private fun extractBodyContent(html: String) =
+            Regex("<body.*?>(.*?)</body>", RegexOption.DOT_MATCHES_ALL).find(html)?.groups?.get(1)?.value?.trim()
+
+    /**
+     * A mutable class that wraps a string containing HTML content.
+     *
+     * This class is used to store and modify HTML content. It provides a way to
+     * set the color of specific HTML tags in the content.
+     *
+     * @property content [String] The HTML content to store.
+     *
+     * @author AbdAlMoniem AlHifnawy
+     */
+    private class MutableHtml(var content: String) {
+
+        /**
+         * Sets the color of the specified HTML tag in the provided string.
+         *
+         * This method takes an HTML string and sets the color of the specified
+         * HTML tag in it. It returns the modified string with the tag colors
+         * set.
+         *
+         * @param tagName [String] The name of the HTML tag to set the color for.
+         * @param color [Int] The color to set for the specified tag.
+         *
+         * @return [String] The modified string with the tag colors set.
+         */
+        @OptIn(ExperimentalStdlibApi::class)
+        fun setHtmlTagColor(
+                tagName: String,
+                @ColorInt
+                color: Int
+        ) = Jsoup.parse(content).run {
+            val tagColor = "#${color.toHexString().substring(2)}"
+            select(tagName).forEach { tag -> tag.html("<font color='${tagColor}'>${tag.text()}</font>") }
+            content = html()
+
+            this@MutableHtml
+        }
     }
 
     /**

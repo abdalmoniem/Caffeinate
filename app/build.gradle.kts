@@ -40,8 +40,8 @@ private var isDebuggingEnabled = false
 private var isSigningConfigEnabled = false
 
 plugins {
+    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
 }
 
 android {
@@ -87,8 +87,8 @@ android {
         minSdk = 24
         compileSdk = 35
         targetSdk = 35
-        versionCode = 33
-        versionName = "2.0.2"
+        versionCode = 34
+        versionName = "2.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -201,14 +201,16 @@ android {
 }
 
 dependencies {
+    implementation(libs.activity)
     implementation(libs.androidxCoreKtx)
     implementation(libs.androidxAppCompat)
     implementation(libs.androidxConstraintLayout)
-    implementation(libs.activity)
-    implementation(libs.material)
+
+    implementation(libs.gson)
+    implementation(libs.jsoup)
     implementation(libs.timber)
     implementation(libs.assent)
-    implementation(libs.gson)
+    implementation(libs.material)
     implementation(libs.materialNumberPicker)
     implementation(libs.circulardurationview)
 

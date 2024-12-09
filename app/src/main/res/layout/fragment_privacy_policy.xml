@@ -27,23 +27,44 @@
         app:layout_constraintTop_toBottomOf="@+id/dragHandle"
         app:strokeWidth="0dp">
 
-        <androidx.core.widget.NestedScrollView
-            android:id="@+id/content"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipToPadding="false"
-            android:overScrollMode="always"
-            android:padding="30dp">
+            android:layout_height="match_parent"
+            android:padding="20dp">
 
             <TextView
-                android:id="@+id/privacyPolicyContent"
+                android:id="@+id/privacyPolicyTitle"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:linksClickable="true"
-                android:text="@string/privacy_policy_content"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                android:textIsSelectable="true"
-                tools:ignore="SpeakableTextPresentCheck" />
-        </androidx.core.widget.NestedScrollView>
+                android:layout_height="wrap_content"
+                android:text="@string/privacy_policy"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"
+                android:textColor="?colorPrimary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/privacyPolicyContentContainer"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginVertical="20dp"
+                android:clipToPadding="false"
+                android:overScrollMode="always"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/privacyPolicyTitle">
+
+                <TextView
+                    android:id="@+id/privacyPolicyContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:linksClickable="true"
+                    android:text="@string/privacy_policy_content"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    android:textIsSelectable="true"
+                    tools:ignore="SpeakableTextPresentCheck,VisualLintLongText" />
+            </androidx.core.widget.NestedScrollView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
