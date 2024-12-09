@@ -230,8 +230,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      *
      * @return [List] A list of [Duration] objects representing the available timeouts.
      */
-    // val timeouts by lazy { listOf(30.seconds, 5.minutes, 10.minutes, 15.minutes, 30.minutes, 60.minutes, 120.minutes, 240.minutes, 480.minutes, Duration.INFINITE) }
-    val timeouts by lazy { listOf(30.seconds, 5.minutes, 10.minutes, 15.minutes, 30.minutes, 60.minutes, Duration.INFINITE) }
+    private val timeouts by lazy { listOf(30.seconds, 5.minutes, 10.minutes, 15.minutes, 30.minutes, 60.minutes, Duration.INFINITE) }
 
     /**
      * Retrieves or sets whether all necessary permissions are granted.

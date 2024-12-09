@@ -1,3 +1,5 @@
+* fix R8 engine optimization causing bugs and crashes
+   >
 * privacy policy colors now match the app's theme
    >
 * preparing for play store release
