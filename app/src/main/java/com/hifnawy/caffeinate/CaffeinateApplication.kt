@@ -86,8 +86,7 @@ class CaffeinateApplication : Application() {
      * @see android.content.SharedPreferences
      * @see androidx.recyclerview.widget.RecyclerView
      */
-    val timeoutCheckBoxes
-        get() = sharedPreferences.timeoutCheckBoxes
+    val timeoutCheckBoxes by lazy { sharedPreferences.timeoutCheckBoxes }
 
     /**
      * The first timeout duration that was selected by the user.

@@ -1127,14 +1127,14 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
 
                         timeoutChoiceSubTextTextView.text = timeoutCheckBoxes.enabledDurations
 
-                        checkBoxItems.find { checkBoxItem -> checkBoxItem.duration == timeout && !checkBoxItem.isChecked }?.let {
-                            when (lastStatusUpdate) {
-                                is ServiceStatus.Running -> KeepAwakeService.startNextTimeout(this, debounce = false)
-                                else                     -> timeout = checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
+                        // find out if the current timeout is still enabled, if not, set it to the first enabled timeout
+                        checkBoxItems.find { checkBoxItem -> checkBoxItem.duration == timeout && !checkBoxItem.isChecked }.let {
+                            when {
+                                lastStatusUpdate is ServiceStatus.Running && it != null ->
+                                    KeepAwakeService.startNextTimeout(this, debounce = false)
+
+                                else                                                    -> timeout = firstTimeout
                             }
-                        } ?: when (lastStatusUpdate) {
-                            is ServiceStatus.Stopped -> timeout = checkBoxItems.first { checkBoxItem -> checkBoxItem.isChecked }.duration
-                            else                     -> Unit // do nothing if the service is running
                         }
 
                         sharedPreferences.timeoutCheckBoxes = timeoutCheckBoxes
