@@ -1122,24 +1122,22 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 TimeoutsSelectionFragment.getInstance(caffeinateApplication) { checkBoxItems ->
                     caffeinateApplication.run {
                         timeoutCheckBoxes.clear()
-
-                        checkBoxItems.forEach { checkBoxItem -> timeoutCheckBoxes.add(checkBoxItem.copy()) }
+                        timeoutCheckBoxes.addAll(checkBoxItems)
 
                         timeoutChoiceSubTextTextView.text = timeoutCheckBoxes.enabledDurations
 
                         // find out if the current timeout is still enabled, if not, set it to the first enabled timeout
                         checkBoxItems.find { checkBoxItem -> checkBoxItem.duration == timeout && !checkBoxItem.isChecked }.let {
-                            when {
-                                lastStatusUpdate is ServiceStatus.Running && it != null ->
-                                    KeepAwakeService.startNextTimeout(this, debounce = false)
-
-                                else                                                    -> timeout = firstTimeout
+                            when (lastStatusUpdate) {
+                                is ServiceStatus.Running if it != null -> KeepAwakeService.startNextTimeout(this, debounce = false)
+                                else                                   -> timeout = firstTimeout
                             }
                         }
 
-                        sharedPreferences.timeoutCheckBoxes = timeoutCheckBoxes
+                        sharedPreferences.timeoutCheckBoxes.clear()
+                        sharedPreferences.timeoutCheckBoxes.addAll(checkBoxItems)
                     }
-                }.show(supportFragmentManager, "about")
+                }.show(supportFragmentManager, TimeoutsSelectionFragment::class.simpleName)
             }
 
             timeoutChoiceCard.isEnabled = isEnabled

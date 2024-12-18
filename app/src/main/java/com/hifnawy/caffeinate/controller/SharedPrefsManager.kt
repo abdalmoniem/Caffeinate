@@ -1,6 +1,7 @@
 package com.hifnawy.caffeinate.controller
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.ContrastLevel.HIGH
@@ -21,7 +22,6 @@ import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.WIDG
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.Theme.DARK
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.Theme.LIGHT
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.Theme.SYSTEM_DEFAULT
-import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toFormattedTime
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableList
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.getSerializableMap
@@ -29,6 +29,8 @@ import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSeria
 import com.hifnawy.caffeinate.utils.SharedPreferencesExtensionFunctions.putSerializableMap
 import com.hifnawy.caffeinate.view.CheckBoxItem
 import com.hifnawy.caffeinate.view.WidgetConfiguration
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -350,20 +352,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      *
      * @return [List] A list of [CheckBoxItem] objects representing the list of timeout check boxes.
      */
-    var timeoutCheckBoxes: MutableList<CheckBoxItem>
-        get() = when {
-            sharedPreferences.contains(TIMEOUT_CHECK_BOXES.name) ->
-                sharedPreferences.getSerializableList<MutableList<CheckBoxItem>>(TIMEOUT_CHECK_BOXES.name)
-
-            else                                                 -> timeouts.map { timeout ->
-                CheckBoxItem(text = timeout.toFormattedTime(), isChecked = true, isEnabled = true, duration = timeout)
-            }
-        }.map { checkBoxItem ->
-            checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext))
-        }.toMutableList()
-        set(value) = sharedPreferences.edit().putSerializableList(TIMEOUT_CHECK_BOXES.name, value.map { checkBoxItem ->
-            checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(caffeinateApplication.localizedApplicationContext))
-        }).apply()
+    val timeoutCheckBoxes by TimeoutCheckBoxesDelegate(sharedPreferences, TIMEOUT_CHECK_BOXES.name, timeouts, caffeinateApplication)
 
     /**
      * Retrieves or sets the widget configuration.
@@ -484,4 +473,287 @@ interface SharedPrefsObserver : Observer {
      * @param isWhileLockedEnabled [Boolean] `true` if the "While Locked" feature is enabled, `false` otherwise.
      */
     fun onIsWhileLockedEnabledUpdated(isWhileLockedEnabled: Boolean) = Unit
+}
+
+/**
+ * A delegate class for reading and writing a list of [CheckBoxItem]s to SharedPreferences.
+ *
+ * This class uses a delegate property to read and write a list of [CheckBoxItem]s to SharedPreferences.
+ * It caches the list of [CheckBoxItem]s in memory and only reads from or writes to SharedPreferences
+ * when the value is changed.
+ *
+ * @property sharedPreferences the SharedPreferences to read from and write to.
+ * @property key the key to use when writing/reading to/from SharedPreferences.
+ * @property initialTimeouts the list of timeouts to use as the initial value for the property.
+ * @property context the context to use for formatting the timeouts.
+ *
+ * @author AbdAlMoniem AlHifnawy
+ */
+private class TimeoutCheckBoxesDelegate(
+
+        /**
+         * The SharedPreferences to read from and write to.
+         *
+         * This property is a val, meaning it cannot be reassigned. It is also a private val, meaning it can only be accessed within this class.
+         */
+        private val sharedPreferences: SharedPreferences,
+
+        /**
+         * The key to use when writing/reading to/from SharedPreferences.
+         *
+         * This property is a val, meaning it cannot be reassigned. It is also a private val, meaning it can only be accessed within this class.
+         *
+         * @see SharedPreferences
+         * @see TimeoutCheckBoxesDelegate
+         */
+        private val key: String,
+
+        /**
+         * The initial list of timeouts to use as the initial value for the property.
+         *
+         * This property is a val, meaning it cannot be reassigned. It is also a private val, meaning it can only be accessed within this class.
+         *
+         * @see List
+         * @see Duration
+         */
+        private val initialTimeouts: List<Duration>,
+
+        /**
+         * The context to use for formatting the timeouts.
+         *
+         * This property is a val, meaning it cannot be reassigned. It is also a private val, meaning it can only be accessed within this class.
+         *
+         * @see Context
+         */
+        private val context: Context
+) : ReadWriteProperty<Any, MutableList<CheckBoxItem>> {
+
+    /**
+     * The cached list of [CheckBoxItem]s.
+     *
+     * This property is used to cache the list of [CheckBoxItem]s in memory, so that it is not necessary to read from SharedPreferences every time the property is accessed.
+     *
+     * This property is a var, meaning it can be reassigned. However, it is private, meaning it can only be accessed within this class.
+     *
+     * @see MutableList
+     * @see CheckBoxItem
+     */
+    private lateinit var timeoutCheckBoxItems: MutableList<CheckBoxItem>
+
+    /**
+     * Gets the value of the property.
+     *
+     * This method returns the value of the property, which is a list of [CheckBoxItem]s.
+     *
+     * The value is cached in memory, so that it is not necessary to read from SharedPreferences every time the property is accessed.
+     * If the value is not yet cached, it is loaded from SharedPreferences.
+     *
+     * @param thisRef the object that the property is being accessed on.
+     * @param property the property that is being accessed.
+     * @return [MutableList] the value of the property, which is a [MutableList] of [CheckBoxItem]s.
+     */
+    override fun getValue(thisRef: Any, property: KProperty<*>): MutableList<CheckBoxItem> {
+        if (!::timeoutCheckBoxItems.isInitialized) timeoutCheckBoxItems = load()
+
+        return MutableListInterceptor(timeoutCheckBoxItems, ::save)
+    }
+
+    /**
+     * Sets the value of the property.
+     *
+     * This method sets the value of the property, which is a list of [CheckBoxItem]s.
+     *
+     * The value is cached in memory, so that it is not necessary to write to SharedPreferences every time the property is assigned.
+     * If the value is not yet cached, it is saved to SharedPreferences.
+     *
+     * @param thisRef the object that the property is being accessed on.
+     * @param property the property that is being accessed.
+     * @param value the value of the property, which is a list of [CheckBoxItem]s.
+     */
+    override fun setValue(thisRef: Any, property: KProperty<*>, value: MutableList<CheckBoxItem>) {
+        timeoutCheckBoxItems = value
+
+        save(value)
+    }
+
+    /**
+     * Loads the list of [CheckBoxItem]s from SharedPreferences.
+     *
+     * If the list is already cached in memory, it returns the cached list.
+     * If the list is not cached, it loads the list from SharedPreferences.
+     * If the list is not available in SharedPreferences, it returns the default list of [CheckBoxItem]s.
+     *
+     * @return [CheckBoxItem] the list of [CheckBoxItem]s.
+     */
+    private fun load() = when {
+        sharedPreferences.contains(key) -> sharedPreferences.getSerializableList<MutableList<CheckBoxItem>>(key)
+        else                            -> initialTimeouts.localizedCheckBoxItems
+    }
+
+    /**
+     * Saves the list of [CheckBoxItem]s to SharedPreferences.
+     *
+     * @param list [MutableList] the list of [CheckBoxItem]s to be saved.
+     */
+    private fun save(list: List<CheckBoxItem>) = sharedPreferences.edit().putSerializableList(key, list.localized).apply()
+
+    /**
+     * Returns a new list of [CheckBoxItem]s, where each item's text is localized to the current locale.
+     *
+     * This method takes a list of [CheckBoxItem]s as an argument and returns a new list of [CheckBoxItem]s.
+     * Each item in the returned list is a [CheckBoxItem] with the text localized to the current locale.
+     *
+     * @return [MutableList] a new [MutableList] of [CheckBoxItem]s, where each item's text is localized.
+     */
+    private val List<CheckBoxItem>.localized
+        get() = map { checkBoxItem -> checkBoxItem.copy(text = checkBoxItem.duration.toLocalizedFormattedTime(context)) }.toMutableList()
+
+    /**
+     * Returns a new list of [CheckBoxItem]s, where each item's text is localized to the current locale.
+     *
+     * This method takes a list of [Duration]s as an argument and returns a new list of [CheckBoxItem]s.
+     * Each item in the returned list is a [CheckBoxItem] with the text localized to the current locale.
+     *
+     * @return [MutableList] a new [MutableList] of [CheckBoxItem]s, where each item's text is localized.
+     */
+    private val List<Duration>.localizedCheckBoxItems
+        get() = map { timeout ->
+            CheckBoxItem(text = timeout.toLocalizedFormattedTime(context), isChecked = true, isEnabled = true, duration = timeout)
+        }.toMutableList()
+
+    /**
+     * An implementation of [MutableList] that wraps a delegate and intercepts the
+     * add and remove operations to notify a listener.
+     *
+     * This class is used to create a list that can be modified by the user in the
+     * UI, and notify the [SharedPrefsManager] when the list is modified, so that
+     * the list can be saved to the preferences.
+     *
+     * @param list the delegate list that will be modified.
+     * @param onModify the function that will be called when the list is modified.
+     *
+     * @author AbdAlMoniem AlHifnawy
+     */
+    private class MutableListInterceptor(
+
+            /**
+             * A list of [CheckBoxItem]s that is being intercepted for modifications.
+             *
+             * This list serves as a delegate for [MutableList] operations and notifies a listener
+             * whenever the list is modified. This is useful for persisting changes or updating the UI
+             * based on list operations like addition or removal of items.
+             *
+             * @property list The underlying mutable list of [CheckBoxItem]s being intercepted.
+             * @property onModify A callback function that is invoked with the list whenever it is modified.
+             */
+            private val list: MutableList<CheckBoxItem>,
+
+            /**
+             * A callback function that is invoked with the list whenever it is modified.
+             *
+             * This callback is used to notify the [SharedPrefsManager] when the list is modified,
+             * so that the list can be saved to the preferences.
+             */
+            private val onModify: (MutableList<CheckBoxItem>) -> Unit
+    ) : MutableList<CheckBoxItem> by list {
+
+        /**
+         * Adds the specified [CheckBoxItem] to the list.
+         *
+         * This method appends the given [CheckBoxItem] to the end of the list. It then triggers
+         * the [onModify] callback to notify observers of the change.
+         *
+         * @param element [CheckBoxItem] The element to be added to this list.
+         * @return [Boolean] `true` if the list changed as a result of the call, `false` otherwise.
+         */
+        override fun add(element: CheckBoxItem): Boolean {
+            val result = list.add(element)
+
+            onModify(list)
+
+            return result
+        }
+
+        /**
+         * Adds all of the elements in the specified collection to this list.
+         *
+         * This method appends all of the elements in the specified collection to the end of this list,
+         * in the order that they are returned by the specified collection's iterator. It then triggers
+         * the [onModify] callback to notify observers of the change.
+         *
+         * @param elements [Collection] The collection containing elements to be added to this list.
+         * @return [Boolean] `true` if this list changed as a result of the call, `false` otherwise.
+         */
+        override fun addAll(elements: Collection<CheckBoxItem>): Boolean {
+            val result = list.addAll(elements)
+
+            onModify(list)
+
+            return result
+        }
+
+        /**
+         * Removes all elements from this list.
+         *
+         * This method clears all [CheckBoxItem]s from the list and triggers the [onModify] callback
+         * to notify observers of the change. After this operation, the list will be empty.
+         */
+        override fun clear() {
+            list.clear()
+
+            onModify(list)
+        }
+
+        /**
+         * Removes the element from this list, if it is present.
+         *
+         * This method is overridden to notify the [onModify] callback after the removal operation.
+         *
+         * @param element The element to be removed from this list, if present.
+         * @return [Boolean] `true` if this list contained the specified element, `false` otherwise.
+         */
+        override fun remove(element: CheckBoxItem): Boolean {
+            val result = list.remove(element)
+
+            onModify(list)
+
+            return result
+        }
+
+        /**
+         * Removes the element at the specified position in this list and returns it.
+         *
+         * This method removes the [CheckBoxItem] at the given index from the list and triggers
+         * the [onModify] callback to notify observers of the change.
+         *
+         * @param index [Int] The index of the element to remove.
+         * @return [CheckBoxItem] The element that was removed from the list.
+         * @throws IndexOutOfBoundsException If the index is out of range (index < 0 || index >= size).
+         */
+        override fun removeAt(index: Int): CheckBoxItem {
+            val result = list.removeAt(index)
+
+            onModify(list)
+
+            return result
+        }
+
+        /**
+         * Replaces the element at the specified position in this list with the specified element.
+         *
+         * This method updates the element at the given index in the list with the provided
+         * [CheckBoxItem] and triggers the [onModify] callback to notify observers of the change.
+         *
+         * @param index [Int] The index of the element to replace.
+         * @param element [CheckBoxItem] The element to be stored at the specified position.
+         * @return [CheckBoxItem] The element previously at the specified position.
+         */
+        override fun set(index: Int, element: CheckBoxItem): CheckBoxItem {
+            val result = list.set(index, element)
+
+            onModify(list)
+
+            return result
+        }
+    }
 }

@@ -180,6 +180,12 @@ android {
         jvmTarget = "21"
     }
 
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.add("-Xwhen-guards")
+        }
+    }
+
     buildFeatures {
         viewBinding = true
         buildConfig = true

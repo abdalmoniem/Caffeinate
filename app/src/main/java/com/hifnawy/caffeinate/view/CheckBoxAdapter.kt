@@ -14,6 +14,7 @@ import androidx.annotation.Keep
 import androidx.recyclerview.widget.RecyclerView
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.TimeoutCheckboxItemBinding
+import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.isVisible
 import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_CHANGED_ALL
 import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_CHANGED_SINGLE
@@ -80,8 +81,7 @@ class CheckBoxAdapter(
         timeoutCheckBoxes: List<CheckBoxItem>,
         private val animationDuration: Long = 50,
         private val onItemsChangedListener: OnItemsChangedListener? = null
-) :
-        RecyclerView.Adapter<CheckBoxAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<CheckBoxAdapter.ViewHolder>() {
 
     /**
      * A mutable list of [CheckBoxItem]s that contains the same items as the original list provided in the constructor.
@@ -325,7 +325,7 @@ class CheckBoxAdapter(
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder) {
         val item = timeoutCheckBoxes[adapterPosition].apply {
-            checkBox.text = text
+            checkBox.text = duration.toLocalizedFormattedTime(itemView.context)
             checkBox.isChecked = isChecked
             checkBox.isEnabled = isEnabled && !isSelecting
 
