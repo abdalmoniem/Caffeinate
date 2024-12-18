@@ -1,5 +1,4 @@
 <!--suppress CheckImageSize, HtmlDeprecatedAttribute -->
-
 <div align=center>
     <img width="200" src="assets/icon_with_background.png" alt="Caffeinate Rounded Icon">
     <h1>💊 Caffeinate</h1>
@@ -62,12 +61,19 @@ to change the device settings. It can be toggled at various places:
 
 # 🔽 Download
 
-For now, you can download the most recent version of Caffeinate
+You can download the most recent version of Caffeinate
 from [GitHub Releases](https://github.com/abdalmoniem/Caffeinate/releases/latest).
 
-[<img alt="Download from GitHub" height="80" src="assets/badge_github.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.hifnawy.caffeinate/)
-[<img alt="Download from GitHub" height="80" src="assets/badge_izzy_on_droid.png"/>](https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate)
+[<img alt="Get it on IzzyOnDroid" height="80" src="assets/badge_izzy_on_droid.png"/>](https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate)
+[<img alt="Get it on F-Droid" height="80" src="assets/badge_f_droid.png">](https://f-droid.org/packages/com.hifnawy.caffeinate/)
+
+[<img alt="Get it on Play Store" height="80" src="assets/badge_play_store.png"/>](https://play.google.com/store/apps/details?id=com.hifnawy.caffeinate)
+[<img alt="Get it on GitHub" height="80" src="assets/badge_github.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
+
+> N.B. App on Play Store is still in testing phase,
+> please
+> [submit an issue](https://github.com/abdalmoniem/Caffeinate/issues/new?assignees=abdalmoniem&labels=play+store+beta+enroll&projects=&template=play-store-beta-enrollment.md&title=%5BPlay+Store+Beta+Enrollment%5D)
+> with your email to be added to the beta testers
 
 ## 🈵 Translations
 
