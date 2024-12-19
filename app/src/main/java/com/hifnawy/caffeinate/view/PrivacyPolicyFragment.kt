@@ -1,14 +1,12 @@
 package com.hifnawy.caffeinate.view
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.core.text.HtmlCompat
@@ -20,6 +18,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.color.MaterialColors
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.FragmentPrivacyPolicyBinding
+import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.windowHeight
 import org.jsoup.Jsoup
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -54,36 +53,6 @@ class PrivacyPolicyFragment : BottomSheetDialogFragment() {
      * @return [FragmentPrivacyPolicyBinding] The inflated layout of the fragment, wrapped in a [FragmentPrivacyPolicyBinding] instance.
      */
     private val binding by lazy { FragmentPrivacyPolicyBinding.inflate(layoutInflater) }
-
-    /**
-     * A utility property that returns the height of the window in display pixels (DP).
-     *
-     * This property calculates the height of the window by taking into account the display height
-     * and the size of the top and bottom system bars. It takes into account the display density
-     * and returns the result as an integer.
-     *
-     * @return [Int] The height of the window in DP, as an integer.
-     */
-    private val windowHeight: Int
-        get() {
-            val height = resources.displayMetrics.heightPixels
-
-            with(requireView().rootWindowInsets) {
-                @Suppress("DEPRECATION")
-                val topInset = when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()).top
-                    else                                           -> systemWindowInsetTop
-                }
-
-                @Suppress("DEPRECATION")
-                val bottomInset = when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()).bottom
-                    else                                           -> systemWindowInsetBottom
-                }
-
-                return height + topInset + bottomInset
-            }
-        }
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -160,12 +129,12 @@ class PrivacyPolicyFragment : BottomSheetDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext()).apply {
         setOnShowListener { dialogInterface ->
             val dialog = (dialogInterface as BottomSheetDialog).findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            dialog?.layoutParams?.height = windowHeight
+            dialog?.layoutParams?.height = binding.root.windowHeight
 
             behavior.apply {
                 isFitToContents = true
                 dismissWithAnimation = true
-                peekHeight = windowHeight * 2 / 5
+                peekHeight = binding.root.windowHeight * 2 / 5
                 state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }

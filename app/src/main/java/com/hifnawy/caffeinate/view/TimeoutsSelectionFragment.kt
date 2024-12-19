@@ -2,7 +2,6 @@ package com.hifnawy.caffeinate.view
 
 import android.animation.Animator
 import android.animation.ValueAnimator
-import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
@@ -11,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.widget.FrameLayout
 import android.widget.NumberPicker
 import androidx.annotation.IdRes
@@ -30,6 +28,9 @@ import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.DialogSetCustomTimeoutBinding
 import com.hifnawy.caffeinate.databinding.FragmentChooseTimeoutsBinding
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
+import com.hifnawy.caffeinate.utils.IntExtensionFunctions.dp
+import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.viewHeight
+import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.windowHeight
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.time.Duration
@@ -45,15 +46,13 @@ import kotlin.time.Duration.Companion.seconds
  * and allows users to add, remove, and save timeout durations. The fragment
  * communicates the selected timeouts back to the hosting application via a callback.
  *
- * @constructor Creates an instance of [TimeoutsSelectionFragment].
+ * @author AbdAlMoniem AlHifnawy
  *
- * @param caffeinateApplication [CaffeinateApplication] The application instance.
- * @param selectionCallback [(List<CheckBoxItem>) -> Unit]? A callback that will be invoked when the user selects timeout durations.
+ * @see CheckBoxAdapter
+ * @see BottomSheetBehavior
+ * @see BottomSheetDialogFragment
  */
-class TimeoutsSelectionFragment(
-        private val caffeinateApplication: CaffeinateApplication,
-        private val selectionCallback: ((List<CheckBoxItem>) -> Unit)? = null
-) : BottomSheetDialogFragment() {
+class TimeoutsSelectionFragment : BottomSheetDialogFragment() {
 
     /**
      * A lazy delegate that inflates the layout of this fragment and stores the result in a
@@ -65,6 +64,16 @@ class TimeoutsSelectionFragment(
      * @return [FragmentChooseTimeoutsBinding] The inflated layout of the fragment, wrapped in a [FragmentChooseTimeoutsBinding] instance.
      */
     private val binding by lazy { FragmentChooseTimeoutsBinding.inflate(layoutInflater) }
+
+    /**
+     * Lazily retrieves the application instance.
+     *
+     * This property is initialized upon first access and provides the [CaffeinateApplication]
+     * instance, which can be used to access application-wide resources and functionality.
+     *
+     * @return [CaffeinateApplication] The application instance.
+     */
+    private val caffeinateApplication: CaffeinateApplication by lazy { binding.root.context.applicationContext as CaffeinateApplication }
 
     /**
      * A lazy delegate that creates a new instance of [CheckBoxAdapter] with the specified timeout check boxes and on-items-changed listener.
@@ -212,59 +221,16 @@ class TimeoutsSelectionFragment(
     private val maxToolbarTitleSize = 30f
 
     /**
-     * A utility property to set and get the height of a view in pixels.
+     * A callback that will be invoked when the user selects a timeout duration.
      *
-     * @return [Int] The height of the view in pixels.
+     * This callback will be invoked when the user selects a timeout duration and clicks the "Save"
+     * button. It will receive a list of [CheckBoxItem] as an argument that contains the selected
+     * timeout durations.
+     *
+     * @see CheckBoxItem
+     * @see saveSelectedTimeouts
      */
-    private var View.viewHeight: Int
-        get() = layoutParams.height
-        set(value) {
-            if (value <= 0) layoutParams.width = 0.dp
-            layoutParams.height = value
-            requestLayout()
-        }
-
-    /**
-     * A utility property that returns the height of the window in display pixels (DP).
-     *
-     * This property calculates the height of the window by taking into account the display height
-     * and the size of the top and bottom system bars. It takes into account the display density
-     * and returns the result as an integer.
-     *
-     * @return [Int] The height of the window in DP, as an integer.
-     */
-    private val windowHeight: Int
-        get() {
-            val height = resources.displayMetrics.heightPixels
-
-            with(requireView().rootWindowInsets) {
-                @Suppress("DEPRECATION")
-                val topInset = when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()).top
-                    else                                           -> systemWindowInsetTop
-                }
-
-                @Suppress("DEPRECATION")
-                val bottomInset = when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()).bottom
-                    else                                           -> systemWindowInsetBottom
-                }
-
-                return height + topInset + bottomInset
-            }
-        }
-
-    /**
-     * A utility property that converts a given integer value to a size in display pixels (DP).
-     *
-     * This property multiplies the given integer value by the device's display density and
-     * returns the result as an integer. It is a convenience method for converting a size
-     * in DP to a size in pixels.
-     *
-     * @return [Int] The size in DP, as an integer.
-     */
-    private val Int.dp: Int
-        get() = (this * Resources.getSystem().displayMetrics.density).toInt()
+    var selectionCallback: ((List<CheckBoxItem>) -> Unit)? = null
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -344,15 +310,15 @@ class TimeoutsSelectionFragment(
      *
      * @return [BottomSheetDialog] The created dialog instance with applied custom settings.
      */
-    override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext()).apply {
+    override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(binding.root.context).apply {
         setOnShowListener { dialogInterface ->
             val dialog = (dialogInterface as BottomSheetDialog).findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            dialog?.layoutParams?.height = windowHeight
+            dialog?.layoutParams?.height = binding.root.windowHeight
 
             bottomSheetBehavior = behavior.apply {
                 isFitToContents = true
                 dismissWithAnimation = true
-                peekHeight = windowHeight * 2 / 5
+                peekHeight = binding.root.windowHeight * 2 / 5
                 state = BottomSheetBehavior.STATE_COLLAPSED
 
                 addBottomSheetCallback(BottomSheetBehaviorCallback())
@@ -425,7 +391,7 @@ class TimeoutsSelectionFragment(
         findItem(R.id.remove_timeouts).apply {
             isVisible = isSelecting
 
-            title = requireContext().resources.getQuantityString(R.plurals.remove_timeout, selectedItems.size, selectedItems.size)
+            title = binding.root.context.resources.getQuantityString(R.plurals.remove_timeout, selectedItems.size, selectedItems.size)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tooltipText = title
         }
         findItem(R.id.change_selection).apply {
@@ -437,8 +403,8 @@ class TimeoutsSelectionFragment(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tooltipText = title
 
             icon = when {
-                isAllSelected -> AppCompatResources.getDrawable(requireContext(), R.drawable.deselect_all_icon)
-                else          -> AppCompatResources.getDrawable(requireContext(), R.drawable.select_all_icon)
+                isAllSelected -> AppCompatResources.getDrawable(binding.root.context, R.drawable.deselect_all_icon)
+                else          -> AppCompatResources.getDrawable(binding.root.context, R.drawable.select_all_icon)
             }
         }
     }
@@ -827,11 +793,9 @@ class TimeoutsSelectionFragment(
         /**
          * Creates an instance of the [TimeoutsSelectionFragment].
          *
-         * @param caffeinateApplication [CaffeinateApplication] The application instance.
-         * @param selectionCallback [(List<CheckBoxItem>) -> Unit] A callback that will be invoked when the user selects a timeout duration.
          * @return [TimeoutsSelectionFragment] An instance of the [TimeoutsSelectionFragment].
          */
-        fun getInstance(caffeinateApplication: CaffeinateApplication, selectionCallback: ((List<CheckBoxItem>) -> Unit)? = null) =
-                TimeoutsSelectionFragment(caffeinateApplication, selectionCallback)
+        val newInstance
+            get() = TimeoutsSelectionFragment()
     }
 }

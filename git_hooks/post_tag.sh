@@ -68,15 +68,15 @@ update_publish_release_yaml_file_and_add_tag() {
       fi
 
       echo
-      echo "adding tag $newTag..."
+      echo "adding tag: $newTag..."
       git tag "$newTag"
-      echo "tag $newTag added!"
+      echo "tag: $newTag added!"
     else
       echo "tags in $publishReleaseYaml are up to date"
     fi
 
   scriptDir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd -P)
-  sh $scriptDir/get_changelog.sh
+  sh $scriptDir/get_changelog.sh --tag "$newTag" --reference_tag "$prevTag" --write_changes --commit_changes
 
   else
     echo "ERROR: file $publishReleaseYaml not found"

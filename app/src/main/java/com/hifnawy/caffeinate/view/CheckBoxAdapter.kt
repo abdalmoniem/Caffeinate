@@ -1,6 +1,5 @@
 package com.hifnawy.caffeinate.view
 
-import android.content.res.Resources
 import android.transition.Explode
 import android.transition.TransitionManager
 import android.view.HapticFeedbackConstants
@@ -15,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.TimeoutCheckboxItemBinding
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
+import com.hifnawy.caffeinate.utils.IntExtensionFunctions.dp
 import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.isVisible
 import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_CHANGED_ALL
 import com.hifnawy.caffeinate.view.CheckBoxAdapter.ModificationType.ITEM_CHANGED_SINGLE
@@ -135,18 +135,6 @@ class CheckBoxAdapter(
      * are launched on the main thread.
      */
     private val mainCoroutineScope by lazy { CoroutineScope(Dispatchers.Main) }
-
-    /**
-     * A utility property that converts a given integer value to a size in display pixels (DP).
-     *
-     * This property multiplies the given integer value by the device's display density and
-     * returns the result as an integer. It is a convenience method for converting a size
-     * in DP to a size in pixels.
-     *
-     * @return [Int] The size in DP, as an integer.
-     */
-    private val Int.dp: Int
-        get() = (this * Resources.getSystem().displayMetrics.density).toInt()
 
     /**
      * The RecyclerView instance that this adapter is attached to.

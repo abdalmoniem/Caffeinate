@@ -1119,23 +1119,25 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
             val timeoutChoiceClickListener = View.OnClickListener { view ->
                 view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
-                TimeoutsSelectionFragment.getInstance(caffeinateApplication) { checkBoxItems ->
-                    caffeinateApplication.run {
-                        timeoutCheckBoxes.clear()
-                        timeoutCheckBoxes.addAll(checkBoxItems)
+                TimeoutsSelectionFragment.newInstance.apply {
+                    selectionCallback = { checkBoxItems ->
+                        caffeinateApplication.run {
+                            timeoutCheckBoxes.clear()
+                            timeoutCheckBoxes.addAll(checkBoxItems)
 
-                        timeoutChoiceSubTextTextView.text = timeoutCheckBoxes.enabledDurations
+                            timeoutChoiceSubTextTextView.text = timeoutCheckBoxes.enabledDurations
 
-                        // find out if the current timeout is still enabled, if not, set it to the first enabled timeout
-                        checkBoxItems.find { checkBoxItem -> checkBoxItem.duration == timeout && !checkBoxItem.isChecked }.let {
-                            when (lastStatusUpdate) {
-                                is ServiceStatus.Running if it != null -> KeepAwakeService.startNextTimeout(this, debounce = false)
-                                else                                   -> timeout = firstTimeout
-                            }
+                            // find out if the current timeout is still enabled, if not, set it to the first enabled timeout
+                            checkBoxItems.find { checkBoxItem -> checkBoxItem.duration == timeout && !checkBoxItem.isChecked }?.let {
+                                when (lastStatusUpdate) {
+                                    is ServiceStatus.Running -> KeepAwakeService.startNextTimeout(this, debounce = false)
+                                    else                     -> timeout = firstTimeout
+                                }
+                            } ?: run { timeout = firstTimeout }
+
+                            sharedPreferences.timeoutCheckBoxes.clear()
+                            sharedPreferences.timeoutCheckBoxes.addAll(checkBoxItems)
                         }
-
-                        sharedPreferences.timeoutCheckBoxes.clear()
-                        sharedPreferences.timeoutCheckBoxes.addAll(checkBoxItems)
                     }
                 }.show(supportFragmentManager, TimeoutsSelectionFragment::class.simpleName)
             }

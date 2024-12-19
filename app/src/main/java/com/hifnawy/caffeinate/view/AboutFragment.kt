@@ -3,7 +3,6 @@ package com.hifnawy.caffeinate.view
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.transition.Explode
 import android.transition.TransitionManager
@@ -11,7 +10,6 @@ import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.view.animation.AnticipateOvershootInterpolator
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +21,7 @@ import com.hifnawy.caffeinate.BuildConfig
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.databinding.FragmentAboutBinding
 import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.isVisible
+import com.hifnawy.caffeinate.utils.ViewExtensionFunctions.windowHeight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.google.android.material.R as materialR
@@ -83,48 +82,6 @@ class AboutFragment : BottomSheetDialogFragment() {
             override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
         }
     }
-
-    /**
-     * A utility property that converts a given integer value to a size in display pixels (DP).
-     *
-     * This property multiplies the given integer value by the device's display density and
-     * returns the result as an integer. It is a convenience method for converting a size
-     * in DP to a size in pixels.
-     *
-     * @return [Int] The size in DP, as an integer.
-     */
-    private val Int.dp: Int
-        get() = (this * resources.displayMetrics.density).toInt()
-
-    /**
-     * A utility property that returns the height of the window in display pixels (DP).
-     *
-     * This property calculates the height of the window by taking into account the display height
-     * and the size of the top and bottom system bars. It takes into account the display density
-     * and returns the result as an integer.
-     *
-     * @return [Int] The height of the window in DP, as an integer.
-     */
-    private val windowHeight: Int
-        get() {
-            val height = resources.displayMetrics.heightPixels
-
-            with(requireView().rootWindowInsets) {
-                @Suppress("DEPRECATION")
-                val topInset = when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()).top
-                    else                                           -> systemWindowInsetTop
-                }
-
-                @Suppress("DEPRECATION")
-                val bottomInset = when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()).bottom
-                    else                                           -> systemWindowInsetBottom
-                }
-
-                return height + topInset + bottomInset
-            }
-        }
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -198,7 +155,7 @@ class AboutFragment : BottomSheetDialogFragment() {
                 skipCollapsed = true
                 isFitToContents = true
                 dismissWithAnimation = true
-                peekHeight = dialog?.layoutParams?.height ?: (windowHeight * 3 / 5)
+                peekHeight = dialog?.layoutParams?.height ?: (binding.root.windowHeight * 3 / 5)
                 state = BottomSheetBehavior.STATE_EXPANDED
 
                 addBottomSheetCallback(bottomSheetCallback)
