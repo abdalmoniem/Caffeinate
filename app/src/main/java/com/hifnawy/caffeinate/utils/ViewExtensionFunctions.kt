@@ -2,6 +2,7 @@ package com.hifnawy.caffeinate.utils
 
 import android.graphics.Rect
 import android.view.View
+import com.hifnawy.caffeinate.utils.IntExtensionFunctions.dp
 
 /**
  * Utility functions for working with [View].
@@ -25,6 +26,49 @@ object ViewExtensionFunctions {
         get() = visibility == View.VISIBLE
         set(value) {
             visibility = if (value) View.VISIBLE else View.GONE
+        }
+
+    /**
+     * A utility property to set and get the height of a view in pixels.
+     *
+     * @return [Int] The height of the view in pixels.
+     */
+    var View.viewHeight: Int
+        get() = layoutParams.height
+        set(value) {
+            if (value <= 0) layoutParams.width = 0.dp
+            layoutParams.height = value
+            requestLayout()
+        }
+
+    /**
+     * A utility property that returns the height of the window in display pixels (DP).
+     *
+     * This property calculates the height of the window by taking into account the display height
+     * and the size of the top and bottom system bars. It takes into account the display density
+     * and returns the result as an integer.
+     *
+     * @return [Int] The height of the window in DP, as an integer.
+     */
+    val View.windowHeight: Int
+        get() {
+            val height = resources.displayMetrics.heightPixels
+
+            with(rootWindowInsets) {
+                @Suppress("DEPRECATION")
+                val topInset = when {
+                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R -> getInsetsIgnoringVisibility(android.view.WindowInsets.Type.systemBars()).top
+                    else                                                                 -> systemWindowInsetTop
+                }
+
+                @Suppress("DEPRECATION")
+                val bottomInset = when {
+                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R -> getInsetsIgnoringVisibility(android.view.WindowInsets.Type.systemBars()).bottom
+                    else                                                                 -> systemWindowInsetBottom
+                }
+
+                return height + topInset + bottomInset
+            }
         }
 
     /**
