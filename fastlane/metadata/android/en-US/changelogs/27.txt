@@ -1,8 +1,9 @@
-added restart button
+* added restart button
+   > - added restart button to the main app's UI and the notification actions,
+   > - this button will appear when the timeout is started and counting down,
+   > - it enables restarting the count down of the currently selected timeout
+   > - without having to cycle through all timeouts
+   > - added widget preview image for launchers that don't support widget
+   > - preview layout
 
-- added restart button to the main app's UI and the notification actions,
-  this button will appear when the timeout is started and counting down,
-  it enables restarting the count down of the currently selected timeout
-  without having to cycle through all timeouts
-- added widget preview image for launchers that don't support widget
-  preview layout
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.7.0...v1.7.1

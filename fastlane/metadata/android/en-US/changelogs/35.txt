@@ -11,7 +11,5 @@
 * New Crowdin updates (#77)
    > - New translations strings.xml (Arabic)
    > - New translations strings.xml (Arabic, Egypt)
-* fix R8 engine optimization causing bugs and crashes
-   >
 
 **Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v2.0.3...v2.1.0

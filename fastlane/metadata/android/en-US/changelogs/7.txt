@@ -1,1 +1,12 @@
-bump app version to 1.2.7
+* bump app version to 1.2.7
+   >
+* Rename android.yml to build_app.yml
+   >
+* Create publish_release_on_tag.yml
+   >
+* fix WakLock acquire not working when duration is INFINITE
+   >
+* adjust layout for RTL support
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.2.6...v1.2.7

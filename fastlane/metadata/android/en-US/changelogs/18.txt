@@ -1,3 +1,225 @@
-fix timeout selection dialog localization
+* fix timeout selection dialog localization
+   > timeouts now show in the app's locale
+* added EG Arabic screenshots to fastlane
+   >
+* New Translations
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Arabic, Egypt)
+   > - New translations full_description.txt (Chinese Simplified)
+   > - New translations short_description.txt (Chinese Simplified)
+   > - New translations title.txt (Chinese Simplified)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Arabic, Egypt)
+* removed all translations
+   >
+* Update Crowdin configuration file
+   >
+* New Translations Arabic, (Arabic, Egypt)
+   > - Update source file strings.xml
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Arabic, Egypt)
+   > - Update source file strings.xml
+* added timeouts selection dialog
+   > users can now select / enable / disable what timeouts the app will cycle through
+* updated crowdin.yml
+   >
+* used CoroutineScope Job instead of TimerTask
+   > instead of using the TimerTask Class to schedule timeouts, I switched to using CoroutineScope Job, this way all handling of starting and stopping the job is handled in one class
+* removed zh-rCN language strings
+   > since zh values is already present, zh-rCN will be removed
+* updated crowdin.yml
+   >
+* New Arabic-Egypt and Chinese-Simplified Translations
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Chinese Traditional)
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Chinese Traditional)
+   > - New translations strings.xml (Arabic, Egypt)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Chinese Traditional)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Chinese Traditional)
+   > - New translations strings.xml (Arabic, Egypt)
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Arabic, Egypt)
+* Update Crowdin configuration file
+   >
+* New Chinese Simplified Translations
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Chinese Traditional)
+   > - New translations full_description.txt (Chinese Simplified)
+   > - New translations short_description.txt (Chinese Simplified)
+   > - New translations title.txt (Chinese Simplified)
+* added debuggable property to release variant
+   > if isDebuggingEnabled set in local.properties, then release variant will be debuggable
+* added debug variant strings
+   >
+* added IzzyOnDroid Download Button in README.md
+   >
+* New Translations for fastlane files
+   > - New translations full_description.txt (Romanian)
+   > - New translations full_description.txt (French)
+   > - New translations full_description.txt (Spanish)
+   > - New translations full_description.txt (Afrikaans)
+   > - New translations full_description.txt (Arabic)
+   > - New translations full_description.txt (Catalan)
+   > - New translations full_description.txt (Czech)
+   > - New translations full_description.txt (Danish)
+   > - New translations full_description.txt (German)
+   > - New translations full_description.txt (Greek)
+   > - New translations full_description.txt (Finnish)
+   > - New translations full_description.txt (Hebrew)
+   > - New translations full_description.txt (Hungarian)
+   > - New translations full_description.txt (Italian)
+   > - New translations full_description.txt (Japanese)
+   > - New translations full_description.txt (Korean)
+   > - New translations full_description.txt (Dutch)
+   > - New translations full_description.txt (Norwegian)
+   > - New translations full_description.txt (Polish)
+   > - New translations full_description.txt (Portuguese)
+   > - New translations short_description.txt (Romanian)
+   > - New translations short_description.txt (French)
+   > - New translations short_description.txt (Spanish)
+   > - New translations short_description.txt (Afrikaans)
+   > - New translations full_description.txt (Russian)
+   > - New translations full_description.txt (Serbian (Cyrillic))
+   > - New translations full_description.txt (Swedish)
+   > - New translations full_description.txt (Turkish)
+   > - New translations full_description.txt (Ukrainian)
+   > - New translations full_description.txt (Chinese Simplified)
+   > - New translations full_description.txt (Chinese Traditional)
+   > - New translations full_description.txt (Vietnamese)
+   > - New translations full_description.txt (Portuguese, Brazilian)
+   > - New translations full_description.txt (Arabic, Egypt)
+   > - New translations short_description.txt (Arabic)
+   > - New translations short_description.txt (Catalan)
+   > - New translations short_description.txt (Czech)
+   > - New translations short_description.txt (Danish)
+   > - New translations short_description.txt (German)
+   > - New translations short_description.txt (Greek)
+   > - New translations short_description.txt (Finnish)
+   > - New translations short_description.txt (Hebrew)
+   > - New translations short_description.txt (Hungarian)
+   > - New translations short_description.txt (Italian)
+   > - New translations short_description.txt (Japanese)
+   > - New translations short_description.txt (Korean)
+   > - New translations short_description.txt (Dutch)
+   > - New translations short_description.txt (Norwegian)
+   > - New translations short_description.txt (Polish)
+   > - New translations short_description.txt (Portuguese)
+   > - New translations short_description.txt (Russian)
+   > - New translations short_description.txt (Serbian (Cyrillic))
+   > - New translations short_description.txt (Swedish)
+   > - New translations short_description.txt (Turkish)
+   > - New translations short_description.txt (Ukrainian)
+   > - New translations short_description.txt (Chinese Simplified)
+   > - New translations short_description.txt (Chinese Traditional)
+   > - New translations short_description.txt (Vietnamese)
+   > - New translations short_description.txt (Portuguese, Brazilian)
+   > - New translations short_description.txt (Arabic, Egypt)
+* initial Fastlane structures from IzzyOnDroid
+   >
+* Added Fastlane Translations
+   > - New translations full_description.txt (Romanian)
+   > - New translations full_description.txt (French)
+   > - New translations full_description.txt (Spanish)
+   > - New translations full_description.txt (Afrikaans)
+   > - New translations full_description.txt (Arabic)
+   > - New translations full_description.txt (Catalan)
+   > - New translations full_description.txt (Czech)
+   > - New translations full_description.txt (Danish)
+   > - New translations full_description.txt (German)
+   > - New translations full_description.txt (Greek)
+   > - New translations full_description.txt (Finnish)
+   > - New translations full_description.txt (Hebrew)
+   > - New translations full_description.txt (Hungarian)
+   > - New translations full_description.txt (Italian)
+   > - New translations full_description.txt (Japanese)
+   > - New translations full_description.txt (Korean)
+   > - New translations full_description.txt (Dutch)
+   > - New translations full_description.txt (Norwegian)
+   > - New translations full_description.txt (Polish)
+   > - New translations full_description.txt (Portuguese)
+   > - New translations full_description.txt (Russian)
+   > - New translations full_description.txt (Serbian (Cyrillic))
+   > - New translations full_description.txt (Swedish)
+   > - New translations full_description.txt (Turkish)
+   > - New translations full_description.txt (Ukrainian)
+   > - New translations full_description.txt (Chinese Simplified)
+   > - New translations full_description.txt (Chinese Traditional)
+   > - New translations full_description.txt (Vietnamese)
+   > - New translations full_description.txt (Portuguese, Brazilian)
+   > - New translations full_description.txt (Arabic, Egypt)
+   > - New translations short_description.txt (Romanian)
+   > - New translations short_description.txt (French)
+   > - New translations short_description.txt (Spanish)
+   > - New translations short_description.txt (Afrikaans)
+   > - New translations short_description.txt (Arabic)
+   > - New translations short_description.txt (Catalan)
+   > - New translations short_description.txt (Czech)
+   > - New translations short_description.txt (Danish)
+   > - New translations short_description.txt (German)
+   > - New translations short_description.txt (Greek)
+   > - New translations short_description.txt (Finnish)
+   > - New translations short_description.txt (Hebrew)
+   > - New translations short_description.txt (Hungarian)
+   > - New translations short_description.txt (Italian)
+   > - New translations short_description.txt (Japanese)
+   > - New translations short_description.txt (Korean)
+   > - New translations short_description.txt (Dutch)
+   > - New translations short_description.txt (Norwegian)
+   > - New translations short_description.txt (Polish)
+   > - New translations short_description.txt (Portuguese)
+   > - New translations short_description.txt (Russian)
+   > - New translations short_description.txt (Serbian (Cyrillic))
+   > - New translations short_description.txt (Swedish)
+   > - New translations short_description.txt (Turkish)
+   > - New translations short_description.txt (Ukrainian)
+   > - New translations short_description.txt (Chinese Simplified)
+   > - New translations short_description.txt (Chinese Traditional)
+   > - New translations short_description.txt (Vietnamese)
+   > - New translations short_description.txt (Portuguese, Brazilian)
+   > - New translations short_description.txt (Arabic, Egypt)
+   > - New translations title.txt (Romanian)
+   > - New translations title.txt (French)
+   > - New translations title.txt (Spanish)
+   > - New translations title.txt (Afrikaans)
+   > - New translations title.txt (Arabic)
+   > - New translations title.txt (Catalan)
+   > - New translations title.txt (Czech)
+   > - New translations title.txt (Danish)
+   > - New translations title.txt (German)
+   > - New translations title.txt (Greek)
+   > - New translations title.txt (Finnish)
+   > - New translations title.txt (Hebrew)
+   > - New translations title.txt (Hungarian)
+   > - New translations title.txt (Italian)
+   > - New translations title.txt (Japanese)
+   > - New translations title.txt (Korean)
+   > - New translations title.txt (Dutch)
+   > - New translations title.txt (Norwegian)
+   > - New translations title.txt (Polish)
+   > - New translations title.txt (Portuguese)
+   > - New translations title.txt (Russian)
+   > - New translations title.txt (Serbian (Cyrillic))
+   > - New translations title.txt (Swedish)
+   > - New translations title.txt (Turkish)
+   > - New translations title.txt (Ukrainian)
+   > - New translations title.txt (Chinese Simplified)
+   > - New translations title.txt (Chinese Traditional)
+   > - New translations title.txt (Vietnamese)
+   > - New translations title.txt (Portuguese, Brazilian)
+   > - New translations title.txt (Arabic, Egypt)
+* Update Crowdin configuration file
+   >
+* added fastlane for F-Droid
+   >
+* update gradle-wrapper version
+   >
 
-timeouts now show in the app's locale
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.3.8...v1.4.0

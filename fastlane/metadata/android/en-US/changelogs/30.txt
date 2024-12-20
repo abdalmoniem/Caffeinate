@@ -1,31 +1,27 @@
-
-* added show overlay option
-* fix allow while locked not working as expected
-* added configureable widget
-* bug fixes and code improvements
 * fix service termination on some chinese OEM devices
+   > - some chinese OEM devices have aggressive battery optimizations which
+   > - would kill the service when the overlay option is enabled and the
+   > - application is swiped away from the recent apps list or after some time
+   > - has passed, the fix is a litte bit crude for now. the app saves the last
+   > - remaining timeout to the device's storage every one second and then when
+   > - the service is killed, it retreives the last saved remaining timeout and
+   > - then restarts the service.
+   > - This may put a strain on the device's storage but can be avoided if the
+   > - overlay is disabled while running on these devices
+* bug fixes and code improvements
+   >
+* added configureable widget
+   > the widget's background can now be configured to be on or off
+* fix allow while locked not working as expected
+   > fixed issue where the allow while locked toggle worked opposite to the intended behavior
+* added show overlay option
+   > - added an option to show or hide an overlay with the remaining timeout
+   > - on the top right/left of the screen
+   > - the overlay option may be required on some devices in order for the app to
+   > - continue working in the background
+   > - if the overlay option is enabled and the app is closed from the recents
+   > - menu, the timeout will be cancelled (seems that this is a restriciton
+   > - from android, if there is an overlay enabled and the app is closed,
+   > - everything gets terminated)
 
-- added an option to show or hide an overlay with the remaining timeout
-  on the top right/left of the screen
-  the overlay option may be required on some devices in order for the app to
-  continue working in the background
-  if the overlay option is enabled and the app is closed from the recents
-  menu, the timeout will be cancelled (seems that this is a restriciton
-  from android, if there is an overlay enabled and the app is closed,
-  everything gets terminated)
-
-- fixed issue where the allow while locked toggle worked opposite to the intended behavior
-
-- the widget's background can now be configured to be on or off
-
-- some chinese OEM devices have aggressive battery optimizations which
-  would kill the service when the overlay option is enabled and the
-  application is swiped away from the recent apps list or after some time
-  has passed, the fix is a litte bit crude for now. the app saves the last
-  remaining timeout to the device's storage every one second and then when
-  the service is killed, it retreives the last saved remaining timeout and
-  then restarts the service.
-  
-  This may put a strain on the device's storage but can be avoided if the
-  overlay is disabled while running on these devices
-
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.7.5...v1.8.0

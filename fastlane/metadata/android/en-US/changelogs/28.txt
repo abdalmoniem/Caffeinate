@@ -1,1 +1,4 @@
-refix quick tile not updating on some devices
+* refix quick tile not updating on some devices
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.7.1...v1.7.2

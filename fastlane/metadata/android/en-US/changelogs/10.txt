@@ -1,1 +1,50 @@
-bump app version to 1.3.1
+* bump app version to 1.3.1
+   >
+* New Arabic Translations
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Arabic, Egypt)
+   > - New translations strings.xml (Arabic, Egypt)
+   > - New translations strings.xml (Arabic, Egypt)
+* New Two Letter Code Translations
+   > - New translations strings.xml (Romanian)
+   > - New translations strings.xml (French)
+   > - New translations strings.xml (Spanish)
+   > - New translations strings.xml (Afrikaans)
+   > - New translations strings.xml (Catalan)
+   > - New translations strings.xml (Czech)
+   > - New translations strings.xml (Danish)
+   > - New translations strings.xml (German)
+   > - New translations strings.xml (Greek)
+   > - New translations strings.xml (Finnish)
+   > - New translations strings.xml (Hebrew)
+   > - New translations strings.xml (Hungarian)
+   > - New translations strings.xml (Italian)
+   > - New translations strings.xml (Japanese)
+   > - New translations strings.xml (Korean)
+   > - New translations strings.xml (Dutch)
+   > - New translations strings.xml (Norwegian)
+   > - New translations strings.xml (Polish)
+   > - New translations strings.xml (Portuguese)
+   > - New translations strings.xml (Russian)
+   > - New translations strings.xml (Serbian (Cyrillic))
+   > - New translations strings.xml (Swedish)
+   > - New translations strings.xml (Turkish)
+   > - New translations strings.xml (Ukrainian)
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Vietnamese)
+   > - New translations strings.xml (Arabic, Egypt)
+   > - New translations strings.xml (Arabic)
+* remove translations
+   >
+* Update Crowdin configuration file
+   >
+* updated crowdin.md
+   >
+* Update Crowdin configuration file
+   >
+* Update README.md
+   >
+* updated README.md
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.3...v1.3.1

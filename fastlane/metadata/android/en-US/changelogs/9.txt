@@ -1,1 +1,18 @@
-bump app version to 1.3
+* bump app version to 1.3
+   >
+* improve QuickTile responsiveness
+   >
+* update visuals
+   >
+* updated crowdin.yml
+   > add mapping from SA Arabic to Arabic
+* Update Crowdin configuration file
+   >
+* updated crowdin.yml
+   > add mapping from SA Arabic to Arabic
+* Update README.md badges
+   >
+* added app icon color theme matching
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.2.8...v1.3

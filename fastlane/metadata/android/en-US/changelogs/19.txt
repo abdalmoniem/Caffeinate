@@ -1,3 +1,62 @@
-optimize notification channel creation
+* optimize notification channel creation
+   > previously the notification manager was creating a notification channel every time the buildForegroundNotification function was called, now the channel is only created when the KeepAwakeService is started and the android API is 26 and above
+* removed comment in MainActivity.kt
+   > a comment was added to MainActivity.kt in the last commit to test gpg signing, this commit is reverting the previous one
+* testing gpg signing commits
+   >
+* updated post_tag.sh
+   > script now checks if the current commit is on the remote or not, if it is, then it creates a new commit with the new version updates, otherwise it ammends the current commit
+* added view counter to README.md
+   >
+* added codacy badge to README.md
+   >
+* remove warnings in README.me
+   >
+* removed unnecessary semi-colons in bash scripts
+   >
+* updated post_tag.sh
+   >
+* fix post_tag.sh logic
+   > first of all, the script exited right after checking the versionCode and versionName. second, the check for existing tag was inverted
+* fix codefactor issues
+   >
+* updated README.md
+   >
+* updated README.md
+   >
+* updated fastlane changelogs
+   >
+* fix sync_tags.sh always deleting tags
+   > the script was deleting and re-adding local tags even if they reference the same commit hash as the remote, this should only happen only if they don't match
+* added checks for versionCode and versionName
+   > post_tag.sh now compares the versionCode and versionName of the new tag and the last tag and if they're equal, it shows an error. this way,they should not be the same accross different tags
+* fixed logic after changing timeouts selection
+   > when the timeouts were changed while the timer is running, the prev. and next timeouts were not updated correctly, and therefore tapping the caffeinate button when the timer has elapsed more than the debounce period, it started the next (incorrect) timeout although it should've stopped
+* fix android studio inspection findings
+   >
+* addde scripts to publish/draft all GitHub releases
+   >
+* updated fastlane changelogs
+   >
+* added haptic feedback to timeouts selection dialog
+   >
+* New Crowdin updates (#38)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Arabic, Egypt)
+* changed dialogs size
+   >
+* updated fastlane changelogs
+   >
+* added sync_tags.sh
+   > this script syncs the tags from the remote repo to the local one when the tags are pointing to different commit hashes in the two repos
+* updated update_build_gradle_version_code_in_all_tags.sh
+   >
+* updated update_fastlane_changelogs.sh
+   >
+* updated update_build_gradle_version_code_in_all_tags.sh
+   >
+* Update README.md
+   >
 
-previously the notification manager was creating a notification channel every time the buildForegroundNotification function was called, now the channel is only created when the KeepAwakeService is started and the android API is 26 and above
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.4.0...v1.4.5

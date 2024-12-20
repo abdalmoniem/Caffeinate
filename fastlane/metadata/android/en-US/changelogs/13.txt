@@ -1,3 +1,4 @@
-fix Localization when the app is closed
+* fix Localization when the app is closed
+   > fixed an issue where, when the app is closed, all localized strings revert to the default localization when the app is closed, and the app's language is different from the system language
 
-fixed an issue where, when the app is closed, all localized strings revert to the default localization when the app is closed, and the app's language is different from the system language
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.3.3...v1.3.4

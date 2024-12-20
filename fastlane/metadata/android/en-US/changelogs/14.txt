@@ -1,3 +1,4 @@
-fix preferences switches logic
+* fix preferences switches logic
+   > listeners for preferences are all synchronized
 
-listeners for preferences are all synchronized
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.3.4...v1.3.5

@@ -1,3 +1,6 @@
-added allow while locked option
+* added allow while locked option
+   > if enabled, the wake lock will not be released when the screen is locked
+* Update README.md
+   > add code factor badge
 
-if enabled, the wake lock will not be released when the screen is locked
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.2...v1.2.5

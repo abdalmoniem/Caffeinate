@@ -1,1 +1,4 @@
-added theming options
+* added theming options
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.1.1...v1.2

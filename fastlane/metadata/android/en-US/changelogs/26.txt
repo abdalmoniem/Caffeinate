@@ -1,3 +1,6 @@
-fix quick tile update issue
+* fix quick tile update issue
+   > fixed quick tile not updating on some device models and on Android 15
+* initial implementation of a restart timeout button
+   >
 
-fixed quick tile not updating on some device models and on Android 15
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.6.7...v1.7.0

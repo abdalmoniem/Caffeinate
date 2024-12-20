@@ -1,1 +1,83 @@
-enabled generateLocaleConfig
+* enabled generateLocaleConfig
+   >
+* Update android.yml
+   >
+* modify baseline_coffee_24 icon tint in main activity and theme chooser dialog
+   >
+* modify strings.xml
+   >
+* Update Crowdin configuration file
+   > - New translations strings.xml (Romanian)
+   > - New translations strings.xml (French)
+   > - New translations strings.xml (Spanish)
+   > - New translations strings.xml (Afrikaans)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Catalan)
+   > - New translations strings.xml (Czech)
+   > - New translations strings.xml (Danish)
+   > - New translations strings.xml (German)
+   > - New translations strings.xml (Greek)
+   > - New translations strings.xml (Finnish)
+   > - New translations strings.xml (Hungarian)
+   > - New translations strings.xml (Italian)
+   > - New translations strings.xml (Japanese)
+   > - New translations strings.xml (Korean)
+   > - New translations strings.xml (Dutch)
+   > - New translations strings.xml (Norwegian)
+   > - New translations strings.xml (Polish)
+   > - New translations strings.xml (Portuguese)
+   > - New translations strings.xml (Russian)
+   > - New translations strings.xml (Serbian (Cyrillic))
+   > - New translations strings.xml (Swedish)
+   > - New translations strings.xml (Turkish)
+   > - New translations strings.xml (Ukrainian)
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (Chinese Traditional)
+   > - New translations strings.xml (Vietnamese)
+   > - New translations strings.xml (Portuguese, Brazilian)
+   > - New translations strings.xml (Arabic, Egypt)
+   > - New translations strings.xml (Romanian)
+* remove translations
+   >
+* updated README.md
+   >
+* Update Crowdin configuration file
+   > - New translations strings.xml (Romanian)
+   > - New translations strings.xml (French)
+   > - New translations strings.xml (Spanish)
+   > - New translations strings.xml (Afrikaans)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Catalan)
+   > - New translations strings.xml (Czech)
+   > - New translations strings.xml (Danish)
+   > - New translations strings.xml (German)
+   > - New translations strings.xml (Greek)
+   > - New translations strings.xml (Finnish)
+   > - New translations strings.xml (Hebrew)
+   > - New translations strings.xml (Hungarian)
+   > - New translations strings.xml (Italian)
+   > - New translations strings.xml (Japanese)
+   > - New translations strings.xml (Korean)
+   > - New translations strings.xml (Dutch)
+   > - New translations strings.xml (Norwegian)
+   > - New translations strings.xml (Polish)
+   > - New translations strings.xml (Portuguese)
+   > - New translations strings.xml (Russian)
+   > - New translations strings.xml (Serbian (Cyrillic))
+   > - New translations strings.xml (Swedish)
+   > - New translations strings.xml (Turkish)
+   > - New translations strings.xml (Ukrainian)
+   > - New translations strings.xml (Chinese Simplified)
+   > - New translations strings.xml (English)
+   > - New translations strings.xml (Vietnamese)
+   > - New translations strings.xml (Arabic)
+* updated README.md
+   >
+* remove crowdin.yml
+   >
+* Update README.md
+   >
+* Update Crowdin configuration file
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.2.5...v1.2.6

@@ -1,1 +1,4 @@
-fix Quick Settings Tile missing updates on some phones
+* fix Quick Settings Tile missing updates on some phones
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.1...v1.1.1

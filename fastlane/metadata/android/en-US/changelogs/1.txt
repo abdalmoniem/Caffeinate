@@ -1,3 +1,14 @@
-add option to allow screen dimming while the wakeLock is held
+* add option to allow screen dimming while the wakeLock is held
+   > the screen will only dim but not turn off completely
+* use context aware Log statements
+   >
+* fix wakeLock not releasing after a long timeout
+   >
+* major refactor
+   > replaced broadcast receivers with a status observer
+* refactoring and optimization
+   >
+* initial project commit
+   >
 
-the screen will only dim but not turn off completely
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/e8e12de...v1.0

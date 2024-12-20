@@ -1,3 +1,6 @@
-fix locale issues
+* fix locale issues
+   > fixed the issue where when the user changed the App Language from system settings, not all UI components reflected that change until the app was restarted. now the App has a listener that applies the changes as soon as they're detected whether the app is in the foreground or background
+* show date of Build App workflow
+   >
 
-fixed the issue where when the user changed the App Language from system settings, not all UI components reflected that change until the app was restarted. now the App has a listener that applies the changes as soon as they're detected whether the app is in the foreground or background
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.5.0...v1.5.1

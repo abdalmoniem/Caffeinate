@@ -1,3 +1,4 @@
-widget background monet theme
+* widget background monet theme
+   > the widget's background color is now themed with the primary color of monet theme of the system
 
-the widget's background color is now themed with the primary color of monet theme of the system
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.6.6...v1.6.7

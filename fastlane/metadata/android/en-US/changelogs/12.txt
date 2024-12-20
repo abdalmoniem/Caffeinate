@@ -1,3 +1,8 @@
-used Timber for logging
+* used Timber for logging
+   > Timber enables the removal of all Log statements in release versions
+* added onCheckedChangeListener to all switch toggles
+   >
+* add post_tag.sh hook
+   > since there are no git hooks for pre/post tag, I created an alias called rtag to call post_tag.sh
 
-Timber enables the removal of all Log statements in release versions
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.3.2...v1.3.3

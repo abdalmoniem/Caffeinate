@@ -1,5 +1,10 @@
-added widget backgrounds for on and off states
+* added widget backgrounds for on and off states
+   > - app widgets now have two distinct backgrounds for
+   > - both the on and off states for easier differntiation
+   > - between states
+* added class and method names to debug log statements
+   >
+* code documentation
+   >
 
-app widgets now have two distinct backgrounds for
-both the on and off states for easier differntiation
-between states
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.6.5...v1.6.6

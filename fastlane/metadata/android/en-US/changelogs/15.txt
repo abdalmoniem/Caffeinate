@@ -1,3 +1,14 @@
-fix Locale
+* fix Locale
+   > fix Locale not changing when the language is changed while the app. is running
+* New translations strings.xml (Arabic, Egypt)
+   >
+* updated build_app.yml, removed duplicate Build APK step
+   >
+* updated build_app.yml to generate a debug artifact
+   >
+* updated build_app.yml
+   >
+* updated README.md
+   > added new screenshots
 
-fix Locale not changing when the language is changed while the app. is running
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.3.5...v1.3.6

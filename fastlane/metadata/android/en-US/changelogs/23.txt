@@ -1,3 +1,10 @@
-added app widget
+* added app widget
+   > users can now control the app from a home screen widget
+* code cleanup
+   >
+* update fastlane changelogs
+   >
+* code and repo cleanup
+   >
 
-users can now control the app from a home screen widget
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.6.0...v1.6.5

@@ -1,3 +1,8 @@
-added haptic feedback to view click listeners
+* added haptic feedback to view click listeners
+   > also long clicking the caffeinate button in the app goes directly to infinite timeout
+* added publish_release.yml GitHub Workflow
+   >
+* updated publish_release_on_tag.yml
+   >
 
-also long clicking the caffeinate button in the app goes directly to infinite timeout
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.2.7...v1.2.8

@@ -2,6 +2,7 @@
 
 gitTopLevel="$(git rev-parse --show-toplevel)"
 versionCodeFilter="\(versionCode\s\+=\s\+\)\([[:digit:]]\+\)"
+tag="HEAD"
 referenceTag=$(git describe --tags $(git rev-list --tags --max-count=1))
 changelogsPath="$gitTopLevel/fastlane/metadata/android/en-US/changelogs"
 changelogs=0
@@ -12,13 +13,13 @@ isWriteChanges=false
 isCommitChanges=false
 
 help() {
-    echo "Usage: $0 --tag <tag> [--reference_tag <tag>] [--write_changes] [--commit_changes]"
+    echo "Usage: $0 [--tag <tag>] [--reference_tag <tag>] [--write_changes] [--commit_changes]"
     echo
     echo "Arguments:"
-    echo "  --tag <tag>              : (Mandatory) Specifies the latest version tag. This is the only required argument."
-    echo "  --reference_tag <tag>    : (Optional) Specifies the reference tag to compare against. If not provided, the script will only work with the latest tag."
-    echo "  --write_changes          : (Optional) If set, the script will write changes to the changelog file. The file is appended with the new changes."
-    echo "  --commit_changes         : (Optional) If set, the script will commit the changes to the repository after writing them to the changelog."
+    echo "  --tag <tag>            : Tag to compare against the reference tag. If not provided, HEAD is used"
+    echo "  --reference_tag <tag>  : Reference tag to compare against. If not provided, the latest tag is used."
+    echo "  --write_changes        : Write the changes to a changelog file. The changelog file name is the <versionCode>.txt"
+    echo "  --commit_changes       : Commit the changes to the repository."
 
     exit 1
 }
@@ -62,16 +63,10 @@ while [[ $# -gt 0 ]]; do
       echo
       help
       ;;
-    esac
+  esac
 done
 
-if [ -z "$tag" ]; then
-  echo "Error: --tag is required."
-  echo
-  help
-fi
-
-commitHashesBetweenTags=$(git log $referenceTag..$tag --pretty=format:"%H")
+commitHashesBetweenTags=$(git log "$referenceTag".."$tag" --pretty=format:"%h")
 commitHashCount=$(echo "$commitHashesBetweenTags" | wc -l)
 referenceVersionCode=$(git show "$referenceTag:app/build.gradle.kts" | grep versionCode | sed -e "s/$versionCodeFilter/\2/" | xargs)
 tagVersionCode=$(git show "$tag:app/build.gradle.kts" | grep versionCode | sed -e "s/$versionCodeFilter/\2/" | xargs)
@@ -90,7 +85,7 @@ if [[ $commitHashCount -gt 0 && -f "$changelogsPath/$tagVersionCode.txt" && "$is
   rm "$changelogsPath/$tagVersionCode.txt"
 fi
 
-echo "Generating Changelog between $referenceTag and $tag..."
+echo "Generating Changelog between $tag and $referenceTag..."
 for commitHash in $commitHashesBetweenTags
 do
   subject=$(git log --format=%s -n 1 $commitHash | sed -e 's/Change-Id:\s*.*//' | sed -e 's/Signed-off-by:\s*.*//' | sed -e 's/^[^a-zA-Z0-9]*//')

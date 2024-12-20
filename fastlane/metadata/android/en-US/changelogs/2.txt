@@ -1,1 +1,8 @@
-use string resources and dimens resources instead of hardcoded values
+* use string resources and dimens resources instead of hardcoded values
+   >
+* fix duplicate observers being added
+   > every time the user changes the timeout or the dimming preference, all observers related to the app would be re-added, which added a lot of unnecessary slow downs
+* updated README.md
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.0...v1.1

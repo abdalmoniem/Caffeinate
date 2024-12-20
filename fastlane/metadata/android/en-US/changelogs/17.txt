@@ -1,1 +1,4 @@
-added debug variant
+* added debug variant
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v1.3.7...v1.3.8
