@@ -70,10 +70,8 @@ from [GitHub Releases](https://github.com/abdalmoniem/Caffeinate/releases/latest
 [<img alt="Get it on Play Store" height="80" src="assets/badge_play_store.png"/>](https://play.google.com/store/apps/details?id=com.hifnawy.caffeinate)
 [<img alt="Get it on GitHub" height="80" src="assets/badge_github.png"/>](https://github.com/abdalmoniem/Caffeinate/releases/latest)
 
-> N.B. App on Play Store is still in testing phase,
-> please
-> [submit an issue](https://github.com/abdalmoniem/Caffeinate/issues/new?assignees=abdalmoniem&labels=play+store+beta+enroll&projects=&template=play-store-beta-enrollment.md&title=%5BPlay+Store+Beta+Enrollment%5D)
-> with your email to be added to the beta testers
+> N.B. App on Play Store is still in testing phase; if you want to join the beta program, please send me
+> an email with your email to be added to the beta testers
 
 ## 🈵 Translations
 
