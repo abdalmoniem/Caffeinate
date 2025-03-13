@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="app_name">Кофеинат</string>
+    <string name="app_icon">Значок приложения</string>
+    <string name="permissions_card_title">Разрешения</string>
+    <string name="battery_optimization_not_granted">Оптимизация Батареи: Не Предоставлена!</string>
+    <string name="battery_optimization_granted">Оптимизация Батареи: Предоставлена!</string>
+    <string name="battery_optimization_needed_title">Требуется отключить оптимизацию батареи</string>
+    <string name="battery_optimization_needed_message">Необходимо отключить Оптимизацию Батареи для правильной работы.</string>
+    <string name="background_optimization_not_granted">Оптимизация работы в фоне: Не предоставляется!</string>
+    <string name="background_optimization_granted">Оптимизация работы в фоне: предоставляется!</string>
+    <string name="notifications_permission_not_granted">Разрешение уведомлений: не предоставлено!</string>
+    <string name="notifications_permission_granted">Разрешение уведомлений: предоставлено!</string>
+    <string name="notifications_permission_required">Требуется разрешение уведомлений</string>
+    <string name="overlay_permission_not_granted">Разрешение отрисовки поверх других приложений не предоставлено!</string>
+    <string name="overlay_permission_granted">Разрешение отрисовки поверх других приложений предоставлено!</string>
+    <string name="overlay_permission_required">Требуется разрешение отрисовки поверх других приложений</string>
+    <string name="settings_card_title">Настройки</string>
+    <string name="app_theme_pref">Тема</string>
+    <string name="app_theme_system_default">Системные настройки</string>
+    <string name="app_theme_system_light">Светлая</string>
+    <string name="app_theme_system_dark">Тёмная</string>
+    <string name="contrast">Контраст</string>
+    <string name="app_contrast_standard">Стандартный</string>
+    <string name="app_contrast_medium">Средний</string>
+    <string name="app_contrast_high">Высокий</string>
+    <string name="material_you_pref">Material You</string>
+    <string name="material_you_pref_not_available">Material You доступна с Android 12 и выше</string>
+    <string name="material_you_pref_description">Настроить цвета приложения в соответствии с цветом обоев.</string>
+    <string name="material_you_pref_off">Material You выключен</string>
+    <string name="material_you_pref_on">Material You включен</string>
+    <string name="show_overlay_pref">Включить оверлей</string>
+    <string name="show_overlay_pref_description">Показывать оверлей с оставшимся временем в верхней части экрана, даже если приложение работает в фоновом режиме. На некоторых устройствах требуется для корректной работы приложения.</string>
+    <string name="show_overlay_pref_off">Отображение оверлея отключено</string>
+    <string name="show_overlay_pref_on">Отображение оверлея включено</string>
+    <string name="picture_in_picture_pref">Включить \"Картинка в картинке\"</string>
+    <string name="picture_in_picture_pref_description">Включить режим \"Картинка в картинке\" чтобы приложение оставалось запущено в фоне</string>
+    <string name="picture_in_picture_pref_off">Картинка в картинке выключено</string>
+    <string name="picture_in_picture_pref_on">Картинка в картинке включено</string>
+    <string name="allow_dimming_pref">Разрешить затемнение</string>
+    <string name="allow_dimming_pref_description">Разрешить затемнение экрана при включенном приложении.</string>
+    <string name="allow_dimming_pref_on">Затемнение экрана включено</string>
+    <string name="allow_dimming_pref_off">Затемнение экрана выключено</string>
+    <string name="allow_while_locked_pref">Разрешить при заблокированном экране</string>
+    <string name="allow_while_locked_pref_description">Разрешить приложению работать при заблокированном экране</string>
+    <string name="allow_while_locked_pref_off">Разрешить приложению работать при заблокированном экране выключено</string>
+    <string name="allow_while_locked_pref_on">Разрешить приложению работать при заблокированном экране включено</string>
+    <string name="timeouts_pref">Интервалы</string>
+    <string name="timeouts_pref_change">Изменить</string>
+    <string name="caffeinate_button_off">Выключен</string>
+    <string name="quick_tile_off">Выключен</string>
+    <string name="action_next_timeout">Следующий интервал</string>
+    <string name="action_restart_timeout">Перезапустить интервал</string>
+    <string name="action_start_timeout">Запустить интервал</string>
+    <string name="action_stop_timeout">Остановить интервал</string>
+    <string name="action_disable_dimming">Выключить затемнение</string>
+    <string name="action_enable_dimming">Включить затемнение</string>
+    <string name="notification_title_indefinite_duration">Приложение будет держать экран включенным</string>
+    <string name="notification_title_definite_duration">Экран будет включен %1$s</string>
+    <string name="stop_notification_action_title">Нажмите, чтобы выключить</string>
+    <string name="time_format_hour_letter">ч</string>
+    <string name="time_format_minute_letter">м</string>
+    <string name="time_format_second_letter">с</string>
+    <string name="ok">ОК</string>
+    <string name="cancel">Отменить</string>
+    <string name="go_to_settings">Перейти в настройки</string>
+    <string name="about">О приложении</string>
+    <string name="about_version_code">Код версии: %s</string>
+    <string name="about_version_name">Имя версии: %s</string>
+    <string name="select_all_timeouts">Выбрать все</string>
+    <string name="deselect_all_timeouts">Отменить выбор всех</string>
+    <string name="add_timeout">Добавить интервал</string>
+    <string name="add_infinite_timeout">Добавить бесконечный интервал</string>
+    <string name="timeout_already_exists">Интервал %s уже существует</string>
+    <plurals name="remove_timeout">
+        <item quantity="one">Удалить %d интервал</item>
+        <item quantity="few">Удалить %d интервалы</item>
+        <item quantity="many">Удалить %d интервалы</item>
+        <item quantity="other">Удалить %d интервалы</item>
+    </plurals>
+    <string name="privacy_policy">Политика конфиденциальности</string>
+    <string name="privacy_policy_content"><![CDATA[<!DOCTYPE html> 
+<html lang="ru">
+   <head>
+      <title>Уведомление о конфиденциальности Caffeinate</title>
+      <style> h1 { margin-top: 20px; } h2 { margin-top: 15px; } h3 { margin-top: 10px; } p { margin-bottom: 5px; } </style>
+   </head>
+   <body>
+      <h1>Введение</h1>
+      <p> Добро пожаловать в Caffeinate! В этом уведомлении о конфиденциальности описывается, как мы собираем, используем и защищаем вашу личную информацию, когда вы используете наше мобильное приложение. Используя Caffeinate, вы соглашаетесь с условиями, описанными в этом уведомлении. </p>
+      <h1>Сбор данных</h1>
+      <p> Доступ к уведомлениям: Caffeinate запрашивает доступ к уведомлениям, чтобы предоставить вам персонализированные обновления об оставшемся времени. Мы не храним какой-либо контент уведомлений или личную информацию (PII) за пределами вашего устройства.  </p>
+      <h1>Использование информации</h1>
+      <h2>Персональные данные</h2>
+      <p> Мы не собираем и не храним никакие персональные данные, такие как имена, адреса электронной почты или номера телефонов. </p>
+      <h1>Аналитика использования</h1>
+      <p>Caffeinate не отслеживает ваше поведение при использовании и не собирает аналитические данные.</p>
+      <h1>Безопасность данных</h1>
+      <h2>Хранилище на устройстве</h2>
+      <p> Все данные, используемые Caffeinate, остаются на вашем устройстве. Caffeinate не передает и не хранит какие-либо данные за пределами устройства. </p>
+      <h1>Сторонние сервисы</h1>
+      <h2>Реклама</h2>
+      <p>Caffeinate не отображает стороннюю рекламу.</p>
+      <h2>Внешние ссылки</h2>
+      <p> Caffeinate может содержать ссылки на внешние веб-сайты. Обратите внимание, что мы не несем ответственности за политику конфиденциальности этих сайтов.  </p>
+      <h1>Конфиденциальность данных детей</h1>
+      <p> Caffeinate не предназначен для детей младше 13 лет. Мы сознательно не собираем никакую информацию о детях. </p>
+      <h1>Изменения в этом уведомлении</h1>
+      <p> Caffeinate может время от времени обновлять это уведомление о конфиденциальности. Любые изменения будут отражены в приложении и на нашем веб-сайте. </p>
+      <h1>Связаться с нами</h1>
+      <p> Если у вас есть какие-либо вопросы или опасения по поводу этого уведомления о конфиденциальности, свяжитесь со мной по адресу <a href="mailto:abdalmoniemalhifnawy@gmail.com">abdalmoniemalhifnawy@gmail.com</a>. </p>
+      <h1>Разрешения Android</h1>
+      <h2>WAKE_LOCK</h2>
+      <p> Это разрешение позволяет приложению удерживать блокировку пробуждения, чтобы устройство не переходило в спящий режим.  </p>
+      <h2>FOREGROUND_SERVICE</h2>
+      <p> Это разрешение позволяет приложению работать в фоновом режиме в качестве приоритетной службы. </p>
+      <h2>POST_NOTIFICATIONS</h2>
+      <p> Это разрешение позволяет приложению уведомлять пользователя о начале тайм-аута. Это необязательно, и пользователь сам решает, хочет ли он получать уведомления или нет. </p>
+      <h2>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</h2>
+      <p> Это разрешение позволяет приложению запрашивать, чтобы система игнорировала оптимизацию батареи. </p>
+      <h2>SYSTEM_ALERT_WINDOW</h2>
+      <p> Это разрешение позволяет приложению отображать наложение поверх других приложений. </p>
+   </body>
+</html>        ]]></string>
+    <!-- Untranslated strings -->
+</resources>
