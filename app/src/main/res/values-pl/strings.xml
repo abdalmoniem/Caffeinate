@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="app_name">Caffeinate</string>
+    <string name="app_icon">Ikona aplikacji</string>
+    <string name="permissions_card_title">Uprawnienia</string>
+    <string name="battery_optimization_not_granted">Optymalizacja baterii: Nie przyznano!</string>
+    <string name="battery_optimization_granted">Optymalizacja baterii: Przyznano!</string>
+    <string name="battery_optimization_needed_title">Wymagana optymalizacja baterii</string>
+    <string name="battery_optimization_needed_message">Ta aplikacja wymaga uprawnienia do optymalizacji baterii, aby działać poprawnie.</string>
+    <string name="background_optimization_not_granted">Optymalizacja w tle: Nie przyznano!</string>
+    <string name="background_optimization_granted">Optymalizacja w tle: Przyznano!</string>
+    <string name="notifications_permission_not_granted">Uprawnienie do powiadomień: Nie przyznano!</string>
+    <string name="notifications_permission_granted">Uprawnienie do powiadomień: Przyznano!</string>
+    <string name="notifications_permission_required">Wymagane uprawnienie do powiadomień</string>
+    <string name="overlay_permission_not_granted">Uprawnienie do wyświetlania nad innymi: Nie przyznano!</string>
+    <string name="overlay_permission_granted">Uprawnienie do wyświetlania nad innymi: Przyznano!</string>
+    <string name="overlay_permission_required">Wymagane uprawnienie do wyświetlania nad innymi</string>
+    <string name="settings_card_title">Ustawienia</string>
+    <string name="app_theme_pref">Motyw</string>
+    <string name="app_theme_system_default">Domyślne systemowe</string>
+    <string name="app_theme_system_light">Jasny</string>
+    <string name="app_theme_system_dark">Ciemny</string>
+    <string name="contrast">Kontrast</string>
+    <string name="app_contrast_standard">Standardowy</string>
+    <string name="app_contrast_medium">Średni</string>
+    <string name="app_contrast_high">Wysoki</string>
+    <string name="material_you_pref">Material You</string>
+    <string name="material_you_pref_not_available">Motyw Material You jest dostępny tylko na Androidzie 12 i wyżej</string>
+    <string name="material_you_pref_description">Dopasuj kolory aplikacji do kolorów Twojej tapety.</string>
+    <string name="material_you_pref_off">Material You wyłączony</string>
+    <string name="material_you_pref_on">Material You włączony</string>
+    <string name="show_overlay_pref">Włącz nakładkę</string>
+    <string name="show_overlay_pref_description">Pokaż Nakładkę czasu pozostałego na górze ekranu, ta nakładka pozostanie na górze nawet wtedy, gdy Aplikacja jest w tle.
+Niektóre urządzenia mogą wymagać tej opcji włączonej, aby Aplikacja działała poprawnie.</string>
+    <string name="show_overlay_pref_off">Nakładka wyłączona</string>
+    <string name="show_overlay_pref_on">Nakładka włączona</string>
+    <string name="picture_in_picture_pref">Włącz obraz w obrazie</string>
+    <string name="picture_in_picture_pref_description">Włącz obraz w obrazie, aby utrzymać aplikację uruchomioną w tle</string>
+    <string name="picture_in_picture_pref_off">Obraz w obrazie wyłączony</string>
+    <string name="picture_in_picture_pref_on">Obraz w obrazie włączony</string>
+    <string name="allow_dimming_pref">Pozwól na przyciemnianie</string>
+    <string name="allow_dimming_pref_description">Pozwól na przyciemnianie ekranu, gdy aplikacja jest włączona.</string>
+    <string name="allow_dimming_pref_on">Zezwolenie na przyciemnianie włączone</string>
+    <string name="allow_dimming_pref_off">Zezwolenie na przyciemnianie wyłączone</string>
+    <string name="allow_while_locked_pref">Zezwól podczas blokady</string>
+    <string name="allow_while_locked_pref_description">Zezwól aplikacji na działanie, gdy ekran jest zablokowany</string>
+    <string name="allow_while_locked_pref_off">Zezwolenie podczas blokady wyłączone</string>
+    <string name="allow_while_locked_pref_on">Zezwolenie podczas blokady włączone</string>
+    <string name="timeouts_pref">Limity czasu</string>
+    <string name="timeouts_pref_change">Zmień</string>
+    <string name="caffeinate_button_off">WYŁ</string>
+    <string name="quick_tile_off">Wyłączone</string>
+    <string name="action_next_timeout">Następny limit czasu</string>
+    <string name="action_restart_timeout">Uruchom ponownie limit czasu</string>
+    <string name="action_start_timeout">Zacznij limit czasu</string>
+    <string name="action_stop_timeout">Zatrzymaj limit czasu</string>
+    <string name="action_disable_dimming">Wyłącz przyciemnianie</string>
+    <string name="action_enable_dimming">Włącz przyciemnianie</string>
+    <string name="notification_title_indefinite_duration">Aplikacja utrzyma ekran włączony</string>
+    <string name="notification_title_definite_duration">Aplikacja utrzyma ekran włączony na %1$s</string>
+    <string name="stop_notification_action_title">Dotknij, aby wyłączyć</string>
+    <string name="time_format_hour_letter">g</string>
+    <string name="time_format_minute_letter">m</string>
+    <string name="time_format_second_letter">s</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Anuluj</string>
+    <string name="go_to_settings">Przejdź do Ustawień</string>
+    <string name="about">O aplikacji</string>
+    <string name="about_version_code">Kod wersji: %s</string>
+    <string name="about_version_name">Nazwa wersji: %s</string>
+    <string name="select_all_timeouts">Zaznacz wszystko</string>
+    <string name="deselect_all_timeouts">Odznacz wszystko</string>
+    <string name="add_timeout">Dodaj limit czasu</string>
+    <string name="add_infinite_timeout">Dodaj nieskończony limit czasu</string>
+    <string name="timeout_already_exists">Limit czasu %s już istnieje</string>
+    <plurals name="remove_timeout">
+        <item quantity="one">Usuń limit czasu %d</item>
+        <item quantity="few">Usuń limity czasu %d</item>
+        <item quantity="many">Usuń limity czasu %d</item>
+        <item quantity="other">Usuń limity czasu %d</item>
+    </plurals>
+    <string name="privacy_policy">Polityka prywatności</string>
+    <string name="privacy_policy_content"><![CDATA[            <!DOCTYPE html>
+            <html lang="pl">
+                <head>
+                    <title>Polityka prywatności Caffeinate</title>
+                    <style>
+                        h1 {
+                            margin-top: 20px;
+                        }
+                        h2 {
+                            margin-top: 15px;
+                        }
+                        h3 {
+                            margin-top: 10px;
+                        }
+                        p {
+                            margin-bottom: 5px;
+                        }
+                    </style>
+                </head>
+
+                <body>
+                    <h1>Wstęp</h1>
+                    <p>
+                        Witaj w Caffeinate! Ta polityka prywatności określa, w jaki sposób gromadzimy, wykorzystujemy
+                        i chronimy dane osobowe osób używających naszej aplikacji mobilnej. Korzystając z Caffeinate,
+                        zgadasz się na warunki opisane tutaj.
+                    </p>
+
+                    <h1>Zbieranie danych</h1>
+                    <p>
+                        Dostęp do powiadomień: Caffeinate prosi o dostęp do powiadomień, aby zapewnić osobom
+                        użytkującym spersonalizowane aktualizacje pozostałego czasu. Nie przechowujemy żadnych treści
+                        powiadomień ani danych osobowych (ang. PII) poza urządzeniami osób użytkujących.
+                    </p>
+
+                    <h1>Wykorzystanie informacji</h1>
+                    <h2>Dane osobowe</h2>
+                    <p>
+                        Nie gromadzimy ani nie przechowujemy żadnych danych osobowych, takich jak imiona i nazwiska,
+                        adresy e-mail czy numery telefonów.
+                    </p>
+
+                    <h1>Analityka użytkowania</h1>
+                    <p>Caffeinate nie śledzi zachowań użytkownika ani nie gromadzi danych analitycznych.</p>
+
+                    <h1>Bezpieczeństwo danych</h1>
+                    <h2Pamięć masowa na urządzeniu</h2>
+                    <p>
+                        Wszystkie dane wykorzystywane przez Caffeinate pozostają na urządzeniu użytkownika.
+                        Caffeinate nie przesyła ani nie przechowuje żadnych danych na zewnątrz.
+                    </p>
+
+                    <h1>Usługi osób trzecich</h1>
+                    <h2>Reklamy</h2>
+                    <p>Caffeinate nie wyświetla reklam osób trzecich.</p>
+
+                    <h2>Linki zewnętrzne</h2>
+                    <p>
+                        Caffeinate może zawierać linki do zewnętrznych stron internetowych. Należy pamiętać, że nie
+                        ponosimy odpowiedzialności za politykę prywatności tych stron.
+                    </p>
+
+                    <h1>Prywatność dzieci</h1>
+                    <p>
+                        Caffeinate nie jest przeznaczony dla dzieci poniżej 13 roku życia. Nie zbieramy świadomie
+                        żadnych informacji od dzieci.
+                    </p>
+
+                    <h1>Zmiany w polityce</h1>
+                    <p>
+                        Caffeinate może od czasu do czasu aktualizować tą politykę prywatności. Wszelkie zmiany
+                        zostaną odzwierciedlone w aplikacji i na naszej stronie internetowej.
+                    </p>
+
+                    <h1>Kontakt</h1>
+                    <p>
+                        W przypadku jakichkolwiek pytań lub wątpliwości dotyczących tej polityki prywatności, proszę o kontakt pod adresem
+                        <a href="mailto:abdalmoniemalhifnawy@gmail.com">abdalmoniemalhifnawy@gmail.com</a>.
+                    </p>
+
+                    <h1>Uprawnienia Androida</h1>
+                    <h2>WAKE_LOCK</h2>
+                    <p>
+                        To uprawnienie umożliwia aplikacji utrzymywanie blokady wybudzania, aby zapobiec uśpieniu urządzenia.
+                    </p>
+
+                    <h2>FOREGROUND_SERVICE</h2>
+                    <p>
+                        To uprawnienie pozwala aplikacji działać w tle jako usługa pierwszoplanowa.
+                    </p>
+
+                    <h2>POST_NOTIFICATIONS</h2>
+                    <p>
+                        To uprawnienie umożliwia aplikacji powiadamianie użytkownika o rozpoczęciu limitu czasu.
+                        Jest to opcjonalne i zależy od osób użytkujących, czy chcą być powiadamiane, czy nie.
+                    </p>
+
+                    <h2>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</h2>
+                    <p>
+                        To uprawnienie pozwala aplikacji poprosić, aby system ignorował
+                        optymalizacje baterii.
+                    </p>
+
+                    <h2>SYSTEM_ALERT_WINDOW</h2>
+                    <p>
+                        To uprawnienie umożliwia aplikacji wyświetlanie nakładki na innych aplikacjach.
+                    </p>
+                </body>
+            </html>
+        ]]></string>
+    <!-- Untranslated strings -->
+</resources>
