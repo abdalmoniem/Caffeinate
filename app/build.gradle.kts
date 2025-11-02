@@ -1,5 +1,6 @@
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -176,12 +177,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    kotlinOptions {
-        jvmTarget = "21"
-    }
-
     kotlin {
         compilerOptions {
+            jvmTarget = JvmTarget.JVM_21
             freeCompilerArgs.add("-Xwhen-guards")
         }
     }

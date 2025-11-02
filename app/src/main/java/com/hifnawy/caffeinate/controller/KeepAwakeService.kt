@@ -5,7 +5,6 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
@@ -14,6 +13,7 @@ import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
+import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.DEBOUNCE_DURATION
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_CHANGE_DIMMING_ENABLED
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_NEXT_TIMEOUT
 import com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceAction.ACTION_RESTART
@@ -97,7 +97,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      *
      * @see NotificationManager
      */
-    private val notificationManager by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+    private val notificationManager by lazy { getSystemService(NOTIFICATION_SERVICE) as NotificationManager }
 
     /**
      * A lazy delegate that provides an instance of [SharedPrefsManager] for managing shared preferences.
@@ -211,7 +211,7 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
      * @see PowerManager.WakeLock.release
      * @see acquireWakeLock
      */
-    private val powerManager by lazy { getSystemService(Context.POWER_SERVICE) as PowerManager }
+    private val powerManager by lazy { getSystemService(POWER_SERVICE) as PowerManager }
 
     /**
      * A [TimeoutJob] that manages the timing of the caffeine session.
@@ -422,8 +422,9 @@ class KeepAwakeService : Service(), SharedPrefsObserver, ServiceStatusObserver {
         this.isOverlayEnabled = isOverlayEnabled
 
         when (caffeinateApplication.lastStatusUpdate) {
-            is ServiceStatus.Running -> if (isOverlayEnabled) overlayHandler.showOverlay() else overlayHandler.hideOverlay()
-            is ServiceStatus.Stopped -> Unit
+            is ServiceStatus.Running if isOverlayEnabled -> overlayHandler.showOverlay()
+            is ServiceStatus.Running                     -> overlayHandler.hideOverlay()
+            is ServiceStatus.Stopped                     -> Unit
         }
     }
 

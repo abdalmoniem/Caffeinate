@@ -21,6 +21,7 @@ import android.view.HapticFeedbackConstants
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -154,6 +155,37 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     private val notGrantedDrawableTint by lazy { MaterialColors.getColor(binding.root, materialR.attr.colorError) }
 
     /**
+     * Lazily initializes the on back pressed callback for the activity.
+     *
+     * This callback is used to handle the back button press event in the activity.
+     * It is initialized lazily when it is first accessed. The instance is created using the
+     * [OnBackPressedCallback] class and the resource identifier for the primary color.
+     *
+     * @return [OnBackPressedCallback] the on back pressed callback for the activity.
+     */
+    private val onBackPressedCallback by lazy {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() = when {
+                isPictureInPictureSupported && !isInPictureInPictureMode -> {
+                    onUserLeaveHint()
+
+                    isEnabled = !isInPictureInPictureActive
+                    if (!isInPictureInPictureActive) onBackPressedDispatcher.onBackPressed()
+                    else Unit
+                }
+
+                else                                                     -> {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        }
+    }
+
+    private val isPictureInPictureSupported: Boolean
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+
+    /**
      * Lazily initializes an instance of [PictureInPictureActionsReceiver] for handling PiP actions.
      *
      * This property creates and caches a [PictureInPictureActionsReceiver] using the application's context.
@@ -261,6 +293,16 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 limit = 10,
                 truncated = "..."
         ) { checkBoxItem -> checkBoxItem.duration.toLocalizedFormattedTime(binding.root.context) }
+
+    /**
+     * A flag indicating whether the application is currently in picture-in-picture mode.
+     *
+     * This property is used to track the state of the application in picture-in-picture mode.
+     * It is initialized to `false` and is updated when the application enters or exits picture-in-picture mode.
+     *
+     * @return [Boolean] `true` if the application is in picture-in-picture mode, `false` otherwise.
+     */
+    private var isInPictureInPictureActive = false
 
     /**
      * The [ActivityResultLauncher] used to launch the overlay permission intent.
@@ -403,6 +445,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 }
             }
         }
+
+        onBackPressedDispatcher.addCallback(onBackPressedCallback)
     }
 
     /**
@@ -595,6 +639,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
         if (!sharedPreferences.isPictureInPictureEnabled || caffeinateApplication.lastStatusUpdate !is ServiceStatus.Running) return
 
         pipParamsBuilder?.run { enterPictureInPictureMode(build()) }
+
+        isInPictureInPictureActive = true
     }
 
     /**
@@ -671,6 +717,8 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     override fun onServiceStatusUpdated(status: ServiceStatus) {
         with(binding) {
             Log.d("Status Changed: $status")
+
+            onBackPressedCallback.isEnabled = status is ServiceStatus.Running
 
             val autoEnterPiP = status is ServiceStatus.Running && sharedPreferences.isPictureInPictureEnabled
             pipParamsBuilder?.run {
