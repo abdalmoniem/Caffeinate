@@ -29,6 +29,10 @@
     <string name="material_you_pref_description">Dopasuj kolory aplikacji do kolorów Twojej tapety.</string>
     <string name="material_you_pref_off">Material You wyłączony</string>
     <string name="material_you_pref_on">Material You włączony</string>
+    <string name="quick_tile_title_pref">Pokaż status aplikacji w tytule szybkiego kafelka</string>
+    <string name="quick_tile_title_pref_description">Niektóre OEM nie pokazują szybkich napisów kafelków (co domyślnie hosty status aplikacji). Włącz tę opcję, jeśli chcesz wyświetlić status aplikacji w tytule szybkiego kafelka.</string>
+    <string name="quick_tile_title_pref_off">Pokaż status w tytule szybkiego kafelka Wł</string>
+    <string name="quick_tile_title_pref_on">Pokaż status w tytule szybkiego kafelka Wył</string>
     <string name="show_overlay_pref">Włącz nakładkę</string>
     <string name="show_overlay_pref_description">Pokaż Nakładkę czasu pozostałego na górze ekranu, ta nakładka pozostanie na górze nawet wtedy, gdy Aplikacja jest w tle.
 Niektóre urządzenia mogą wymagać tej opcji włączonej, aby Aplikacja działała poprawnie.</string>
