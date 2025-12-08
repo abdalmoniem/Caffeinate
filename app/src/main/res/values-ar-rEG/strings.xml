@@ -29,6 +29,10 @@
     <string name="material_you_pref_description">خَلِّى ألوان البرنامج زى ألوان خلفية الشاشة بتاعتك.</string>
     <string name="material_you_pref_off">الألوان الديناميكية مَطفية</string>
     <string name="material_you_pref_on">الألوان الديناميكية شغالة</string>
+    <string name="quick_tile_title_pref">إظهار حالة البرنامج فى عنوان زُرار الإعدادات السريعة</string>
+    <string name="quick_tile_title_pref_description">بعض الأجهزة مابتظهرش العناوين المُصَغٌَرة فى زُرار الإعدادات السريعة (و اللى بيبقى فيها حالة البرنامج بشكل افتراضى) شَغٌَل الخِيار ده لو عايز تظهر حالة البرنامج فى زُرار الإعدادات السريعة.</string>
+    <string name="quick_tile_title_pref_off">إظهار حالة البرنامج فى زُرار الإعدادات السريعة شَغٌَال</string>
+    <string name="quick_tile_title_pref_on">إظهار حالة البرنامج فى زُرار الإعدادات السريعة مَطفى</string>
     <string name="show_overlay_pref">شَغَّل الشاشة العايمة</string>
     <string name="show_overlay_pref_description">اعرض الوقت المِتبَقِّى فى شاشة عايمة على شاشة الموبايل من فوق، الشاشة دى هتفضل 
 ظاهرة حتى لما البرنامج يبقى في الخلفية. بعض الأجهزة ممكن تعدحتاج تشغيل الخِيار ده عشان البرنامج يشتغل كويس.</string>
