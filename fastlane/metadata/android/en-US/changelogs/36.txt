@@ -1,0 +1,40 @@
+* bump app version to 2.2.0
+   > - New Crowdin updates (#94)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Polish)
+   > - New translations strings.xml (Russian)
+   > - New translations strings.xml (Arabic, Egypt)
+* New Crowdin updates (#94)
+   > - New translations strings.xml (Arabic)
+   > - New translations strings.xml (Polish)
+   > - New translations strings.xml (Russian)
+   > - New translations strings.xml (Arabic, Egypt)
+* feat: Show application status in Quick Tile title
+   > - Introduced a new preference allowing users to display the application's status directly in the Quick Settings tile title. This is beneficial for OEM devices that do not show tile subtitles.
+   > - Added a "Show Application Status in Quick Tile Title" switch in the settings UI.
+   > - Updated `QuickTileService` to observe this preference and dynamically change the tile's label or subtitle.
+   > - Refactored `SharedPrefsManager` to use the `edit { ... }` Kotlin extension for conciseness.
+   > - Upgraded Kotlin version to `2.2.21`.
+   > - Enabled `-Xcontext-parameters` compiler argument.
+* fix PiP not working on WSA devices
+   > for some reason, pressing the back button on WSA didn't trigger onUserLeaveHint or onPictureInPictureUiStateChanged, so I added a callback to onBackPressedDispatcher to handle the case
+* New Crowdin updates (#90)
+   > - New translations strings.xml (Polish)
+   > - New translations full_description.txt (Polish)
+   > - New translations short_description.txt (Polish)
+   > - New translations title.txt (Polish)
+   > - New translations strings.xml (Polish)
+* New Crowdin Russian Translations
+   > - New translations full_description.txt (Russian)
+   > - New translations short_description.txt (Russian)
+   > - New translations title.txt (Russian)
+   > - New translations strings.xml (Russian)
+   > - New translations strings.xml (Russian)
+* Update README.md
+   >
+* Update issue templates
+   >
+* updated git_hooks scripts and changelog files
+   >
+
+**Full Changelog**: https://github.com/abdalmoniem/Caffeinate/compare/v2.1.0...v2.2.0
