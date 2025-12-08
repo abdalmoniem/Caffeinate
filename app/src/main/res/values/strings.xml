@@ -29,6 +29,10 @@
     <string name="material_you_pref_description">Match the App.\'s colors to your wallpaper\'s colors.</string>
     <string name="material_you_pref_off">Material You Off</string>
     <string name="material_you_pref_on">Material You On</string>
+    <string name="quick_tile_title_pref">Show Application Status in Quick Tile Title</string>
+    <string name="quick_tile_title_pref_description">Some OEMs don\'t show the quick tile subtitles (which host the application status by default). Enable this option if you want to show the application status in the quick tile title.</string>
+    <string name="quick_tile_title_pref_off">Show Status in Quick Tile Title On</string>
+    <string name="quick_tile_title_pref_on">Show Status in Quick Tile Title Off</string>
     <string name="show_overlay_pref">Enable Overlay</string>
     <string name="show_overlay_pref_description">Show an Overlay of the remaining time on top of the screen, this overlay will stay on top even when the App. is in the background.
 Some devices may require this option enabled in order for the App. to work properly.</string>

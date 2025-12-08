@@ -666,6 +666,7 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
     override fun onIsAllPermissionsGrantedUpdated(isAllPermissionsGranted: Boolean) {
         binding.toggleButton.isEnabled = isAllPermissionsGranted
 
+        changeShowQuickTileStatusInTitlePreferences(isAllPermissionsGranted)
         changeOverlayPreferences(isAllPermissionsGranted && checkOverlayPermission())
         changePictureInPicturePreferences(isAllPermissionsGranted)
         changeDimmingPreferences(isAllPermissionsGranted)
@@ -1023,6 +1024,37 @@ class MainActivity : AppCompatActivity(), SharedPrefsObserver, ServiceStatusObse
                 materialYouSubTextTextView.isVisible = isChecked
 
                 sharedPreferences.run { changeThemeAndContrast(theme, contrastLevel, isChecked) }
+            }
+        }
+    }
+
+    /**
+     * Enables the show quick tile status in title preferences.
+     *
+     * The show quick tile status in title preferences are:
+     * 1. A [MaterialCardView][com.google.android.material.card.MaterialCardView] that shows the show quick tile status in title preferences.
+     * 2. A [TextView][android.widget.TextView] that shows the show quick tile status in title preferences title.
+     * 3. A [TextView][android.widget.TextView] that shows the show quick tile status in title preferences subtitle.
+     * 4. A [MaterialSwitch][com.google.android.material.materialswitch.MaterialSwitch] that toggles the show quick tile status in title preferences.
+     *
+     * @param isEnabled [Boolean] `true` if the show quick tile status in title preferences should be enabled, `false` otherwise.
+     */
+    private fun changeShowQuickTileStatusInTitlePreferences(isEnabled: Boolean) {
+        with(binding) {
+            quickTileShowStatusInTitleCard.isEnabled = isEnabled
+            quickTileShowStatusInTitleTextView.isEnabled = isEnabled
+            quickTileShowStatusInTitleSubTextTextView.isEnabled = isEnabled && sharedPreferences.isShowStatusInQuickTileTitleEnabled
+            quickTileShowStatusInTitleSubTextTextView.isVisible = isEnabled && sharedPreferences.isShowStatusInQuickTileTitleEnabled
+            quickTileShowStatusInTitleSwitch.isEnabled = isEnabled
+            quickTileShowStatusInTitleSwitch.isChecked = sharedPreferences.isShowStatusInQuickTileTitleEnabled
+
+            quickTileShowStatusInTitleCard.setOnClickListener { quickTileShowStatusInTitleSwitch.isChecked = !sharedPreferences.isShowStatusInQuickTileTitleEnabled }
+            quickTileShowStatusInTitleSwitch.setOnCheckedChangeListener { switch, isChecked ->
+                switch.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+
+                quickTileShowStatusInTitleSubTextTextView.isEnabled = isChecked
+                quickTileShowStatusInTitleSubTextTextView.isVisible = isChecked
+                sharedPreferences.isShowStatusInQuickTileTitleEnabled = isChecked
             }
         }
     }

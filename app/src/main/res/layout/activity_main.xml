@@ -529,7 +529,7 @@
                         </com.google.android.material.card.MaterialCardView>
 
                         <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/overlayCard"
+                            android:id="@+id/quickTileShowStatusInTitleCard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginVertical="5dp"
@@ -541,6 +541,81 @@
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@+id/materialYouCard"
+                            app:strokeWidth="0dp">
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/quickTileShowStatusInTitleLayout"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
+                                android:padding="10dp">
+
+                                <ImageView
+                                    android:id="@+id/quickTileShowStatusInTitleIcon"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="10dp"
+                                    android:importantForAccessibility="no"
+                                    android:src="@drawable/prefs_quick_tile_icon"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toStartOf="@+id/quickTileShowStatusInTitleTextView"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:tint="?colorPrimary" />
+
+                                <TextView
+                                    android:id="@+id/quickTileShowStatusInTitleTextView"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:enabled="false"
+                                    android:text="@string/quick_tile_title_pref"
+                                    android:textSize="@dimen/prefTextSize"
+                                    android:textStyle="bold"
+                                    app:layout_constraintBottom_toTopOf="@+id/quickTileShowStatusInTitleSubTextTextView"
+                                    app:layout_constraintEnd_toStartOf="@+id/quickTileShowStatusInTitleSwitch"
+                                    app:layout_constraintStart_toEndOf="@+id/quickTileShowStatusInTitleIcon"
+                                    app:layout_constraintTop_toTopOf="parent" />
+
+                                <TextView
+                                    android:id="@+id/quickTileShowStatusInTitleSubTextTextView"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:enabled="false"
+                                    android:text="@string/quick_tile_title_pref_description"
+                                    android:textSize="@dimen/prefsDescriptionTextSize"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toStartOf="@+id/quickTileShowStatusInTitleSwitch"
+                                    app:layout_constraintStart_toStartOf="@+id/quickTileShowStatusInTitleTextView"
+                                    app:layout_constraintTop_toBottomOf="@+id/quickTileShowStatusInTitleTextView" />
+
+                                <com.google.android.material.materialswitch.MaterialSwitch
+                                    android:id="@+id/quickTileShowStatusInTitleSwitch"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:checked="false"
+                                    android:enabled="false"
+                                    android:textOff="@string/quick_tile_title_pref_off"
+                                    android:textOn="@string/quick_tile_title_pref_on"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:thumbIcon="@drawable/switch_thumb_icon" />
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/overlayCard"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginVertical="5dp"
+                            android:clickable="true"
+                            android:enabled="false"
+                            android:focusable="true"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="10dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/quickTileShowStatusInTitleCard"
                             app:strokeWidth="0dp">
 
                             <androidx.constraintlayout.widget.ConstraintLayout

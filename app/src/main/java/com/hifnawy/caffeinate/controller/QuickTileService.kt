@@ -11,11 +11,11 @@ import android.service.quicksettings.TileService
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.controller.QuickTileService.Companion.requestTileStateUpdate
-import com.hifnawy.caffeinate.view.MainActivity
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.itemClasses
 import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
+import com.hifnawy.caffeinate.view.MainActivity
 import timber.log.Timber as Log
 
 /**
@@ -27,7 +27,7 @@ import timber.log.Timber as Log
  *
  * @author AbdAlMoniem AlHifnawy
  */
-class QuickTileService : TileService(), ServiceStatusObserver {
+class QuickTileService : TileService(), ServiceStatusObserver, SharedPrefsObserver {
 
     /**
      * Lazily initializes the [CaffeinateApplication] instance associated with this service.
@@ -39,6 +39,15 @@ class QuickTileService : TileService(), ServiceStatusObserver {
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
 
     /**
+     * Lazily initializes the [SharedPrefsManager] instance associated with this service.
+     *
+     * The [SharedPrefsManager] instance is used to access and modify the shared preferences of the application.
+     *
+     * @return the [SharedPrefsManager] instance associated with this service.
+     */
+    private val sharedPrefsManager by lazy { SharedPrefsManager(caffeinateApplication) }
+
+    /**
      * Lazily initializes a variable that indicates whether all permissions necessary for the application to
      * function correctly have been granted.
      *
@@ -46,7 +55,78 @@ class QuickTileService : TileService(), ServiceStatusObserver {
      *
      * @author AbdAlMoniem AlHifnawy
      */
-    private val isAllPermissionsGranted by lazy { SharedPrefsManager(caffeinateApplication).isAllPermissionsGranted }
+    private val isAllPermissionsGranted by lazy { sharedPrefsManager.isAllPermissionsGranted }
+
+    /**
+     * Lazily initializes a variable that holds the attributes of the tile, including the tile state, tile subtitle,
+     * and the icon drawable.
+     *
+     * The tile state is determined based on the current status of the Caffeinate service. If the service is stopped,
+     * the tile state is set to [Tile.STATE_INACTIVE] and the tile subtitle is set accordingly. If the service is
+     * running, the tile state is set to [Tile.STATE_ACTIVE] and the tile subtitle is set to the remaining time until
+     * the service is stopped.
+     *
+     * The icon drawable is determined based on the tile state. If the tile state is [Tile.STATE_INACTIVE], the icon
+     * drawable is set to `R.drawable.coffee_icon_off`. Otherwise, the icon drawable is set to `R.drawable.coffee_icon_on`.
+     *
+     * @return a [Triple] containing the tile state, tile subtitle, and the icon drawable.
+     *
+     * @author AbdAlMoniem AlHifnawy
+     */
+    context(status: ServiceStatus)
+    private val tileAttributes
+        get() = caffeinateApplication.run {
+            val (tileState, tileSubtitle) = when (status) {
+                is ServiceStatus.Stopped -> Tile.STATE_INACTIVE to when {
+                    isShowStatusInQuickTileTitleEnabled -> localizedApplicationContext.getString(R.string.app_name)
+                    else                                -> localizedApplicationContext.getString(R.string.quick_tile_off)
+                }
+
+                is ServiceStatus.Running -> Tile.STATE_ACTIVE to status.remaining.toLocalizedFormattedTime(caffeinateApplication, true)
+            }
+
+            val iconDrawable = when (tileState) {
+                Tile.STATE_ACTIVE -> R.drawable.coffee_icon_on
+                else              -> R.drawable.coffee_icon_off
+            }
+
+            Triple(tileState, tileSubtitle, iconDrawable)
+        }
+
+
+    /**
+     * Determines the tile label based on the current tile subtitle and the value of [isShowStatusInQuickTileTitleEnabled].
+     *
+     * If the SDK version is at least [Build.VERSION_CODES.Q] and [isShowStatusInQuickTileTitleEnabled] is `true`,
+     * the tile label is set to the tile subtitle. Otherwise, if [isShowStatusInQuickTileTitleEnabled] is `false`,
+     * the tile label is set to the localized application name.
+     *
+     * @return a [String] representing the tile label.
+     *
+     * @author AbdAlMoniem AlHifnawy
+     */
+    context(tileSubtitle: String)
+    private val tileLabel
+        get() = caffeinateApplication.run {
+            when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> when {
+                    isShowStatusInQuickTileTitleEnabled -> tileSubtitle
+                    else                                -> localizedApplicationContext.getString(R.string.app_name)
+                }
+
+                else                                           -> tileSubtitle
+            }
+        }
+
+    /**
+     * A [Boolean] value indicating whether the "Show Application Status in Quick Tile Title" feature is enabled.
+     *
+     * This value is obtained from the [SharedPrefsManager] associated with the [CaffeinateApplication] instance
+     * associated with this service.
+     *
+     * @author AbdAlMoniem AlHifnawy
+     */
+    private var isShowStatusInQuickTileTitleEnabled = false
 
     /**
      * Called when the user begins interacting with the tile.
@@ -57,11 +137,17 @@ class QuickTileService : TileService(), ServiceStatusObserver {
      * @see TileService.onStartListening
      */
     override fun onStartListening() = caffeinateApplication.run {
+        isShowStatusInQuickTileTitleEnabled = sharedPrefsManager.isShowStatusInQuickTileTitleEnabled
+
         // If the current class isn't in the list of observers, add it. Since only one QuickTile is added to the QuickSettings
         // Panel, this ensures that only one observer is added over the lifetime of the application when a timeout is started.
         if (this@QuickTileService::class !in keepAwakeServiceObservers.itemClasses) {
             keepAwakeServiceObservers.addObserver(this@QuickTileService)
             updateQuickTile(lastStatusUpdate)
+        }
+
+        if (this@QuickTileService::class !in sharedPrefsObservers.itemClasses) {
+            sharedPrefsObservers.addObserver(this@QuickTileService)
         }
     }
 
@@ -77,6 +163,7 @@ class QuickTileService : TileService(), ServiceStatusObserver {
         // only remove the observer if the service is stopped.
         if (lastStatusUpdate is ServiceStatus.Stopped) {
             keepAwakeServiceObservers.removeObserver(this@QuickTileService)
+            sharedPrefsObservers.removeObserver(this@QuickTileService)
             updateQuickTile(lastStatusUpdate)
         }
     }
@@ -87,6 +174,15 @@ class QuickTileService : TileService(), ServiceStatusObserver {
      * @param status [ServiceStatus] the new status of the service
      */
     override fun onServiceStatusUpdated(status: ServiceStatus) = updateQuickTile(status)
+
+    /**
+     * Called when the "Show Quick Tile Status in Title" preference changes.
+     *
+     * @param isShowQuickTileStatusInTitleEnabled [Boolean] `true` if the "Show Quick Tile Status in Title" feature is enabled, `false` otherwise.
+     */
+    override fun onIsShowQuickTileStatusInTitleEnabledUpdated(isShowQuickTileStatusInTitleEnabled: Boolean) = isShowQuickTileStatusInTitleEnabled.let {
+        this@QuickTileService.isShowStatusInQuickTileTitleEnabled = it
+    }
 
     /**
      * Called when the user clicks on the tile.
@@ -125,21 +221,12 @@ class QuickTileService : TileService(), ServiceStatusObserver {
 
         Log.d("status: $status")
 
-        val (tileState, tileSubtitle) = when (status) {
-            is ServiceStatus.Stopped -> Tile.STATE_INACTIVE to localizedApplicationContext.getString(R.string.quick_tile_off)
-            is ServiceStatus.Running -> Tile.STATE_ACTIVE to status.remaining.toLocalizedFormattedTime(this, true)
-        }
-        val iconDrawable = when (tileState) {
-            Tile.STATE_ACTIVE -> R.drawable.coffee_icon_on
-            else              -> R.drawable.coffee_icon_off
-        }
+        val (tileState, tileSubtitle, iconDrawable) = with(status) { tileAttributes }
 
         quickTile.run {
             state = tileState
-            label = when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> localizedApplicationContext.getString(R.string.app_name)
-                else                                           -> tileSubtitle
-            }
+            label = with(tileSubtitle) { tileLabel }
+
             contentDescription = localizedApplicationContext.getString(R.string.app_name)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) subtitle = tileSubtitle
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) stateDescription = tileSubtitle
@@ -182,7 +269,7 @@ class QuickTileService : TileService(), ServiceStatusObserver {
          *
          * @param ex [Exception] the exception to handle
          */
-        private fun handleException(ex: Exception) = Log.e("${ex::class.simpleName}: An exception was raised", ex)
+        private fun handleException(ex: Exception) = Log.e(ex, "${ex::class.simpleName}: An exception was raised")
 
         /**
          * Requests a tile state update for the tile provided by [QuickTileService].

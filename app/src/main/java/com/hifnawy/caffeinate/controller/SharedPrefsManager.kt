@@ -3,6 +3,7 @@ package com.hifnawy.caffeinate.controller
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.ContrastLevel.HIGH
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.ContrastLevel.MEDIUM
@@ -13,6 +14,7 @@ import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENAB
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_MATERIAL_YOU
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_OVERLAY
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_PICTURE_IN_PICTURE
+import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_SHOW_STATUS_IN_QUICK_TILE_TITLE
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.ENABLE_WHILE_LOCKED
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.IS_SERVICE_RUNNING
 import com.hifnawy.caffeinate.controller.SharedPrefsManager.SharedPrefsKeys.LAST_REMAINING_TIMEOUT
@@ -60,6 +62,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      * @property THEME A [Theme] value indicating the current theme of the application.
      * @property ENABLE_DIMMING A [Boolean] value indicating whether the screen should be dimmed while the service is running.
      * @property ENABLE_MATERIAL_YOU A [Boolean] value indicating whether Material You design elements should be enabled.
+     * @property ENABLE_SHOW_STATUS_IN_QUICK_TILE_TITLE A [Boolean] value indicating whether the application status should be shown in the quick tile title.
      * @property ENABLE_OVERLAY A [Boolean] value indicating whether the overlay should be enabled.
      * @property ENABLE_WHILE_LOCKED A [Boolean] value indicating whether the service should be enabled while the screen is locked.
      * @property TIMEOUT_CHECK_BOXES A [List] of [CheckBoxItem] values indicating the timeouts that should be displayed in the RecyclerView.
@@ -87,6 +90,11 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
          * A [Boolean] value indicating whether Material You design elements should be enabled.
          */
         ENABLE_MATERIAL_YOU,
+
+        /**
+         * A [Boolean] value indicating whether the application status should be shown in the quick tile title.
+         */
+        ENABLE_SHOW_STATUS_IN_QUICK_TILE_TITLE,
 
         /**
          * A [Boolean] value indicating whether the overlay should be enabled.
@@ -242,7 +250,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
     var isAllPermissionsGranted: Boolean
         get() = sharedPreferences.getBoolean(ALL_PERMISSIONS_GRANTED.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(ALL_PERMISSIONS_GRANTED.name, value).apply()
+            sharedPreferences.edit { putBoolean(ALL_PERMISSIONS_GRANTED.name, value) }
             notifySharedPrefsObservers { observer -> observer.onIsAllPermissionsGrantedUpdated(value) }
         }
 
@@ -258,7 +266,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      */
     var theme: Theme
         get() = Theme.valueOf(sharedPreferences.getString(THEME.name, SYSTEM_DEFAULT.name) ?: SYSTEM_DEFAULT.name)
-        set(value) = sharedPreferences.edit().putString(THEME.name, value.name).apply()
+        set(value) = sharedPreferences.edit { putString(THEME.name, value.name) }
 
     /**
      * Retrieves or sets the contrast level of the application.
@@ -272,7 +280,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      */
     var contrastLevel: ContrastLevel
         get() = ContrastLevel.valueOf(sharedPreferences.getString(CONTRAST_LEVEL.name, STANDARD.name) ?: STANDARD.name)
-        set(value) = sharedPreferences.edit().putString(CONTRAST_LEVEL.name, value.name).apply()
+        set(value) = sharedPreferences.edit { putString(CONTRAST_LEVEL.name, value.name) }
 
     /**
      * Retrieves or sets whether the "Material You" feature is enabled.
@@ -284,7 +292,22 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      */
     var isMaterialYouEnabled: Boolean
         get() = sharedPreferences.getBoolean(ENABLE_MATERIAL_YOU.name, false)
-        set(value) = sharedPreferences.edit().putBoolean(ENABLE_MATERIAL_YOU.name, value).apply()
+        set(value) = sharedPreferences.edit { putBoolean(ENABLE_MATERIAL_YOU.name, value) }
+
+    /**
+     * Retrieves or sets whether the quick tile status should be shown in the title.
+     *
+     * This property is used to determine if the quick tile status should be shown in the title.
+     * It allows the application to show or hide the quick tile status based on the user's preference stored in shared preferences.
+     *
+     * @return [Boolean] `true` if the quick tile status should be shown in the title, `false` otherwise.
+     */
+    var isShowStatusInQuickTileTitleEnabled: Boolean
+        get() = sharedPreferences.getBoolean(ENABLE_SHOW_STATUS_IN_QUICK_TILE_TITLE.name, false)
+        set(value) {
+            sharedPreferences.edit { putBoolean(ENABLE_SHOW_STATUS_IN_QUICK_TILE_TITLE.name, value) }
+            notifySharedPrefsObservers { observer -> observer.onIsShowQuickTileStatusInTitleEnabledUpdated(value) }
+        }
 
     /**
      * Retrieves or sets whether the screen overlay should be shown while it is being kept awake.
@@ -297,7 +320,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
     var isOverlayEnabled: Boolean
         get() = sharedPreferences.getBoolean(ENABLE_OVERLAY.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(ENABLE_OVERLAY.name, value).apply()
+            sharedPreferences.edit { putBoolean(ENABLE_OVERLAY.name, value) }
             notifySharedPrefsObservers { observer -> observer.onIsOverlayEnabledUpdated(value) }
         }
 
@@ -311,7 +334,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      */
     var isPictureInPictureEnabled: Boolean
         get() = sharedPreferences.getBoolean(ENABLE_PICTURE_IN_PICTURE.name, false)
-        set(value) = sharedPreferences.edit().putBoolean(ENABLE_PICTURE_IN_PICTURE.name, value).apply()
+        set(value) = sharedPreferences.edit { putBoolean(ENABLE_PICTURE_IN_PICTURE.name, value) }
 
     /**
      * Retrieves or sets whether the screen should be dimmed while it is being kept awake.
@@ -324,7 +347,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
     var isDimmingEnabled: Boolean
         get() = sharedPreferences.getBoolean(ENABLE_DIMMING.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(ENABLE_DIMMING.name, value).apply()
+            sharedPreferences.edit { putBoolean(ENABLE_DIMMING.name, value)}
             notifySharedPrefsObservers { observer -> observer.onIsDimmingEnabledUpdated(value) }
         }
 
@@ -340,7 +363,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
     var isWhileLockedEnabled: Boolean
         get() = sharedPreferences.getBoolean(ENABLE_WHILE_LOCKED.name, false)
         set(value) {
-            sharedPreferences.edit().putBoolean(ENABLE_WHILE_LOCKED.name, value).apply()
+            sharedPreferences.edit { putBoolean(ENABLE_WHILE_LOCKED.name, value) }
             notifySharedPrefsObservers { observer -> observer.onIsWhileLockedEnabledUpdated(value) }
         }
 
@@ -364,7 +387,7 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
      */
     var widgetsConfiguration: MutableMap<Int, WidgetConfiguration>
         get() = sharedPreferences.getSerializableMap<MutableMap<Int, WidgetConfiguration>>(WIDGET_CONFIGURATION.name)
-        set(value) = sharedPreferences.edit().putSerializableMap(WIDGET_CONFIGURATION.name, value).apply()
+        set(value) = sharedPreferences.edit { putSerializableMap(WIDGET_CONFIGURATION.name, value) }
 
     /**
      * Retrieves or sets whether the service is running.
@@ -388,8 +411,8 @@ class SharedPrefsManager(private val caffeinateApplication: CaffeinateApplicatio
                 else                                     -> -1L
             }
 
-            sharedPreferences.edit().putBoolean(IS_SERVICE_RUNNING.name, value).apply()
-            sharedPreferences.edit().putLong(LAST_REMAINING_TIMEOUT.name, timeout).apply()
+            sharedPreferences.edit { putBoolean(IS_SERVICE_RUNNING.name, value) }
+            sharedPreferences.edit { putLong(LAST_REMAINING_TIMEOUT.name, timeout) }
         }
 
     /**
@@ -445,6 +468,13 @@ interface SharedPrefsObserver : Observer {
      * @param isAllPermissionsGranted [Boolean] `true` if all permissions are granted, `false` otherwise.
      */
     fun onIsAllPermissionsGrantedUpdated(isAllPermissionsGranted: Boolean) = Unit
+
+    /**
+     * Called when the "Show Quick Tile Status in Title" preference changes.
+     *
+     * @param isShowQuickTileStatusInTitleEnabled [Boolean] `true` if the "Show Quick Tile Status in Title" feature is enabled, `false` otherwise.
+     */
+    fun onIsShowQuickTileStatusInTitleEnabledUpdated(isShowQuickTileStatusInTitleEnabled: Boolean) = Unit
 
     /**
      * Called when the "Overlay Enabled" preference changes.
@@ -595,7 +625,7 @@ private class TimeoutCheckBoxesDelegate(
      *
      * @param list [MutableList] the list of [CheckBoxItem]s to be saved.
      */
-    private fun save(list: List<CheckBoxItem>) = sharedPreferences.edit().putSerializableList(key, list.localized).apply()
+    private fun save(list: List<CheckBoxItem>) = sharedPreferences.edit { putSerializableList(key, list.localized) }
 
     /**
      * Returns a new list of [CheckBoxItem]s, where each item's text is localized to the current locale.
@@ -634,6 +664,7 @@ private class TimeoutCheckBoxesDelegate(
      *
      * @author AbdAlMoniem AlHifnawy
      */
+    @Suppress("JavaDefaultMethodsNotOverriddenByDelegation")
     private class MutableListInterceptor(
 
             /**

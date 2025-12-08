@@ -130,6 +130,7 @@ android {
         debug {
             isMinifyEnabled = false
             isShrinkResources = false
+            isDebuggable = true
 
             proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -181,6 +182,7 @@ android {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_21
             freeCompilerArgs.add("-Xwhen-guards")
+            freeCompilerArgs.add("-Xcontext-parameters")
         }
     }
 

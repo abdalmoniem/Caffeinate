@@ -16,7 +16,7 @@ junitVersion = "4.13.2"
 androidxJunitVersion = "1.2.1"
 androidXEspressoCoreVersion = "3.6.1"
 
-kotlinVersion = "2.1.0"
+kotlinVersion = "2.2.21"
 androidApplicationVersion = "8.7.3"
 
 [libraries]
