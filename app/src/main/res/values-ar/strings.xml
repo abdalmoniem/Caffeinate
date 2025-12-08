@@ -29,6 +29,10 @@
     <string name="material_you_pref_description">طابق ألوان التطبيق مع ألوان الخلفية الخاصة بك.</string>
     <string name="material_you_pref_off">الألوان الديناميكية مُعطَّلة</string>
     <string name="material_you_pref_on">الألوان الديناميكية مُفعَّلة</string>
+    <string name="quick_tile_title_pref">إظهار حالة التطبيق فى عنوان زر الإعدادات السريعة</string>
+    <string name="quick_tile_title_pref_description">لا تُظهِر بعض الأجهزة العناوين المُصَغٌَرة فى زر الإعدادات السريعة (و التى تستضيف حالة التطبيق بشكل افتراضى) قم بتفعيل هذا الخِيار إذا كنت تريد إظهار حالة التطبيق فى زر الإعدادات السريعة.</string>
+    <string name="quick_tile_title_pref_off">إظهار حالة التطبيق فى زر الإعدادات السريعة مُفعَّل</string>
+    <string name="quick_tile_title_pref_on">إظهار حالة التطبيق فى زر الإعدادات السريعة مُعطَّل</string>
     <string name="show_overlay_pref">تفعيل النافذة العائمة</string>
     <string name="show_overlay_pref_description">عرض الوقت المتبقى فى نافذة عائمة أعلى الشاشة، ستظل هذه النافذة معروضة حتى عندما يكون التطبيق فى الخلفية.
 قد تتطلب بعض الأجهزة تفعيل هذا الخِيار لكى يعمل التطبيق بشكل صحيح.</string>
