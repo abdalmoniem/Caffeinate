@@ -29,6 +29,10 @@
     <string name="material_you_pref_description">Настроить цвета приложения в соответствии с цветом обоев.</string>
     <string name="material_you_pref_off">Material You выключен</string>
     <string name="material_you_pref_on">Material You включен</string>
+    <string name="quick_tile_title_pref">Отображать статус приложения в заголовке быстрой плитки</string>
+    <string name="quick_tile_title_pref_description">Некоторые OEM-производители не отображают подзаголовки плиток быстрого доступа (где по умолчанию отображается статус приложения). Включите эту опцию, чтобы отображать статус приложения в заголовке плитки быстрого доступа.</string>
+    <string name="quick_tile_title_pref_off">Показывать статус в заголовке быстрой плитки Вкл</string>
+    <string name="quick_tile_title_pref_on">Показывать статус в заголовке быстрой плитки Выкл</string>
     <string name="show_overlay_pref">Включить оверлей</string>
     <string name="show_overlay_pref_description">Показывать оверлей с оставшимся временем в верхней части экрана, даже если приложение работает в фоновом режиме. На некоторых устройствах требуется для корректной работы приложения.</string>
     <string name="show_overlay_pref_off">Отображение оверлея отключено</string>
