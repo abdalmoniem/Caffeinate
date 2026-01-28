@@ -4,9 +4,7 @@
     <img width="200" src="assets/icon_with_background.png" alt="Caffeinate App Icon">
 </p>
 
-<h1 align="center">
-   💊 Caffeinate
-</h1>
+<h1 align="center"> 💊 Caffeinate </h1>
 
 <p align="center">
      A lightweight Android app that keeps your screen awake for a configurable duration, without changing system settings.
