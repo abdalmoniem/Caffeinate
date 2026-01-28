@@ -5,8 +5,7 @@
 </p>
 
 <h1 align="center">
-    <img src="https://cdn.jsdelivr.net/npm/@tabler/icons/icons/pill.svg" width="26" alt="" />
-    Caffeinate
+   💊 Caffeinate
 </h1>
 
 <p align="center">
@@ -30,7 +29,7 @@
 
 <!-- About: What the app does and when to use it -->
 
-## <img src="https://cdn.jsdelivr.net/npm/@tabler/icons/icons/info-circle.svg" width="18" /> About
+## ℹ️ About
 
 **Caffeinate** is a lightweight Android utility that keeps your device’s screen awake for a configurable duration, without changing system display or power settings. 
 
@@ -42,7 +41,7 @@ The app can be controlled in two ways:
 
 <!-- Features: What users get and why it matters -->
 
-## <img src="https://cdn.jsdelivr.net/npm/@tabler/icons/icons/bolt.svg" width="18" /> Features
+## ⚡ Features
 
 - **Keep your screen awake when you need it**  
   Uses Android’s `WakeLock` to prevent unwanted screen timeouts.
@@ -73,7 +72,7 @@ The app can be controlled in two ways:
 
 <!-- Screenshots: Visual overview of the app UI -->
 
-## <img src="https://cdn.jsdelivr.net/npm/@tabler/icons/icons/photo.svg" width="18" /> Screenshots
+## 🖼️ Screenshots
 
 <div align="center">
     <img src="assets/Screenshot_2024-06-01-20-47-55-37.png" alt="Caffeinate Screenshot 01" height="360" />
@@ -104,7 +103,7 @@ The app can be controlled in two ways:
 
 <!-- Download: Installation options -->
 
-## <img src="https://cdn.jsdelivr.net/npm/@tabler/icons/icons/download.svg" width="18" /> Download
+## 📥 Download
 
 Caffeinate can be installed using the options below.  
 Choose the method that best fits your update preferences.  
@@ -125,50 +124,36 @@ Install via **Obtainium** to receive automatic updates directly from GitHub rele
 
 ### Other Installation Options
 
-<p align="center">
-  <a href="https://f-droid.org/packages/com.hifnawy.caffeinate/">
-    <img src="assets/badge_f_droid.png" height="80" alt="Get it on F-Droid">
-  </a>
-  <a href="https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate">
-    <img src="assets/badge_izzy_on_droid.png" height="80" alt="Get it on IzzyOnDroid">
-  </a>
-</p>
+| | |
+|:--:|:--:|
+| [![Get it on F-Droid](assets/badge_f_droid.png)](https://f-droid.org/packages/com.hifnawy.caffeinate/) | [![Get it on IzzyOnDroid](assets/badge_izzy_on_droid.png)](https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate) |
+| [![Get it on Google Play](assets/badge_play_store.png)](https://play.google.com/store/apps/details?id=com.hifnawy.caffeinate) | [![Download from GitHub](assets/badge_github.png)](https://github.com/abdalmoniem/Caffeinate/releases/latest) |
 
-<p align="center">
-  <a href="https://play.google.com/store/apps/details?id=com.hifnawy.caffeinate">
-    <img src="assets/badge_play_store.png" height="80" alt="Get it on Google Play">
-  </a>
-  <a href="https://github.com/abdalmoniem/Caffeinate/releases/latest">
-    <img src="assets/badge_github.png" height="80" alt="Download from GitHub Releases">
-  </a>
-</p>
-
->**Note**  
+> **Note**  
 > The Google Play version is currently in testing.  
 > To join the beta program, please contact the maintainer.
 
 <!-- Translations: Localization workflow and contribution -->
 
-## <img src="https://cdn.jsdelivr.net/npm/@tabler/icons/icons/language.svg" width="18" /> Translations
+## 🌐 Translations
 
-Caffeinate is localized using **Crowdin**, which manages both in-app text and app store descriptions:  
+Caffeinate is localized using **Crowdin**, which manages both in-app text and app store descriptions.  
 
-https://crowdin.com/project/caffeinate
+View the project on [Crowdin](https://crowdin.com/project/caffeinate).  
 
 ### How translations work
 - All translations are reviewed before being included.
 - New languages and updates are approved to maintain quality and consistency.
 
 ### Contribute a translation
-- Request a new language or apply as a translator on Crowdin:  
-  https://crowdin.com/profile/abdalmoniem
-- Or open a GitHub issue to discuss translation-related requests.
+- Request a new language or apply as a translator on [Crowdin](https://crowdin.com/profile/abdalmoniem).  
+- Alternatively, open a GitHub issue to discuss translation-related requests.  
 
 This process ensures accurate, high-quality translations while keeping contributions simple and transparent.
 
 <!-- License: Legal information -->
 
-## <img src="https://cdn.jsdelivr.net/npm/@tabler/icons/icons/license.svg" width="18" /> License
+## ⚖️ License
 
 Caffeinate is licensed under the **GNU General Public License v3.0**.  
 See the [LICENSE](LICENSE) file for details.
