@@ -20,8 +20,10 @@
 [![Codacy Grade](https://app.codacy.com/project/badge/Grade/0beba9b2841c40aa982513161d5febe5)](https://app.codacy.com/gh/abdalmoniem/Caffeinate)
 [![Crowdin](https://badges.crowdin.net/caffeinate/localized.svg)](https://crowdin.com/project/caffeinate)
 [![Views](https://views.whatilearened.today/views/github/abdalmoniem/Caffeinate.svg)](https://github.com/abdalmoniem/Caffeinate)
-[![GitHub Downloads](https://img.shields.io/github/downloads/abdalmoniem/Caffeinate/total?logo=github&label=Downloads)](https://github.com/abdalmoniem/Caffeinate/releases/latest)
 [![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/com.hifnawy.caffeinate&logo=android)](https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate)
+[![GitHub Downloads](https://img.shields.io/github/downloads/abdalmoniem/Caffeinate/total?logo=github&label=Downloads)](https://github.com/abdalmoniem/Caffeinate/releases/latest)
+[![F-Droid Downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgithub.com%2Fkitswas%2Ffdroid-metrics-dashboard%2Fraw%2Frefs%2Fheads%2Fmain%2Fprocessed%2Ftotal%2Fcom.hifnawy.caffeinate.json&query=%24.total_downloads&style=flat&logo=fdroid&label=F-Droid%20Downloads)](https://f-droid.org/en/packages/com.hifnawy.caffeinate)
+
 
 </div>
 
