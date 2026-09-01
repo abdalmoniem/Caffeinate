@@ -35,8 +35,15 @@ jobs:
           format: sarif
           gh-code-scanning-compat: true
           max-allowed-issues: 2147483647
-
+      - name: Group SARIF runs by category
+        run: |
+          jq '
+            .runs |= (
+              unique_by({tool: .tool.driver.name, invocations: .invocations})
+              | map(. + {automationDetails: {id: ((.tool.driver.name | ascii_downcase | gsub("[^a-z0-9]+"; "-") | gsub("^-|-$"; "")) + "/")}})
+            )
+          ' results.sarif > results-grouped.sarif
       - name: Upload SARIF results file
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: results.sarif
+          sarif_file: results-grouped.sarif
