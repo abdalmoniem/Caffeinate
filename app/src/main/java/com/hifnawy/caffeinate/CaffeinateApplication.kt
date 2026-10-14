@@ -89,6 +89,15 @@ class CaffeinateApplication : Application() {
     val timeoutCheckBoxes by lazy { sharedPreferences.timeoutCheckBoxes }
 
     /**
+     * Whether the Caffeinate service was running before the device was shut down.
+     *
+     * This mirrors [SharedPrefsManager.isServiceRunning] and is exposed publicly so
+     * that [BootReceiver][com.hifnawy.caffeinate.controller.BootReceiver] can decide
+     * whether to restart the service after boot.
+     */
+    val isServiceRunning get() = sharedPreferences.isServiceRunning
+
+    /**
      * The first timeout duration that was selected by the user.
      *
      * This is the first timeout duration that was selected by the user in the list of available timeout durations. When the user selects a new
