@@ -12,6 +12,15 @@ materialVersion = "1.12.0"
 materialNumberPickerVersion = "1.0.5"
 circulardurationviewVersion = "1.1.4"
 
+composeBom = "2024.10.00"
+composeUiVersion = "1.6.8"
+composeMaterial3Version = "1.4.0"
+composeFoundationVersion = "1.6.8"
+composeRuntimeVersion = "1.6.8"
+activityComposeVersion = "1.9.3"
+lifecycleViewmodelComposeVersion = "2.8.0"
+glanceVersion = "1.1.0"
+
 junitVersion = "4.13.2"
 androidxJunitVersion = "1.2.1"
 androidXEspressoCoreVersion = "3.6.1"
@@ -21,6 +30,7 @@ androidApplicationVersion = "8.7.3"
 
 [libraries]
 activity = { group = "androidx.activity", name = "activity", version.ref = "activityVersion" }
+activityCompose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityComposeVersion" }
 androidxCoreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "androidXCoreKtxVersion" }
 androidxAppCompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidXAppCompatVersion" }
 androidxConstraintLayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidXConstraintLayoutVersion" }
@@ -33,6 +43,17 @@ material = { group = "com.google.android.material", name = "material", version.r
 materialNumberPicker = { module = "com.github.StephenVinouze:MaterialNumberPicker", version.ref = "materialNumberPickerVersion" }
 circulardurationview = { module = "com.github.abdalmoniem:CircularDurationView", version.ref = "circulardurationviewVersion" }
 
+composeBom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+composeUi = { group = "androidx.compose.ui", name = "ui", version.ref = "composeUiVersion" }
+composeUiGraphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "composeUiVersion" }
+composeUiTooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "composeUiVersion" }
+composeMaterial3 = { group = "androidx.compose.material3", name = "material3", version.ref = "composeMaterial3Version" }
+composeFoundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "composeFoundationVersion" }
+composeRuntime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "composeRuntimeVersion" }
+composeLifecycleViewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
+glanceAppwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glanceVersion" }
+glanceMaterial = { group = "androidx.glance", name = "glance-material", version.ref = "glanceVersion" }
+
 junit = { group = "junit", name = "junit", version.ref = "junitVersion" }
 androidxJunit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunitVersion" }
 androidxEspressoCore = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidXEspressoCoreVersion" }
@@ -40,3 +61,4 @@ androidxEspressoCore = { group = "androidx.test.espresso", name = "espresso-core
 [plugins]
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 androidApplication = { id = "com.android.application", version.ref = "androidApplicationVersion" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinVersion" }

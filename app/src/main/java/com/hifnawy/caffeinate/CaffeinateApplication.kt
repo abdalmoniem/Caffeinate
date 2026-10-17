@@ -11,9 +11,9 @@ import com.hifnawy.caffeinate.controller.ServiceStatus
 import com.hifnawy.caffeinate.controller.ServiceStatusObserver
 import com.hifnawy.caffeinate.controller.SharedPrefsManager
 import com.hifnawy.caffeinate.controller.SharedPrefsObserver
+import com.hifnawy.caffeinate.ui.theme.CaffeinateTheme
 import com.hifnawy.caffeinate.utils.LogDebugTree
 import com.hifnawy.caffeinate.view.CheckBoxItem
-import com.hifnawy.caffeinate.view.Widget
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -248,7 +248,6 @@ class CaffeinateApplication : Application() {
         }
 
         QuickTileService.requestTileStateUpdate(this)
-        Widget.updateAllWidgets(this)
 
         Log.d("observers notified!")
     }

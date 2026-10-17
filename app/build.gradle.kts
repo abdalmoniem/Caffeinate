@@ -4,45 +4,15 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.util.Properties
 
-/**
- * The package name of the application.
- *
- * This constant holds the package name used throughout the application.
- * It is primarily used for identifying the application's namespace in
- * Android and is essential for intents, broadcasting, and other system
- * interactions.
- */
 private val packageName = "com.hifnawy.caffeinate"
-
-/**
- * The file object representing the local.properties file in the root project directory.
- *
- * This file is used to store custom configuration properties for the project, such as
- * signing configurations, debugging options, and other local settings. The properties
- * are loaded during the build process to configure the build environment.
- *
- * @see Properties
- * @see FileInputStream
- */
 private val localPropertiesFile = rootProject.file("local.properties")
-
-/**
- * A flag indicating whether debugging is enabled in the release variant.
- *
- * @see ApplicationBuildType.isDebuggable
- */
 private var isDebuggingEnabled = false
-
-/**
- * A flag indicating whether signing is enabled in the release variant.
- *
- * @see ApplicationBuildType.signingConfig
- */
 private var isSigningConfigEnabled = false
 
 plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.androidApplication)
+    alias(libs.plugins.composeCompiler)
 }
 
 android {
@@ -61,7 +31,7 @@ android {
                     .forEach { missingKey -> project.logger.warn("WARNING: missing key in '${localPropertiesFile.absolutePath}': $missingKey") }
             }
 
-            else                    -> {
+            else -> {
                 signingConfigs {
                     project.logger.lifecycle("INFO: keystore: ${rootProject.file(keystoreProperties["storeFile"] as String).absolutePath}")
 
@@ -119,7 +89,7 @@ android {
                         project.logger.lifecycle("INFO: $name signing config is located in ${signingConfiguration.storeFile?.absolutePath}")
                     }
 
-                    else                   -> project.logger.warn(
+                    else -> project.logger.warn(
                             "WARNING: $name buildType is not signed, " +
                             "add signing config in local.properties to enable signing."
                     )
@@ -145,14 +115,14 @@ android {
                         project.logger.lifecycle("INFO: $name signing config is located in ${signingConfiguration.storeFile?.absolutePath}")
                     }
 
-                    else                   -> project.logger.lifecycle(
+                    else -> project.logger.lifecycle(
                             "INFO: $name buildType is signed with default signing config, " +
                             "add signing config in local.properties to enable signing."
                     )
                 }
             } ?: project.logger.lifecycle(
                     "INFO: $name buildType is signed with default signing config, " +
-                    "add signing config in local.properties to enable signing."
+                            "add signing config in local.properties to enable signing."
             )
 
             applicationIdSuffix = ".debug"
@@ -173,11 +143,6 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
     kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_21
@@ -187,8 +152,14 @@ android {
     }
 
     buildFeatures {
+        compose = true
         viewBinding = true
         buildConfig = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     androidResources {
@@ -200,23 +171,29 @@ android {
         includeInApk = false
         includeInBundle = false
     }
-
-    dataBinding {
-        enable = true
-    }
 }
 
 dependencies {
-    implementation(libs.activity)
+    implementation(libs.activityCompose)
     implementation(libs.androidxCoreKtx)
     implementation(libs.androidxAppCompat)
     implementation(libs.androidxConstraintLayout)
+
+    implementation(libs.composeBom)
+    implementation(libs.composeUi)
+    implementation(libs.composeUiGraphics)
+    implementation(libs.composeUiTooling)
+    implementation(libs.composeMaterial3)
+    implementation(libs.composeFoundation)
+    implementation(libs.composeRuntime)
+    implementation(libs.composeLifecycleViewmodel)
 
     implementation(libs.gson)
     implementation(libs.jsoup)
     implementation(libs.timber)
     implementation(libs.assent)
     implementation(libs.material)
+
     implementation(libs.materialNumberPicker)
     implementation(libs.circulardurationview)
 
