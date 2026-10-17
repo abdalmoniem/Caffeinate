@@ -157,11 +157,7 @@ android {
         buildConfig = true
     }
 
-    tasks.named("lintRelease") {
-        isEnabled = false
-    }
-
-    compileOptions {
+compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
@@ -174,6 +170,12 @@ android {
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
+    }
+
+    afterEvaluate {
+        tasks.named("lintRelease") {
+            isEnabled = false
+        }
     }
 }
 
