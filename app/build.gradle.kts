@@ -189,7 +189,7 @@ android {
     }
 
     lint {
-        disable "NullSafeMutableLiveData"
+        disable("NullSafeMutableLiveData")
     }
 
     compileOptions {
