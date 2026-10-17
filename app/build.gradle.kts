@@ -1,5 +1,4 @@
 import com.android.build.api.dsl.ApplicationBuildType
-import com.android.build.api.tasks.Lint
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
@@ -154,7 +153,7 @@ android {
                 }
             } ?: project.logger.lifecycle(
                     "INFO: $name buildType is signed with default signing config, " +
-                    "add signing config in local.properties to enable signing."
+                            "add signing config in local.properties to enable signing."
             )
 
             applicationIdSuffix = ".debug"
@@ -189,7 +188,7 @@ android {
         buildConfig = true
     }
 
-compileOptions {
+    compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
@@ -203,6 +202,7 @@ compileOptions {
         includeInApk = false
         includeInBundle = false
     }
+}
 
 dependencies {
     implementation(libs.activityCompose)
@@ -224,9 +224,6 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.assent)
     implementation(libs.material)
-
-    implementation(libs.glanceAppwidget)
-    implementation(libs.glanceMaterial)
 
     implementation(libs.materialNumberPicker)
     implementation(libs.circulardurationview)
