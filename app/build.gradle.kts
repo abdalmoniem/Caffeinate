@@ -173,8 +173,8 @@ compileOptions {
     }
 
     afterEvaluate {
-        tasks.named("lintRelease") {
-            isEnabled = false
+        tasks.named("lintRelease") { task ->
+            task.isEnabled = false
         }
     }
 }
