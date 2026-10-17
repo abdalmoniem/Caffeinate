@@ -188,11 +188,7 @@ android {
         buildConfig = true
     }
 
-    lint {
-        disable("NullSafeMutableLiveData")
-    }
-
-    compileOptions {
+compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
