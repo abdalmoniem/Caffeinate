@@ -6,7 +6,7 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.view.Gravity
 import android.view.WindowManager
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -188,8 +188,8 @@ class OverlayHandler(private val context: Context) {
             fontSize = when (CaffeinateApplication.isRTL) {
                 true -> ctx.resources.getDimension(com.hifnawy.caffeinate.R.dimen.overlayTextSizeRTL).sp
                 false -> ctx.resources.getDimension(com.hifnawy.caffeinate.R.dimen.overlayTextSizeLTR).sp
-            }
-            modifier = Modifier.fillMaxSize().align(Alignment.TopEnd),
+            },
+            modifier = Modifier.fillMaxSize(),
             style = MaterialTheme.typography.titleLarge
         )
     }

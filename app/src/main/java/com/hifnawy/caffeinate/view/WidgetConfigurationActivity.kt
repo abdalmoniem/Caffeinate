@@ -4,10 +4,12 @@ import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.setContent
+import androidx.activity.compose.setContent
 import androidx.annotation.Keep
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,8 +23,6 @@ import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
 import com.hifnawy.caffeinate.controller.SharedPrefsManager
 import com.hifnawy.caffeinate.ui.theme.CaffeinateTheme
-import com.hifnawy.caffeinate.widget.CaffeinateGlanceAppWidget
-import com.hifnawy.caffeinate.widget.CaffeinateGlanceReceiver
 import java.io.Serializable
 
 /**
@@ -41,36 +41,27 @@ class WidgetConfigurationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sharedPreferences.run {
-            setActivityTheme(contrastLevel, theme.mode, isMaterialYouEnabled)
-        }
-
         setContent {
             val context = LocalContext.current
             val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
             val currentConfig = sharedPreferences.widgetsConfiguration[appWidgetId]
             var showBackground by remember { mutableStateOf(currentConfig?.showBackground ?: false) }
 
+            val useDarkTheme = when (sharedPreferences.theme) {
+                SharedPrefsManager.Theme.DARK -> true
+                SharedPrefsManager.Theme.LIGHT -> false
+                else -> LocalContext.current.applicationContext.resources.configuration.uiMode and
+                    android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
+            }
+            val dynamicColor = sharedPreferences.isMaterialYouEnabled &&
+                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
+
             CaffeinateTheme(
-                darkTheme = when (sharedPreferences.theme) {
-                    SharedPrefsManager.Theme.DARK -> true
-                    SharedPrefsManager.Theme.LIGHT -> false
-                    else -> LocalContext.current.applicationContext.resources.configuration.uiMode and
-                        android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
-                },
-                dynamicColor = sharedPreferences.isMaterialYouEnabled &&
-                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S,
+                darkTheme = useDarkTheme,
+                dynamicColor = dynamicColor,
                 contrastLevel = sharedPreferences.contrastLevel
             ) {
                 Scaffold(
-                    topBar = {
-                        TopAppBar(
-                            title = { Text(text = stringResource(id = R.string.app_name)) },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            )
-                        )
-                    }
                 ) { padding ->
                     Column(
                         modifier = Modifier
@@ -118,10 +109,6 @@ class WidgetConfigurationActivity : ComponentActivity() {
                                     else MaterialTheme.colorScheme.surface
                                 )
                                 .clickable(onClick = { showBackground = !showBackground })
-                                .border(
-                                    BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                                    RoundedCornerShape(10.dp)
-                                )
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -140,7 +127,6 @@ class WidgetConfigurationActivity : ComponentActivity() {
                                 val configs = sharedPreferences.widgetsConfiguration.toMutableMap()
                                 configs[appWidgetId] = com.hifnawy.caffeinate.view.WidgetConfiguration(appWidgetId, showBackground)
                                 sharedPreferences.widgetsConfiguration = configs
-                                caffeinateApplication.updateAllGlanceWidgets()
                                 setResult(RESULT_OK, Intent().apply {
                                     putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                                 })

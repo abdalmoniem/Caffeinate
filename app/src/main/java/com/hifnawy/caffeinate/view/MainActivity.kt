@@ -130,37 +130,7 @@ class MainActivity : FragmentActivity(), ServiceStatusObserver, SharedPrefsObser
                     isAllPermissionsGranted = isAllPermissionsGranted,
                     isPictureInPictureSupported = isPictureInPictureSupported,
                     isInPictureInPictureMode = isInPictureInPictureMode,
-                    onToggleClicked = { onToggleClicked() },
-                    onToggleLongClicked = { onToggleLongClicked() },
-                    onRestartClicked = { onRestartClicked() },
                     onTimeoutsChosen = { onTimeoutsChosen() },
-                    onThemeSelected = { theme ->
-                        changeThemeAndContrast(theme, sharedPreferences.contrastLevel, sharedPreferences.isMaterialYouEnabled)
-                    },
-                    onContrastSelected = { contrast ->
-                        changeThemeAndContrast(sharedPreferences.theme, contrast, sharedPreferences.isMaterialYouEnabled)
-                    },
-                    onMaterialYouToggled = { checked ->
-                        changeThemeAndContrast(sharedPreferences.theme, sharedPreferences.contrastLevel, checked)
-                    },
-                    onQuickTileStatusToggled = { checked ->
-                        sharedPreferences.isShowStatusInQuickTileTitleEnabled = checked
-                    },
-                    onOverlayToggled = { checked ->
-                        sharedPreferences.isOverlayEnabled = checked
-                    },
-                    onPictureInPictureToggled = { checked ->
-                        sharedPreferences.isPictureInPictureEnabled = checked
-                    },
-                    onDimmingToggled = { checked ->
-                        sharedPreferences.isDimmingEnabled = checked
-                    },
-                    onWhileLockedToggled = { checked ->
-                        sharedPreferences.isWhileLockedEnabled = checked
-                    },
-                    onPermissionCardClicked = { type -> onPermissionCardClicked(type) },
-                    onAboutClicked = { onAboutClicked() },
-                    onPrivacyClicked = { onPrivacyClicked() },
                     notificationPermissionLauncher = notificationPermissionLauncher
                 )
             }

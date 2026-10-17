@@ -5,12 +5,9 @@ import android.content.Context
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -18,32 +15,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.android.material.color.DynamicColors
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.controller.PiPAction
+import com.hifnawy.caffeinate.controller.KeepAwakeService
 import com.hifnawy.caffeinate.controller.ServiceStatus
 import com.hifnawy.caffeinate.controller.SharedPrefsManager
 import com.hifnawy.caffeinate.utils.DurationExtensionFunctions.toLocalizedFormattedTime
+import com.google.android.material.color.DynamicColors
 
-/**
- * The main Compose screen.
- *
- * Mirrors the previous Views-based activity layout:
- * - top app bar (navigation icon reflects running/stopped state)
- * - permissions section (battery, background, notification, overlay)
- * - settings section (theme, contrast, Material You, quick-tile status, overlay,
- *   picture-in-picture, dimming, while-locked)
- * - timeouts section (enabled durations + choose button)
- * - primary toggle button (shows remaining time / off)
- * - restart button (visible when running)
- * - picture-in-picture content overlay
- */
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
@@ -54,39 +37,12 @@ fun MainScreen(
     isAllPermissionsGranted: Boolean,
     isPictureInPictureSupported: Boolean,
     isInPictureInPictureMode: Boolean,
-    onToggleClicked: () -> Unit,
-    onToggleLongClicked: () -> Unit,
-    onRestartClicked: () -> Unit,
     onTimeoutsChosen: () -> Unit,
-    onThemeSelected: (SharedPrefsManager.Theme) -> Unit,
-    onContrastSelected: (SharedPrefsManager.ContrastLevel) -> Unit,
-    onMaterialYouToggled: (Boolean) -> Unit,
-    onQuickTileStatusToggled: (Boolean) -> Unit,
-    onOverlayToggled: (Boolean) -> Unit,
-    onPictureInPictureToggled: (Boolean) -> Unit,
-    onDimmingToggled: (Boolean) -> Unit,
-    onWhileLockedToggled: (Boolean) -> Unit,
-    onPermissionCardClicked: (PermissionCardType) -> Unit,
-    onAboutClicked: () -> Unit,
-    onPrivacyClicked: () -> Unit,
     notificationPermissionLauncher: ActivityResultLauncher<Array<String>>
 ) {
     Column(modifier = modifier) {
-        // Top app bar
-        TopAppBar(
-            title = { Text(text = stringResource(id = R.string.app_name)) },
-            navigationIcon = {
-                val painter = when (serviceStatus) {
-                    is ServiceStatus.Stopped -> painterResource(id = R.drawable.toolbar_icon_off)
-                    is ServiceStatus.Running -> painterResource(id = R.drawable.toolbar_icon_on)
-                }
-                IconButton(onClick = {}) {
-                    Icon(painter = painter, contentDescription = null)
-                }
-            }
-        )
+        Text(text = stringResource(id = R.string.app_name), style = MaterialTheme.typography.headlineSmall)
 
-        // Body
         if (isInPictureInPictureMode) {
             PictureInPictureContent(serviceStatus = serviceStatus, context = context)
         } else {
@@ -97,28 +53,13 @@ fun MainScreen(
                 serviceStatus = serviceStatus,
                 isAllPermissionsGranted = isAllPermissionsGranted,
                 isPictureInPictureSupported = isPictureInPictureSupported,
-                onToggleClicked = onToggleClicked,
-                onToggleLongClicked = onToggleLongClicked,
-                onRestartClicked = onRestartClicked,
                 onTimeoutsChosen = onTimeoutsChosen,
-                onThemeSelected = onThemeSelected,
-                onContrastSelected = onContrastSelected,
-                onMaterialYouToggled = onMaterialYouToggled,
-                onQuickTileStatusToggled = onQuickTileStatusToggled,
-                onOverlayToggled = onOverlayToggled,
-                onPictureInPictureToggled = onPictureInPictureToggled,
-                onDimmingToggled = onDimmingToggled,
-                onWhileLockedToggled = onWhileLockedToggled,
-                onPermissionCardClicked = onPermissionCardClicked,
-                onAboutClicked = onAboutClicked,
-                onPrivacyClicked = onPrivacyClicked,
                 notificationPermissionLauncher = notificationPermissionLauncher
             )
         }
     }
 }
 
-/** Primary content shown when not in picture-in-picture mode. */
 @Composable
 private fun MainContent(
     context: Context,
@@ -127,21 +68,7 @@ private fun MainContent(
     serviceStatus: ServiceStatus,
     isAllPermissionsGranted: Boolean,
     isPictureInPictureSupported: Boolean,
-    onToggleClicked: () -> Unit,
-    onToggleLongClicked: () -> Unit,
-    onRestartClicked: () -> Unit,
     onTimeoutsChosen: () -> Unit,
-    onThemeSelected: (SharedPrefsManager.Theme) -> Unit,
-    onContrastSelected: (SharedPrefsManager.ContrastLevel) -> Unit,
-    onMaterialYouToggled: (Boolean) -> Unit,
-    onQuickTileStatusToggled: (Boolean) -> Unit,
-    onOverlayToggled: (Boolean) -> Unit,
-    onPictureInPictureToggled: (Boolean) -> Unit,
-    onDimmingToggled: (Boolean) -> Unit,
-    onWhileLockedToggled: (Boolean) -> Unit,
-    onPermissionCardClicked: (PermissionCardType) -> Unit,
-    onAboutClicked: () -> Unit,
-    onPrivacyClicked: () -> Unit,
     notificationPermissionLauncher: ActivityResultLauncher<Array<String>>
 ) {
     Column(
@@ -150,24 +77,27 @@ private fun MainContent(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // Permissions section
-        SectionTitle(text = stringResource(id = R.string.permissions_card_title))
+        Text(text = stringResource(id = R.string.permissions_card_title), style = MaterialTheme.typography.titleMedium)
 
         Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp)) {
             Column {
                 val permissions = listOf(
                     PermissionCardType.BATTERY_OPTIMIZATION to checkBatteryOptimization(context),
-                    PermissionCardType.BACKGROUND_OPTIMIZATION to checkBackgroundOptimization(),
+                    PermissionCardType.BACKGROUND_OPTIMIZATION to checkBackgroundOptimization(context),
                     PermissionCardType.NOTIFICATION to checkNotificationPermission(context),
                     PermissionCardType.OVERLAY to checkOverlayPermission(context)
                 )
-                permissions.forEachIndexed { index, (type, isGranted) ->
+                permissions.forEachIndexed { index, pair ->
+                    val type = pair.first
+                    val isGranted = pair.second
                     PermissionCardRow(
                         type = type,
                         isGranted = isGranted,
                         context = context,
                         app = app,
-                        onClick = { if (!isGranted) onPermissionCardClicked(type) }
+                        prefs = prefs,
+                        notificationPermissionLauncher = notificationPermissionLauncher,
+                        onClick = { if (!isGranted) onPermissionCardClicked(context, type, app, prefs, notificationPermissionLauncher) }
                     )
                     if (index != permissions.lastIndex) Divider()
                 }
@@ -176,129 +106,148 @@ private fun MainContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Settings section
-        SectionTitle(text = stringResource(id = R.string.settings_card_title))
+        Text(text = stringResource(id = R.string.settings_card_title), style = MaterialTheme.typography.titleMedium)
 
         Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp)) {
             Column {
                 SettingCardRow(
                     title = stringResource(id = R.string.app_theme_pref),
-                    icon = painterResource(id = R.drawable.pref_theme_icon),
+                    iconRes = R.drawable.pref_theme_icon,
                     isEnabled = isAllPermissionsGranted,
-                    trailing = ThemeToggleRow(selectedTheme = prefs.theme, onThemeSelected = onThemeSelected),
-                    onClick = { Unit }
+                    trailing = {
+                        ThemeToggleRow(
+                            selectedTheme = prefs.theme,
+                            onThemeSelected = { theme -> changeThemeAndContrast(prefs, theme, prefs.contrastLevel, prefs.isMaterialYouEnabled) }
+                        )
+                    },
+                    onClick = {}
                 )
                 Divider()
 
                 SettingCardRow(
                     title = stringResource(id = R.string.contrast),
-                    icon = painterResource(id = R.drawable.pref_contrast_icon),
+                    iconRes = R.drawable.pref_contrast_icon,
                     isEnabled = isAllPermissionsGranted,
-                    trailing = ContrastToggleRow(selectedContrast = prefs.contrastLevel, onContrastSelected = onContrastSelected),
-                    onClick = { Unit }
+                    trailing = {
+                        ContrastToggleRow(
+                            selectedContrast = prefs.contrastLevel,
+                            onContrastSelected = { contrast -> changeThemeAndContrast(prefs, prefs.theme, contrast, prefs.isMaterialYouEnabled) }
+                        )
+                    },
+                    onClick = {}
                 )
                 Divider()
 
                 SettingCardRow(
                     title = stringResource(id = R.string.material_you_pref),
-                    icon = painterResource(id = R.drawable.pref_material_you_icon),
+                    iconRes = R.drawable.pref_material_you_icon,
                     subtitle = if (DynamicColors.isDynamicColorAvailable())
                         stringResource(id = R.string.material_you_pref_description)
                     else stringResource(id = R.string.material_you_pref_not_available),
                     isEnabled = isAllPermissionsGranted && DynamicColors.isDynamicColorAvailable(),
-                    trailing = Switch(
-                        checked = prefs.isMaterialYouEnabled && prefs.contrastLevel == SharedPrefsManager.ContrastLevel.STANDARD,
-                        onCheckedChange = onMaterialYouToggled,
-                        enabled = isAllPermissionsGranted && DynamicColors.isDynamicColorAvailable()
-                    ),
-                    onClick = { onMaterialYouToggled(!prefs.isMaterialYouEnabled) }
+                    trailing = {
+                        Switch(
+                            checked = prefs.isMaterialYouEnabled && prefs.contrastLevel == SharedPrefsManager.ContrastLevel.STANDARD,
+                            onCheckedChange = { checked -> changeThemeAndContrast(prefs, prefs.theme, prefs.contrastLevel, checked) },
+                            enabled = isAllPermissionsGranted && DynamicColors.isDynamicColorAvailable()
+                        )
+                    },
+                    onClick = { onMaterialYouToggled(prefs) }
                 )
                 Divider()
 
                 SettingCardRow(
                     title = stringResource(id = R.string.quick_tile_title_pref),
-                    icon = painterResource(id = R.drawable.prefs_quick_tile_icon),
+                    iconRes = R.drawable.prefs_quick_tile_icon,
                     subtitle = stringResource(id = R.string.quick_tile_title_pref_description),
                     isEnabled = isAllPermissionsGranted,
-                    trailing = Switch(
-                        checked = prefs.isShowStatusInQuickTileTitleEnabled,
-                        onCheckedChange = onQuickTileStatusToggled,
-                        enabled = isAllPermissionsGranted
-                    ),
-                    onClick = { onQuickTileStatusToggled(!prefs.isShowStatusInQuickTileTitleEnabled) }
+                    trailing = {
+                        Switch(
+                            checked = prefs.isShowStatusInQuickTileTitleEnabled,
+                            onCheckedChange = { checked -> prefs.isShowStatusInQuickTileTitleEnabled = checked },
+                            enabled = isAllPermissionsGranted
+                        )
+                    },
+                    onClick = { onQuickTileStatusToggled(prefs) }
                 )
                 Divider()
 
                 SettingCardRow(
                     title = stringResource(id = R.string.show_overlay_pref),
-                    icon = painterResource(id = R.drawable.pref_overlay_icon),
+                    iconRes = R.drawable.pref_overlay_icon,
                     subtitle = stringResource(id = R.string.show_overlay_pref_description),
                     isEnabled = isAllPermissionsGranted && checkOverlayPermission(context),
-                    trailing = Switch(
-                        checked = prefs.isOverlayEnabled,
-                        onCheckedChange = onOverlayToggled,
-                        enabled = isAllPermissionsGranted && checkOverlayPermission(context)
-                    ),
-                    onClick = { onOverlayToggled(!prefs.isOverlayEnabled) }
+                    trailing = {
+                        Switch(
+                            checked = prefs.isOverlayEnabled,
+                            onCheckedChange = { checked -> prefs.isOverlayEnabled = checked },
+                            enabled = isAllPermissionsGranted && checkOverlayPermission(context)
+                        )
+                    },
+                    onClick = { onOverlayToggled(prefs, context) }
                 )
                 Divider()
 
                 SettingCardRow(
                     title = stringResource(id = R.string.picture_in_picture_pref),
-                    icon = painterResource(id = R.drawable.pref_picture_in_picture_icon),
+                    iconRes = R.drawable.pref_picture_in_picture_icon,
                     subtitle = stringResource(id = R.string.picture_in_picture_pref_description),
                     isEnabled = isAllPermissionsGranted,
-                    trailing = Switch(
-                        checked = prefs.isPictureInPictureEnabled,
-                        onCheckedChange = onPictureInPictureToggled,
-                        enabled = isAllPermissionsGranted
-                    ),
-                    onClick = { onPictureInPictureToggled(!prefs.isPictureInPictureEnabled) }
+                    trailing = {
+                        Switch(
+                            checked = prefs.isPictureInPictureEnabled,
+                            onCheckedChange = { checked -> prefs.isPictureInPictureEnabled = checked },
+                            enabled = isAllPermissionsGranted
+                        )
+                    },
+                    onClick = { onPictureInPictureToggled(prefs) }
                 )
                 Divider()
 
                 SettingCardRow(
                     title = stringResource(id = R.string.allow_dimming_pref),
-                    icon = painterResource(id = R.drawable.pref_dim_icon),
+                    iconRes = R.drawable.pref_dim_icon,
                     subtitle = stringResource(id = R.string.allow_dimming_pref_description),
                     isEnabled = isAllPermissionsGranted,
-                    trailing = Switch(
-                        checked = prefs.isDimmingEnabled,
-                        onCheckedChange = onDimmingToggled,
-                        enabled = isAllPermissionsGranted
-                    ),
-                    onClick = { onDimmingToggled(!prefs.isDimmingEnabled) }
+                    trailing = {
+                        Switch(
+                            checked = prefs.isDimmingEnabled,
+                            onCheckedChange = { checked -> prefs.isDimmingEnabled = checked },
+                            enabled = isAllPermissionsGranted
+                        )
+                    },
+                    onClick = { onDimmingToggled(prefs) }
                 )
                 Divider()
 
                 SettingCardRow(
                     title = stringResource(id = R.string.allow_while_locked_pref),
-                    icon = painterResource(id = R.drawable.pref_lock_icon),
+                    iconRes = R.drawable.pref_lock_icon,
                     subtitle = stringResource(id = R.string.allow_while_locked_pref_description),
                     isEnabled = isAllPermissionsGranted,
-                    trailing = Switch(
-                        checked = prefs.isWhileLockedEnabled,
-                        onCheckedChange = onWhileLockedToggled,
-                        enabled = isAllPermissionsGranted
-                    ),
-                    onClick = { onWhileLockedToggled(!prefs.isWhileLockedEnabled) }
+                    trailing = {
+                        Switch(
+                            checked = prefs.isWhileLockedEnabled,
+                            onCheckedChange = { checked -> prefs.isWhileLockedEnabled = checked },
+                            enabled = isAllPermissionsGranted
+                        )
+                    },
+                    onClick = { onWhileLockedToggled(prefs) }
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Timeouts section
-        SectionTitle(text = stringResource(id = R.string.timeouts_pref))
+        Text(text = stringResource(id = R.string.timeouts_pref), style = MaterialTheme.typography.titleMedium)
 
         Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp)) {
             Column {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth().padding(16.dp)
                 ) {
                     Text(
-                        text = prefs.timeoutCheckBoxes.enabledDurations,
+                        text = prefs.timeoutCheckBoxes.joinToString(", ") { it.text },
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f)
                     )
@@ -314,15 +263,13 @@ private fun MainContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Toggle button
         val remainingText = when (serviceStatus) {
             is ServiceStatus.Stopped -> context.getString(R.string.caffeinate_button_off)
             is ServiceStatus.Running -> serviceStatus.remaining.toLocalizedFormattedTime(context)
         }
 
         Button(
-            onClick = onToggleClicked,
-            onLongClick = onToggleLongClicked,
+            onClick = { onToggleClicked(app, prefs) },
             enabled = isAllPermissionsGranted,
             modifier = Modifier.fillMaxWidth().height(56.dp),
             colors = ButtonDefaults.buttonColors(
@@ -335,19 +282,21 @@ private fun MainContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Restart button
         val isRestartButtonEnabled = (serviceStatus as? ServiceStatus.Running)?.run {
             (!isRestarted && isCountingDown) || isRestarted
         } ?: false
 
         if (isRestartButtonEnabled) {
             Button(
-                onClick = onRestartClicked,
+                onClick = { onRestartClicked(app, prefs) },
                 enabled = isAllPermissionsGranted,
                 modifier = Modifier.fillMaxWidth().height(48.dp)
             ) {
-                Row(horizontalArrangement = Arrangement.Center) {
-                    Icon(imageVector = Icons.Default.Restart, contentDescription = null)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "●")
                     Text(text = stringResource(id = R.string.action_restart_timeout))
                 }
             }
@@ -357,29 +306,20 @@ private fun MainContent(
     }
 }
 
-/** Picture-in-picture content. */
 @Composable
 private fun PictureInPictureContent(serviceStatus: ServiceStatus, context: Context) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CircularProgressIndicator(
-            progress = when {
-                serviceStatus is ServiceStatus.Stopped -> 0f
-                serviceStatus is ServiceStatus.Running && serviceStatus.remaining.isInfinite() -> 1f
-                else -> {
-                    val start = (serviceStatus as ServiceStatus.Running).startTimeout
-                    if (start > 0) 1f - (serviceStatus.remaining / start).coerceIn(0f, 1f) else 0f
-                }
-            },
+            progress = 0f,
             modifier = Modifier.size(200.dp)
         )
         Text(
-            text = when {
-                serviceStatus is ServiceStatus.Stopped -> context.getString(R.string.caffeinate_button_off)
-                else -> serviceStatus.remaining.toLocalizedFormattedTime(context)
+            text = when (serviceStatus) {
+                is ServiceStatus.Stopped -> context.getString(R.string.caffeinate_button_off)
+                is ServiceStatus.Running -> serviceStatus.remaining.toLocalizedFormattedTime(context)
             },
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(top = 24.dp)
@@ -387,77 +327,61 @@ private fun PictureInPictureContent(serviceStatus: ServiceStatus, context: Conte
     }
 }
 
-/** Section title. */
 @Composable
 private fun SectionTitle(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(vertical = 15.dp, start = 10.dp)
+        modifier = Modifier.padding(vertical = 15.dp)
     )
 }
 
-/** Permission card row. */
 @Composable
 private fun PermissionCardRow(
     type: PermissionCardType,
     isGranted: Boolean,
     context: Context,
     app: CaffeinateApplication,
+    prefs: SharedPrefsManager,
+    notificationPermissionLauncher: ActivityResultLauncher<Array<String>>,
     onClick: () -> Unit
 ) {
-    val (iconRes, title, grantedText, notGrantedText) = when (type) {
+    val pair = when (type) {
         PermissionCardType.BATTERY_OPTIMIZATION -> R.drawable.permission_battery_optimization_icon to
-            stringResource(id = R.string.battery_optimization_granted) to
             stringResource(id = R.string.battery_optimization_granted) to
             stringResource(id = R.string.battery_optimization_not_granted)
         PermissionCardType.BACKGROUND_OPTIMIZATION -> R.drawable.permission_background_optimization_icon to
             stringResource(id = R.string.background_optimization_granted) to
-            stringResource(id = R.string.background_optimization_granted) to
             stringResource(id = R.string.background_optimization_not_granted)
         PermissionCardType.NOTIFICATION -> R.drawable.permission_notifications_icon to
-            stringResource(id = R.string.notifications_permission_granted) to
             stringResource(id = R.string.notifications_permission_granted) to
             stringResource(id = R.string.notifications_permission_not_granted)
         PermissionCardType.OVERLAY -> R.drawable.permission_draw_on_top_icon to
             stringResource(id = R.string.overlay_permission_granted) to
-            stringResource(id = R.string.overlay_permission_granted) to
             stringResource(id = R.string.overlay_permission_not_granted)
     }
+    val iconRes = pair.first.first
+    val grantedText = pair.first.second
+    val notGrantedText = pair.second
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .clickable(onClick = onClick)
-            .height(48.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .height(48.dp)
     ) {
-        Image(
-            painter = painterResource(iconRes),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp).tint(if (isGranted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = if (isGranted) grantedText else notGrantedText,
+        Text(text = if (isGranted) grantedText else notGrantedText,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            imageVector = if (isGranted) Icons.Default.CheckCircle else Icons.Default.Off,
-            contentDescription = null,
-            tint = if (isGranted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-        )
+            modifier = Modifier.weight(1f))
     }
 }
 
-/** Setting card row with trailing content. */
 @Composable
 private fun SettingCardRow(
     title: String,
-    icon: androidx.compose.ui.graphics.painter.Painter,
+    iconRes: Int,
     subtitle: String? = null,
     isEnabled: Boolean,
     trailing: @Composable () -> Unit,
@@ -468,31 +392,23 @@ private fun SettingCardRow(
             .fillMaxWidth()
             .padding(16.dp)
             .clickable(onClick = onClick)
-            .height(56.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .height(56.dp)
     ) {
-        Image(
-            painter = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp).tint(MaterialTheme.colorScheme.primary)
-        )
+        Text(text = "●")
         Spacer(modifier = Modifier.width(16.dp))
         Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.Start
+            modifier = Modifier.weight(1f)
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.alpha(if (isEnabled) 1f else 0.5f)
+                color = MaterialTheme.colorScheme.onSurface
             )
             if (subtitle != null) {
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.alpha(if (isEnabled && subtitle.isNotEmpty()) 1f else 0.5f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -501,7 +417,6 @@ private fun SettingCardRow(
     }
 }
 
-/** Theme toggle row (system/light/dark buttons). */
 @Composable
 private fun ThemeToggleRow(
     selectedTheme: SharedPrefsManager.Theme,
@@ -513,10 +428,10 @@ private fun ThemeToggleRow(
             SharedPrefsManager.Theme.LIGHT to stringResource(id = R.string.app_theme_system_light),
             SharedPrefsManager.Theme.DARK to stringResource(id = R.string.app_theme_system_dark)
         )
-        themes.forEachIndexed { index, (theme, label) ->
+        themes.forEachIndexed { index, pair ->
+            val (theme, label) = pair
             Button(
                 onClick = { onThemeSelected(theme) },
-                selected = selectedTheme == theme,
                 modifier = Modifier.padding(horizontal = 2.dp)
             ) {
                 Text(text = label)
@@ -525,7 +440,6 @@ private fun ThemeToggleRow(
     }
 }
 
-/** Contrast toggle row (standard/medium/high buttons). */
 @Composable
 private fun ContrastToggleRow(
     selectedContrast: SharedPrefsManager.ContrastLevel,
@@ -537,10 +451,10 @@ private fun ContrastToggleRow(
             SharedPrefsManager.ContrastLevel.MEDIUM to stringResource(id = R.string.app_contrast_medium),
             SharedPrefsManager.ContrastLevel.HIGH to stringResource(id = R.string.app_contrast_high)
         )
-        contrasts.forEachIndexed { index, (contrast, label) ->
+        contrasts.forEachIndexed { index, pair ->
+            val (contrast, label) = pair
             Button(
                 onClick = { onContrastSelected(contrast) },
-                selected = selectedContrast == contrast,
                 modifier = Modifier.padding(horizontal = 2.dp)
             ) {
                 Text(text = label)
@@ -549,7 +463,6 @@ private fun ContrastToggleRow(
     }
 }
 
-/** Types of permission cards displayed on the main screen. */
 enum class PermissionCardType {
     BATTERY_OPTIMIZATION,
     BACKGROUND_OPTIMIZATION,
@@ -562,10 +475,10 @@ private fun checkBatteryOptimization(context: Context): Boolean {
         .isIgnoringBatteryOptimizations(context.packageName)
 }
 
-private fun checkBackgroundOptimization(): Boolean {
+private fun checkBackgroundOptimization(context: Context): Boolean {
     return when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ->
-            !(LocalContext.current.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isBackgroundRestricted
+            !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isBackgroundRestricted
         else -> true
     }
 }
@@ -581,4 +494,98 @@ private fun checkNotificationPermission(context: Context): Boolean {
 
 private fun checkOverlayPermission(context: Context): Boolean {
     return Settings.canDrawOverlays(context)
+}
+
+private fun onPermissionCardClicked(context: Context, type: PermissionCardType, app: CaffeinateApplication, prefs: SharedPrefsManager, notificationPermissionLauncher: ActivityResultLauncher<Array<String>>) {
+    when (type) {
+        PermissionCardType.BATTERY_OPTIMIZATION -> requestBatteryOptimizationPermission(context)
+        PermissionCardType.BACKGROUND_OPTIMIZATION -> requestBatteryOptimizationPermission(context)
+        PermissionCardType.NOTIFICATION -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                notificationPermissionLauncher.launch(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS))
+            }
+        }
+        PermissionCardType.OVERLAY -> {
+            val intent = android.content.Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION, android.net.Uri.parse("package:${context.packageName}"))
+            context.startActivity(intent)
+        }
+    }
+}
+
+private fun requestBatteryOptimizationPermission(context: Context) {
+    context.startActivity(
+        android.content.Intent(
+            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            android.net.Uri.parse("package:${context.packageName}")
+        )
+    )
+}
+
+private fun onMaterialYouToggled(prefs: SharedPrefsManager) {
+    changeThemeAndContrast(prefs, prefs.theme, prefs.contrastLevel, !prefs.isMaterialYouEnabled)
+}
+
+private fun onQuickTileStatusToggled(prefs: SharedPrefsManager) {
+    prefs.isShowStatusInQuickTileTitleEnabled = !prefs.isShowStatusInQuickTileTitleEnabled
+}
+
+private fun onOverlayToggled(prefs: SharedPrefsManager, context: Context) {
+    prefs.isOverlayEnabled = !prefs.isOverlayEnabled
+}
+
+private fun onPictureInPictureToggled(prefs: SharedPrefsManager) {
+    prefs.isPictureInPictureEnabled = !prefs.isPictureInPictureEnabled
+}
+
+private fun onDimmingToggled(prefs: SharedPrefsManager) {
+    prefs.isDimmingEnabled = !prefs.isDimmingEnabled
+}
+
+private fun onWhileLockedToggled(prefs: SharedPrefsManager) {
+    prefs.isWhileLockedEnabled = !prefs.isWhileLockedEnabled
+}
+
+private fun onToggleClicked(app: CaffeinateApplication, prefs: SharedPrefsManager) {
+    if (!prefs.isAllPermissionsGranted) return
+    KeepAwakeService.startNextTimeout(app)
+}
+
+private fun onToggleLongClicked(app: CaffeinateApplication, prefs: SharedPrefsManager) {
+    if (!prefs.isAllPermissionsGranted) return
+    when (app.lastStatusUpdate) {
+        is ServiceStatus.Stopped -> KeepAwakeService.startIndefinitely(app)
+        is ServiceStatus.Running -> KeepAwakeService.toggleState(
+            app,
+            com.hifnawy.caffeinate.controller.KeepAwakeService.Companion.KeepAwakeServiceState.STATE_STOP
+        )
+    }
+}
+
+private fun onRestartClicked(app: CaffeinateApplication, prefs: SharedPrefsManager) {
+    if (!prefs.isAllPermissionsGranted) return
+    KeepAwakeService.restart(app)
+}
+
+private fun changeThemeAndContrast(
+    prefs: SharedPrefsManager,
+    selectedTheme: SharedPrefsManager.Theme,
+    selectedContrastLevel: SharedPrefsManager.ContrastLevel,
+    selectedIsMaterialYouEnabled: Boolean
+) {
+    val isToRecreate = prefs.theme == selectedTheme
+    val newContrastLevel =
+        ((selectedContrastLevel.isNotStandard && !selectedIsMaterialYouEnabled) ||
+         (selectedContrastLevel.isNotStandard && prefs.contrastLevel.isStandard && prefs.isMaterialYouEnabled)).let { isNotStandard ->
+            when {
+                isNotStandard -> selectedContrastLevel
+                else          -> SharedPrefsManager.ContrastLevel.STANDARD
+            }
+        }
+    val newIsMaterialYouEnabled =
+        (selectedIsMaterialYouEnabled && selectedContrastLevel.isStandard) ||
+        (selectedIsMaterialYouEnabled && !prefs.isMaterialYouEnabled && prefs.contrastLevel.isNotStandard)
+
+    prefs.theme = selectedTheme
+    prefs.contrastLevel = newContrastLevel
+    prefs.isMaterialYouEnabled = newIsMaterialYouEnabled
 }
