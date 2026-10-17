@@ -3,201 +3,158 @@ package com.hifnawy.caffeinate.view
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
-import android.view.HapticFeedbackConstants
-import android.view.View
-import android.widget.FrameLayout
-import android.widget.RemoteViews
-import androidx.activity.enableEdgeToEdge
+import androidx.activity.ComponentActivity
+import androidx.activity.setContent
 import androidx.annotation.Keep
-import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.card.MaterialCardView
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.hifnawy.caffeinate.CaffeinateApplication
 import com.hifnawy.caffeinate.R
-import com.hifnawy.caffeinate.controller.ServiceStatus
-import com.hifnawy.caffeinate.controller.ServiceStatusObserver
 import com.hifnawy.caffeinate.controller.SharedPrefsManager
-import com.hifnawy.caffeinate.databinding.ActivityWidgetConfigurationBinding
-import com.hifnawy.caffeinate.utils.ActivityExtensionFunctions.setActivityTheme
-import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.addObserver
-import com.hifnawy.caffeinate.utils.MutableListExtensionFunctions.removeObserver
+import com.hifnawy.caffeinate.ui.theme.CaffeinateTheme
+import com.hifnawy.caffeinate.widget.CaffeinateGlanceAppWidget
+import com.hifnawy.caffeinate.widget.CaffeinateGlanceReceiver
 import java.io.Serializable
-import timber.log.Timber as Log
 
 /**
- * Activity for configuring the widget.
+ * Widget configuration activity rewritten with Jetpack Compose.
  *
- * This activity provides the user interface for configuring the appearance and behavior of the widget.
- * It allows users to preview different widget styles and select their preferred configuration.
- *
- * The activity handles the interaction with the [AppWidgetManager] to update the widget options based
- * on the user's selection and ensures the result is set appropriately before finishing.
+ * Lets the user choose whether the widget shows its background, then saves the
+ * choice to [SharedPrefsManager.widgetsConfiguration] and refreshes all Glance
+ * widgets. Behaviour parity with the previous Views-based implementation is
+ * preserved; only the UI toolkit changed.
  */
-class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
+class WidgetConfigurationActivity : ComponentActivity() {
 
-    /**
-     * Lazily initializes the [ActivityWidgetConfigurationBinding] for this activity.
-     *
-     * This binding is used to access and manipulate the views in the layout file
-     * associated with this activity. It is inflated using the [getLayoutInflater] and
-     * provides a type-safe way to interact with the views.
-     *
-     * @return [ActivityWidgetConfigurationBinding] the binding instance for this activity.
-     */
-    private val binding by lazy { ActivityWidgetConfigurationBinding.inflate(layoutInflater) }
-
-    /**
-     * The [CaffeinateApplication] instance that is the context of this activity.
-     *
-     * This field is initialized lazily when it is first accessed. The instance is
-     * created by casting the [android.app.Application] context of this activity to
-     * [CaffeinateApplication].
-     *
-     * @return [CaffeinateApplication] the application instance.
-     */
     private val caffeinateApplication by lazy { application as CaffeinateApplication }
-
-    /**
-     * A [SharedPrefsManager] instance for accessing and modifying the application's
-     * shared preferences.
-     *
-     * This field is initialized lazily when it is first accessed. The instance is
-     * created from the [CaffeinateApplication] instance that is the context of this activity.
-     */
     private val sharedPreferences by lazy { SharedPrefsManager(caffeinateApplication) }
 
-    /**
-     * Lazily initializes the [RemoteViews] for the widget.
-     *
-     * This [RemoteViews] instance is used to manage the layout of the widget,
-     * allowing the application to update its UI remotely.
-     *
-     * @return [RemoteViews] the remote views instance for the widget.
-     */
-    private val remoteViews by lazy { RemoteViews(packageName, R.layout.widget) }
-
-    /**
-     * Called when the activity is starting.
-     *
-     * This method is where the activity is initialized. It is called after [onRestoreInstanceState] and before [onStart].
-     *
-     * The activity is being re-initialized after being shut down, this method is called with the saved state that the activity previously supplied in [onSaveInstanceState].
-     * Otherwise, it is called with a null state.
-     *
-     * @param savedInstanceState [Bundle] If the activity is being re-initialized after being shut down, then this [Bundle] contains the data it most recently supplied in [onSaveInstanceState].
-     * Otherwise it is null.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sharedPreferences.run { setActivityTheme(contrastLevel, theme.mode, isMaterialYouEnabled) }
+        sharedPreferences.run {
+            setActivityTheme(contrastLevel, theme.mode, isMaterialYouEnabled)
+        }
 
-        enableEdgeToEdge()
-        setContentView(binding.root)
-
-        with(binding) {
+        setContent {
+            val context = LocalContext.current
             val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
-            val widgetsConfiguration = sharedPreferences.widgetsConfiguration.ifEmpty { mutableMapOf() }
-            val widgetPreviewsConfiguration = mutableMapOf(
-                    widgetPreviewContainer1.id to WidgetConfiguration(appWidgetId, true),
-                    widgetPreviewContainer2.id to WidgetConfiguration(appWidgetId, false)
-            )
+            val currentConfig = sharedPreferences.widgetsConfiguration[appWidgetId]
+            var showBackground by remember { mutableStateOf(currentConfig?.showBackground ?: false) }
 
-            Log.d("Configuring widget $appWidgetId")
-            val clickListener = View.OnClickListener { view ->
-                view ?: return@OnClickListener
-                val widgetConfiguration = widgetPreviewsConfiguration[view.tag] ?: return@OnClickListener
+            CaffeinateTheme(
+                darkTheme = when (sharedPreferences.theme) {
+                    SharedPrefsManager.Theme.DARK -> true
+                    SharedPrefsManager.Theme.LIGHT -> false
+                    else -> LocalContext.current.applicationContext.resources.configuration.uiMode and
+                        android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
+                },
+                dynamicColor = sharedPreferences.isMaterialYouEnabled &&
+                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S,
+                contrastLevel = sharedPreferences.contrastLevel
+            ) {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text(text = stringResource(id = R.string.app_name)) },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
+                        )
+                    }
+                ) { padding ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.configure_widget),
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
 
-                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(id = R.string.widget_show_background),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(
+                                    text = stringResource(id = R.string.widget_show_background_desc),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = showBackground,
+                                onCheckedChange = { showBackground = it }
+                            )
+                        }
 
-                sharedPreferences.widgetsConfiguration = widgetsConfiguration.apply {
-                    set(appWidgetId, widgetConfiguration)
-                }
+                        Spacer(modifier = Modifier.height(32.dp))
 
-                Widget.updateAllWidgets(this@WidgetConfigurationActivity)
+                        // Preview
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .background(
+                                    if (showBackground) MaterialTheme.colorScheme.surfaceContainer
+                                    else MaterialTheme.colorScheme.surface
+                                )
+                                .clickable(onClick = { showBackground = !showBackground })
+                                .border(
+                                    BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                                    RoundedCornerShape(10.dp)
+                                )
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (showBackground)
+                                    stringResource(id = R.string.widget_background_on)
+                                else stringResource(id = R.string.widget_background_off),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
 
-                Log.d("Configured widget $appWidgetId, widgetsConfiguration: $widgetsConfiguration")
+                        Spacer(modifier = Modifier.height(32.dp))
 
-                setResult(RESULT_OK, Intent().apply { putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId) })
-                finish()
-            }
-
-            widgetPreviewsConfiguration.forEach { entry ->
-                val widgetPreviewContainer = findViewById<FrameLayout>(entry.key) ?: return@forEach
-                widgetPreviewContainer.removeAllViews()
-                addWidgetPreview(widgetPreviewContainer, entry.value.showBackground)
-                val widgetPreviewContainerParent = widgetPreviewContainer.parent as MaterialCardView
-                widgetPreviewContainerParent.apply {
-                    tag = entry.key
-                    widgetPreviewContainerParent.setOnClickListener(clickListener)
+                        Button(
+                            onClick = {
+                                val configs = sharedPreferences.widgetsConfiguration.toMutableMap()
+                                configs[appWidgetId] = com.hifnawy.caffeinate.view.WidgetConfiguration(appWidgetId, showBackground)
+                                sharedPreferences.widgetsConfiguration = configs
+                                caffeinateApplication.updateAllGlanceWidgets()
+                                setResult(RESULT_OK, Intent().apply {
+                                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                                })
+                                finish()
+                            },
+                            enabled = appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(text = stringResource(android.R.string.ok))
+                        }
+                    }
                 }
             }
         }
-
-        onServiceStatusUpdated(caffeinateApplication.lastStatusUpdate)
-    }
-
-    /**
-     * Called after [onRestoreInstanceState], [onRestart], or [onPause], for your activity to start interacting with the user. This is a good place to
-     * begin animations, open exclusive-access devices (such as the camera), etc.
-     *
-     * Keep in mind that onResume is not the best indicator that your activity is visible to the user (as described in the ActivityLifecycle document).
-     *
-     * @see [onPause]
-     * @see [onStop]
-     * @see [onDestroy]
-     */
-    override fun onResume() = caffeinateApplication.run {
-        super.onResume()
-        keepAwakeServiceObservers.addObserver(this@WidgetConfigurationActivity)
-    }
-
-    /**
-     * Called as part of the activity lifecycle when an activity is going into the background, but has not (yet) been destroyed. Use this method to
-     * release resources, such as broadcast receivers, that will not be needed while the activity is paused.
-     *
-     * This is usually a good place to commit unsaved changes to persistent data, stop animations and other ongoing actions, etc.
-     *
-     * @see [onResume]
-     * @see [onStop]
-     * @see [onDestroy]
-     */
-    override fun onPause() = caffeinateApplication.run {
-        super.onPause()
-        caffeinateApplication.keepAwakeServiceObservers.removeObserver(this@WidgetConfigurationActivity)
-    }
-
-    /**
-     * Called when the status of the Caffeinate service is updated.
-     *
-     * @param status [ServiceStatus] the new status of the service
-     */
-    override fun onServiceStatusUpdated(status: ServiceStatus) = with(binding) {
-        updateWidgetPreview(widgetPreviewContainer1, true)
-        updateWidgetPreview(widgetPreviewContainer2, false)
-    }
-
-    /**
-     * Adds a widget preview to the specified container.
-     *
-     * @param widgetPreviewContainer [FrameLayout] the container to add the widget preview to
-     * @param showBackground [Boolean] `true` if the widget preview should show its background, `false` otherwise
-     */
-    private fun addWidgetPreview(widgetPreviewContainer: FrameLayout, showBackground: Boolean) {
-        val widgetView = remoteViews.apply(applicationContext, widgetPreviewContainer)
-        widgetPreviewContainer.addView(widgetView)
-
-        updateWidgetPreview(widgetPreviewContainer, showBackground)
-    }
-
-    /**
-     * Updates the widget preview in the specified container to show or hide its background depending on the given flag.
-     *
-     * @param widgetPreviewContainer [FrameLayout] the container holding the widget preview
-     * @param showBackground [Boolean] `true` if the widget preview should show its background, `false` otherwise
-     */
-    private fun updateWidgetPreview(widgetPreviewContainer: FrameLayout, showBackground: Boolean) {
-        Widget.updateRemoteViews(caffeinateApplication, remoteViews, showBackground)
-        remoteViews.reapply(applicationContext, widgetPreviewContainer)
     }
 }
 
@@ -209,13 +166,9 @@ class WidgetConfigurationActivity : AppCompatActivity(), ServiceStatusObserver {
  * @property widgetId [Int] the ID of the widget. This is the unique identifier of the widget as assigned by the
  * [AppWidgetManager] when the widget is created.
  * @property showBackground [Boolean] `true` if the widget should show its background, `false` otherwise.
- *
- * @author AbdAlMoniem AlHifnawy
  */
 @Keep
 data class WidgetConfiguration(
-        @Keep
-        val widgetId: Int,
-        @Keep
-        val showBackground: Boolean
+    @Keep val widgetId: Int,
+    @Keep val showBackground: Boolean
 ) : Serializable

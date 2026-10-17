@@ -205,4 +205,11 @@ Some devices may require this option enabled in order for the App. to work prope
     <string name="crowdin_link" translatable="false">https://crowdin.com/project/caffeinate</string>
     <string name="f_droid_link" translatable="false">https://f-droid.org/packages/com.hifnawy.caffeinate</string>
     <string name="izzy_on_droid_link" translatable="false">https://apt.izzysoft.de/fdroid/index/apk/com.hifnawy.caffeinate</string>
+
+    <!-- Widget configuration strings -->
+    <string name="configure_widget">Configure Widget</string>
+    <string name="widget_show_background">Show background</string>
+    <string name="widget_show_background_desc">Toggle the widget background visibility</string>
+    <string name="widget_background_on">Background on</string>
+    <string name="widget_background_off">Background off</string>
 </resources>

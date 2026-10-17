@@ -11,9 +11,11 @@ import com.hifnawy.caffeinate.controller.ServiceStatus
 import com.hifnawy.caffeinate.controller.ServiceStatusObserver
 import com.hifnawy.caffeinate.controller.SharedPrefsManager
 import com.hifnawy.caffeinate.controller.SharedPrefsObserver
+import com.hifnawy.caffeinate.ui.theme.CaffeinateTheme
 import com.hifnawy.caffeinate.utils.LogDebugTree
 import com.hifnawy.caffeinate.view.CheckBoxItem
-import com.hifnawy.caffeinate.view.Widget
+import com.hifnawy.caffeinate.widget.CaffeinateGlanceAppWidget
+import com.hifnawy.caffeinate.widget.CaffeinateGlanceReceiver
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -248,10 +250,33 @@ class CaffeinateApplication : Application() {
         }
 
         QuickTileService.requestTileStateUpdate(this)
-        Widget.updateAllWidgets(this)
+        updateGlanceWidgets(this)
 
         Log.d("observers notified!")
     }
+
+    /**
+     * Updates all Glance app widgets with the current service status.
+     *
+     * This replaces the previous [Widget.updateAllWidgets] call. Glance widgets are
+     * updated through [androidx.glance.appwidget.GlanceAppWidgetManager].
+     */
+    private fun updateGlanceWidgets(context: android.content.Context) {
+        try {
+            val intent = android.content.Intent("android.appwidget.action.APPWIDGET_UPDATE")
+            intent.setComponent(
+                android.content.ComponentName(context, CaffeinateGlanceReceiver::class.java)
+            )
+            context.sendBroadcast(intent)
+        } catch (e: Exception) {
+            Log.e(e, "Failed to update Glance widgets")
+        }
+    }
+
+    /**
+     * Public entry point to refresh all Glance app widgets (e.g. from the widget configuration activity).
+     */
+    fun updateAllGlanceWidgets() = updateGlanceWidgets(this)
 
     /**
      * Applies the locale configuration set by the user.

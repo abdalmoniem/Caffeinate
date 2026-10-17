@@ -72,18 +72,15 @@
         </service>
 
         <receiver
-            android:name=".view.Widget"
+            android:name=".widget.CaffeinateGlanceReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="android.appwidget.action.APPWIDGET_ENABLED" />
-                <action android:name="android.appwidget.action.APPWIDGET_DISABLED" />
-                <action android:name="CLICK" />
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/widget_info" />
+                android:resource="@xml/caffeinate_glance_app_widget_info" />
         </receiver>
     </application>
 </manifest>
