@@ -174,15 +174,6 @@ android {
         }
     }
 
-    lint {
-        disable "NullSafeMutableLiveData"
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
     kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_21
@@ -195,6 +186,15 @@ android {
         compose = true
         viewBinding = true
         buildConfig = true
+    }
+
+    lint {
+        disable "NullSafeMutableLiveData"
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     androidResources {
