@@ -204,10 +204,6 @@ compileOptions {
         includeInBundle = false
     }
 
-    tasks.named<Lint>("lintRelease") {
-        isEnabled = false
-    }
-
 dependencies {
     implementation(libs.activityCompose)
     implementation(libs.androidxCoreKtx)
