@@ -43,6 +43,7 @@ private var isSigningConfigEnabled = false
 plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.androidApplication)
+    alias(libs.plugins.composeCompiler)
 }
 
 android {
@@ -187,6 +188,7 @@ android {
     }
 
     buildFeatures {
+        compose = true
         viewBinding = true
         buildConfig = true
     }
@@ -200,23 +202,32 @@ android {
         includeInApk = false
         includeInBundle = false
     }
-
-    dataBinding {
-        enable = true
-    }
 }
 
 dependencies {
-    implementation(libs.activity)
+    implementation(libs.activityCompose)
     implementation(libs.androidxCoreKtx)
     implementation(libs.androidxAppCompat)
     implementation(libs.androidxConstraintLayout)
+
+    implementation(libs.composeBom)
+    implementation(libs.composeUi)
+    implementation(libs.composeUiGraphics)
+    implementation(libs.composeUiTooling)
+    implementation(libs.composeMaterial3)
+    implementation(libs.composeFoundation)
+    implementation(libs.composeRuntime)
+    implementation(libs.composeLifecycleViewmodel)
 
     implementation(libs.gson)
     implementation(libs.jsoup)
     implementation(libs.timber)
     implementation(libs.assent)
     implementation(libs.material)
+
+    implementation(libs.glanceAppwidget)
+    implementation(libs.glanceMaterial)
+
     implementation(libs.materialNumberPicker)
     implementation(libs.circulardurationview)
 
